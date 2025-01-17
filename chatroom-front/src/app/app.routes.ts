@@ -10,6 +10,7 @@ import { MainComponent } from './main/main.component';
 import { MainIndexComponent } from './main/main-index/main-index.component';
 import { MainAccountComponent } from './main/main-account/main-account.component';
 import { MainDashboardComponent } from './main/main-dashboard/main-dashboard.component';
+import { MainChatroomComponent } from './main/main-chatroom/main-chatroom.component';
 
 import { AdminComponent } from './admin/admin.component';
 import { AdminIndexComponent } from './admin/admin-index/admin-index.component';
@@ -41,6 +42,11 @@ export const routes: Routes = [
 				path: SITEMAP.dashboard.path,
 				canActivate: [isAuthenticatedGuard],
 				component: MainDashboardComponent,
+			},
+			{
+				path: SITEMAP.chatroom.path,
+				canActivate: [isAuthenticatedGuard],
+				component: MainChatroomComponent,
 			}
 		],
 	},
