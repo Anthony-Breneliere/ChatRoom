@@ -16,6 +16,8 @@ export class MessagingService extends SignalRClientBase {
 		this._hubConnection.on('NewMessage', (message: ChatMessage) => {
 			console.log('New message received:', message);
 
+			//TODO
+
 		});
 
 		this._hubConnection.on('EditedMessage', (message: ChatMessage) => {

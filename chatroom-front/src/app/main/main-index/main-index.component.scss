@@ -1,26 +1,16 @@
-.chat-main-index {
-	@apply relative
-		isolate
-		px-6 lg:px-8;
+.chat-list-wrapper {
+	padding: 5px;
+	border: 3px solid black;
+	border-radius: 20px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
+	gap: 20px;
 
-	.chat-main-index-title {
-		@apply mb-[4rem]
-			text-4xl font-bold tracking-tight
-			text-gray-900
-			sm:text-6xl;
-
-		&:is(.dark *) {
-			@apply text-white;
-		}
-	}
-
-	.chat-main-index-paragraphe {
-		@apply mt-6
-			text-lg leading-8
-			text-gray-600;
-
-		&:is(.dark *) {
-			@apply text-gray-400;
-		}
+	.chat-channel-item {
+		padding: 20px, 10px;
+		background-color: bisque;
+		border-radius: 8px;
 	}
 }
