@@ -6,6 +6,7 @@ using Chat.ApiModel.Messaging;
 using Chat.Business.Messaging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 
 namespace Chat.Api.Hubs;
 
@@ -32,9 +33,9 @@ public sealed class MessagingHub : Hub<IMessagingHubPush>, IMessagingHubInvoke
         _mapper = mapper;
     }
 
-    private string NameIdentifier => Context.User?.GetNameIdentifier() 
+    private string NameIdentifier => Context.User?.GetNameIdentifier()
         ?? throw new AuthenticationException("User nameidentifier not found in Claims.");
-    
+
     /// <summary>
     /// Gets the chat room from an offer.
     /// </summary>
@@ -45,7 +46,7 @@ public sealed class MessagingHub : Hub<IMessagingHubPush>, IMessagingHubInvoke
 
         return _mapper.Map<ChatRoomDto>(room);
     }
-    
+
     /// <summary>
     /// Gets the chat room from an offer.
     /// </summary>
@@ -56,7 +57,21 @@ public sealed class MessagingHub : Hub<IMessagingHubPush>, IMessagingHubInvoke
 
         return _mapper.Map<ChatRoomDto>(room);
     }
-    
+
+    /// <summary>
+    /// Gets the chat room from an offer.
+    /// </summary>
+    public async Task<ChatRoomDto[]> ListChatRoom()
+    {
+        var rooms = await _messagingService.GetRooms().ToListAsync();
+        if (rooms == null)
+        {
+            throw new ArgumentException("Offer not created");
+        }
+
+        return _mapper.Map<ChatRoomDto[]>(rooms);
+    }
+
     /// <inheritdoc />
     public async Task<IEnumerable<ChatMessageDto>> JoinChatRoom(Guid roomId)
     {

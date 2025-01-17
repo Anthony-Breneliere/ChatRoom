@@ -74,4 +74,13 @@ export class MessagingService extends SignalRClientBase {
 
 		await this._hubConnection.invoke('SendMessage', roomId, message);
 	}
+
+	/**
+	 * Get chat room list
+	 */
+	public async listChatRoom(): Promise<ChatRoom[]> {
+		await this.getConnectionPromise;
+
+		return await this._hubConnection.invoke<ChatRoom[]>('ListChatRoom');
+	}
 }

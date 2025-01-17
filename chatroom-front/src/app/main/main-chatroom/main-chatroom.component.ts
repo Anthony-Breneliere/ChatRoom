@@ -18,6 +18,8 @@ export class MainChatroomComponent {
 	constructor (private messagingService: MessagingService) {}
 
 	ngOnInit() {
-		this.messagingService
+		this.messagingService.createChatRoom();
+		console.log(this.messagingService)
+		this.messagingService.listChatRoom().then(rooms => console.log(rooms))
 	}
 }

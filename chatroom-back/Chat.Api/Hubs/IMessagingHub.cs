@@ -3,7 +3,7 @@ using Chat.ApiModel.Messaging;
 namespace Chat.Api.Hubs;
 
 /// <summary>
-/// Company messaging related methods pushed by the hub (server-to-client).  
+/// Company messaging related methods pushed by the hub (server-to-client).
 /// </summary>
 public interface IMessagingHubPush
 {
@@ -12,13 +12,13 @@ public interface IMessagingHubPush
     /// </summary>
     /// <param name="message">The message to push.</param>
     public Task NewMessage(ChatMessageDto message);
-    
+
     /// <summary>
     /// Pushes an edited message to the client.
     /// </summary>
     /// <param name="message">The edited message to push.</param>
     public Task EditedMessage(ChatMessageDto message);
-    
+
     /// <summary>
     /// Pushes a deleted message to the client.
     /// </summary>
@@ -43,7 +43,7 @@ public interface IMessagingHubInvoke
     /// </summary>
     /// <param name="roomId"></param>
     public Task LeaveChatRoom(Guid roomId);
-    
+
     /// <summary>
     /// Submits a new message to the chatroom.
     /// </summary>
@@ -58,4 +58,9 @@ public interface IMessagingHubInvoke
     /// Create chat room
     /// </summary>
     Task<ChatRoomDto> CreateChatRoom();
+
+    /// <summary>
+    /// Get chat room list
+    /// </summary>
+    Task<ChatRoomDto[]> ListChatRoom();
 }

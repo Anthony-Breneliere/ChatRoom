@@ -13,13 +13,13 @@ public interface IMessagingPersistance
     /// </summary>
     /// <returns>All messages of the room.</returns>
     Task<IEnumerable<ChatMessage>> GetMessages( Guid roomId, CancellationToken ct = default);
-    
+
     /// <summary>
     /// Gets all chat rooms.
     /// </summary>
     /// <returns>All chat rooms.</returns>
     IQueryable<Model.Messaging.ChatRoom> GetRooms();
-    
+
     /// <summary>
     /// Gets all messages in a chat room.
     /// </summary>
