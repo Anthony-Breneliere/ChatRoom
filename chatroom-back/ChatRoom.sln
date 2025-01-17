@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.10.35013.160
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31624.102
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chat.Startup", "Chat.Startup\Chat.Startup.csproj", "{B77A95F3-2C6E-4D54-8236-83C4C490393F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chat.Startup", "Chat.Startup\Chat.Startup.csproj", "{B77A95F3-2C6E-4D54-8236-83C4C490393F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{69627BFB-DA98-4891-BB4C-F9391091CC96}"
 	ProjectSection(SolutionItems) = preProject
@@ -14,15 +14,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		version.json = version.json
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chat.ApiModel", "Chat.ApiModel\Chat.ApiModel.csproj", "{2E2B2AE1-0566-48D2-9A61-6E5BC4403DCF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chat.ApiModel", "Chat.ApiModel\Chat.ApiModel.csproj", "{2E2B2AE1-0566-48D2-9A61-6E5BC4403DCF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chat.Model", "Chat.Model\Chat.Model.csproj", "{A15BD20F-38FB-48A7-9F3C-ADC15CD515F8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chat.Model", "Chat.Model\Chat.Model.csproj", "{A15BD20F-38FB-48A7-9F3C-ADC15CD515F8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chat.Repository", "Chat.Repository\Chat.Repository.csproj", "{A16C22B6-67E3-4CC4-9619-5125A99D050C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chat.Repository", "Chat.Repository\Chat.Repository.csproj", "{A16C22B6-67E3-4CC4-9619-5125A99D050C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chat.Api", "Chat.Api\Chat.Api.csproj", "{CE730482-0816-4C4A-8BAB-CC986564F0E4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chat.Api", "Chat.Api\Chat.Api.csproj", "{CE730482-0816-4C4A-8BAB-CC986564F0E4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chat.Business", "Chat.Business\Chat.Business.csproj", "{F45762CA-BC9E-463B-B481-3504990D7915}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chat.Business", "Chat.Business\Chat.Business.csproj", "{F45762CA-BC9E-463B-B481-3504990D7915}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
