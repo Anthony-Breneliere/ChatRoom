@@ -45,7 +45,18 @@ public sealed class MessagingHub : Hub<IMessagingHubPush>, IMessagingHubInvoke
 
         return _mapper.Map<ChatRoomDto>(room);
     }
-    
+
+    /// <summary>
+    /// Gets the chat room from an offer.
+    /// </summary>
+    public async Task<ChatRoomDto> GetAllChatRoom(Guid roomId)
+    {
+        Model.Messaging.ChatRoom room = await _messagingService.GetChatRoom(roomId)
+                                        ?? throw new ArgumentException("Offer not found");
+
+        return _mapper.Map<ChatRoomDto>(room);
+    }
+
     /// <summary>
     /// Gets the chat room from an offer.
     /// </summary>

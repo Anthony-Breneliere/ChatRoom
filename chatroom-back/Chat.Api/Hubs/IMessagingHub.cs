@@ -55,6 +55,12 @@ public interface IMessagingHubInvoke
     Task<ChatRoomDto> GetChatRoom(Guid roomId);
 
     /// <summary>
+    /// Get All ChatRooms
+    /// </summary>
+    /// <returns></returns>
+    Task<List<ChatRoomDto>> GetAllChatRooms();
+
+    /// <summary>
     /// Create chat room
     /// </summary>
     Task<ChatRoomDto> CreateChatRoom();
