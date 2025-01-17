@@ -6,6 +6,7 @@ using Chat.ApiModel.Messaging;
 using Chat.Business.Messaging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 
 namespace Chat.Api.Hubs;
 
@@ -91,5 +92,11 @@ public sealed class MessagingHub : Hub<IMessagingHubPush>, IMessagingHubInvoke
     public async Task SendMessage(string roomId, string message)
     {
         await _messagingService.SubmitMessageAsync(roomId, message, NameIdentifier);
+    }
+
+    /// <inheritdoc/>
+    public ChatRoomDto[] GetAllChatRooms()
+    {
+        return _messagingService.GetRooms().ToListAsync();
     }
 }

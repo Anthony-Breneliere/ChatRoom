@@ -58,7 +58,7 @@ public interface IMessagingHubInvoke
     /// Get All ChatRooms
     /// </summary>
     /// <returns></returns>
-    Task<List<ChatRoomDto>> GetAllChatRooms();
+    ChatRoomDto[] GetAllChatRooms();
 
     /// <summary>
     /// Create chat room
