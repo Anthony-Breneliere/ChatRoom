@@ -13,6 +13,7 @@ import { SITEMAP } from 'src/app/_common/sitemap';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ChatSvgIconComponent } from '../../_common/components/chat-svg-icon/chat-svg-icon.component';
+import { MessagingService } from 'src/app/_common/services/messaging/messaging.service';
 
 @Component({
 	selector: 'app-main-dashboard',
@@ -38,7 +39,10 @@ import { ChatSvgIconComponent } from '../../_common/components/chat-svg-icon/cha
 	templateUrl: './main-dashboard.component.html',
 })
 export class MainDashboardComponent {
+
 	private readonly _accountSvc = inject(AccountService);
+
+	private readonly _messagingSvc = inject(MessagingService);
 
 	public readonly sitemap = SITEMAP;
 
@@ -52,5 +56,9 @@ export class MainDashboardComponent {
 	public viewSelected: number = 1;
 
 	constructor() {}
+
+	createRoom() {
+		this._messagingSvc.createChatRoom().then(chat => console.log(chat));
+	}
 
 }
