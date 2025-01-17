@@ -22,6 +22,7 @@ import { MaintenanceComponent } from './maintenance/maintenance.component';
 import { NotFoundComponent } from './not-found/not-found.component';
 import { UnauthorizedComponent } from './unauthorized/unauthorized.component';
 import { ForbiddenComponent } from './forbidden/forbidden.component';
+import { ChanelListComponent } from './chanel-list/chanel-list.component';
 
 export const routes: Routes = [
 	{
@@ -65,5 +66,6 @@ export const routes: Routes = [
 	{ path: SITEMAP.maintenance.path, component: MaintenanceComponent },
 	{ path: SITEMAP.forbidden.path, component: ForbiddenComponent },
 	{ path: SITEMAP.unauthorized.path, component: UnauthorizedComponent },
+	{path : SITEMAP.chanels.path, component: ChanelListComponent},
 	{ path: '**', component: NotFoundComponent },
 ];

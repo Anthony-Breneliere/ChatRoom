@@ -39,6 +39,15 @@ export class MessagingService extends SignalRClientBase {
 		return await this._hubConnection.invoke<ChatRoom>('GetChatRoomFromOffer', offerId);
 	}
 
+		/**
+	 * Join the chat room and get all chat room message history
+	 */
+		public async createChatRoom(): Promise<ChatRoom> {
+			await this.getConnectionPromise;
+	
+			return await this._hubConnection.invoke<ChatRoom>('CreateChatRoom');
+		}
+
 	/**
 	 * Join the chat room and get all chat room message history
 	 */
