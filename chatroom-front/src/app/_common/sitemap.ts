@@ -1,5 +1,6 @@
 export const SITEMAP = {
 	main: { path: '', route: '/' },
+	channelslist : {path: 'channelslist', route:'/channelslist'},
 	account: { path: 'account', route: '/account' },
 	dashboard: { path: 'dashboard', route: '/dashboard' },
 	admin: { path: 'admin', route: '/admin' },

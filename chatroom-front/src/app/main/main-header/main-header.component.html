@@ -5,8 +5,6 @@
         <span class="sr-only">ChatRoom</span>
         <chat-svg-logo class="w-[149px] h-[40px]" />
       </a>
-
-      <chat-label class="ml-2 mt-1" label="Beta" />
     </div>
 
     <div class="flex lg:hidden">
@@ -19,16 +17,11 @@
     </div>
     <div class="hidden lg:flex lg:gap-x-6">
       <a
-        [routerLink]="[ this.sitemap.dashboard.route ]"
-        [ngClass]="this.router.url === this.sitemap.dashboard.route ? 'bg-blue-50 dark:bg-blue-900': ''"
+        [routerLink]="[ this.sitemap.channelslist.route ]"
+        [ngClass]="this.router.url === this.sitemap.channelslist.route ? 'bg-blue-50 dark:bg-blue-900': ''"
         class="chat-header-nav-link"
       >
-        <ng-icon
-          class="mr-2"
-          [ngClass]="this.router.url === this.sitemap.dashboard.route ? 'text-blue-500' : 'text-gray-900 dark:text-white'"
-          [name]="this.router.url === this.sitemap.dashboard.route ? 'saxHome2Bulk' : 'saxHome2Outline'"
-        />
-        Dashboard
+        Channels List
       </a>
 
 
