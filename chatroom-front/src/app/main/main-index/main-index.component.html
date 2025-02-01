@@ -1,21 +1,23 @@
 
 
-<h1>List des chats disponibles </h1>
 
-<button mat-button>Menu</button>
-
-<div class="chat-list-wrapper">
-
-  @for (chat of chatRooms(); track chat.id) {
-    <button #joinChat class="chat-channel-item" >
-      Channel {{chat.id}}
-    </button>
-  }
+<div class="chat-wrapper">
   
-   
+  <div class="chat-rooms-list">
+    <h1 class="chat-list-title">Chats disponibles</h1>
+    <button class="btn-base" (click)="createNewChatRoom()">Creer un nouveau chat</button>
+    
+    <div class="chat-rooms">
+      @for (chat of chatRooms(); track chat.id) {
+        <app-chat-room-item [chatRoom]="chat" (chatClicked)="joinChat(chat.id)"></app-chat-room-item>
+      }
+    </div>
+  </div>
 
-  <button (click)="createNewChatRoom()">
-  Creer un nouveau chat
-</button>
+  <div class="chat-content">
+    <app-chat-room-content></app-chat-room-content>
+  </div>
+
 </div>
+
 

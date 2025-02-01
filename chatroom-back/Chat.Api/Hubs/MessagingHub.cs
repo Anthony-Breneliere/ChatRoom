@@ -95,8 +95,9 @@ public sealed class MessagingHub : Hub<IMessagingHubPush>, IMessagingHubInvoke
     }
 
     /// <inheritdoc/>
-    public ChatRoomDto[] GetAllChatRooms()
+    public async Task<ChatRoomDto[]> GetAllChatRooms()
     {
-        return _messagingService.GetRooms().ToListAsync();
+        List<Model.Messaging.ChatRoom> chatRooms = await _messagingService.GetRooms().ToListAsync();
+        return _mapper.Map<ChatRoomDto[]>(chatRooms);
     }
 }

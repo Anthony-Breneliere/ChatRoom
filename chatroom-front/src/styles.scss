@@ -22,6 +22,7 @@ input {
 // Remove spinner from number input
 @layer base {
 	input[type='number'] {
+
 		&::-webkit-inner-spin-button,
 		&::-webkit-outer-spin-button {
 			-webkit-appearance: none;
@@ -31,9 +32,7 @@ input {
 }
 
 .chat-separator {
-	@apply my-12 h-px border-t-0
-		opacity-25
-		bg-transparent bg-gradient-to-r from-transparent via-neutral-500 to-transparent;
+	@apply my-12 h-px border-t-0 opacity-25 bg-transparent bg-gradient-to-r from-transparent via-neutral-500 to-transparent;
 
 	&:is(.dark *) {
 		@apply via-neutral-400;
@@ -43,19 +42,39 @@ input {
 .icon-container {
 	transition: transform 0.5s ease, filter 0.5s ease;
 
-	& > ng-icon:hover {
-		transform: scale(1.1); /* Zoom légèrement */
-		filter: drop-shadow(0 0 5px #999); /* Rend l'icône plus lumineuse et ajoute un effet de brillance */
+	&>ng-icon:hover {
+		transform: scale(1.1);
+		/* Zoom légèrement */
+		filter: drop-shadow(0 0 5px #999);
+
+		/* Rend l'icône plus lumineuse et ajoute un effet de brillance */
 		&:is(.dark *) {
 			filter: brightness(150%) drop-shadow(0 0 5px #fff);
 		}
 	}
 }
 
-// .icon-container {
-// 	@apply transition-all duration-500 ease-in-out;
 
-// 	& > ng-icon:hover {
-// 		@apply transform scale-125 filter brightness-150 dark:drop-shadow-lg;
-// 	}
-// }
+
+
+button {
+	margin: 5px;
+	padding: 10px 15px;
+	border: none;
+	background: #007bff;
+	color: white;
+	border-radius: 5px;
+	cursor: pointer;
+
+	&:hover {
+		background: #0056b3;
+	}
+
+	&:disabled {
+		cursor: default;
+	}
+
+	&.red {
+		background-color: rgb(238, 7, 7);
+	}
+}

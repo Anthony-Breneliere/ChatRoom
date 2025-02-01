@@ -1,16 +1,26 @@
-.chat-list-wrapper {
-	padding: 5px;
-	border: 3px solid black;
-	border-radius: 20px;
+.chat-wrapper {
 	display: flex;
-	align-items: center;
-	justify-content: center;
-	flex-direction: column;
-	gap: 20px;
+	flex-grow: 1;
 
-	.chat-channel-item {
-		padding: 20px, 10px;
-		background-color: bisque;
-		border-radius: 8px;
+	.chat-rooms-list {
+		max-width: 400px;
+		padding: 20px;
+		height: 100%;
+
+		.chat-list-title {
+			text-align: center;
+			padding: 5px;
+		}
+
+		.chat-rooms {
+			overflow-y: auto;
+			display: flex;
+			flex-direction: column;
+			gap: 10px;
+		}
+	}
+
+	.chat-content {
+		flex-grow: 1;
 	}
 }

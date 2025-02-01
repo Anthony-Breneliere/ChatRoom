@@ -1,0 +1,14 @@
+
+
+
+    <div *ngIf="chatRoom !== undefined" class="chat-room-item">
+        <p class="chat-name">Name : {{ chatRoom.name}}</p>
+
+        <p *ngIf="chatRoom.messages.length !== 0" class="chat-info">
+          Dernier message : {{ chatRoom.messages[chatRoom.messages.length - 1] }}
+        </p>
+
+        <p *ngIf="chatRoom.messages.length === 0" class="chat-info">
+          Participants : {{ chatRoom.participants.length }}
+        </p>
+    </div>
