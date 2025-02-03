@@ -1,0 +1,20 @@
+<table>
+	<thead>
+		<tr>
+			<td>Messages</td>
+		</tr>
+	</thead>
+	<tbody>
+		@for(message of messages; track message.id){
+			<tr>
+				<td>{{ message.content }}</td>
+			</tr>
+		}
+	</tbody>
+</table>
+<div>
+	<input style="border: 1px solid black;" type="text" [(ngModel)]="newMessage">
+	<button (click)="sendMessage()">Envoyer</button>
+</div>
+
+<p>{{ id }}</p>

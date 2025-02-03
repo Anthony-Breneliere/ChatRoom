@@ -36,6 +36,20 @@ public sealed class MessagingHubNotificationHandler : IMessagingNotificationHand
     }
 
     /// <inheritdoc />
+    public async Task NotifyNewChatroomAsync(Model.Messaging.ChatRoom chatroom)
+    {
+        ChatRoomDto dto = _mapper.Map<ChatRoomDto>(chatroom);
+        await _hubContext.Clients.All.NewChatroom(dto);
+    }
+
+    /// <inheritdoc />
+    public async Task NotifyDeleteChatroomAsync(Model.Messaging.ChatRoom chatroom)
+    {
+        ChatRoomDto dto = _mapper.Map<ChatRoomDto>(chatroom);
+        await _hubContext.Clients.All.DeletedChatroom(dto);
+    }
+
+    /// <inheritdoc />
     public async Task NotifyEditedMessageAsync(ChatMessage message)
     {
         ChatMessageDto dto = _mapper.Map<ChatMessageDto>(message);

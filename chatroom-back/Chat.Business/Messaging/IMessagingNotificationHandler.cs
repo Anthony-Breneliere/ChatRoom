@@ -20,6 +20,20 @@ public interface IMessagingNotificationHandler
     public Task NotifyEditedMessageAsync(ChatMessage message);
 
     /// <summary>
+    /// Notifies the client of an new chatroom.
+    /// </summary>
+    /// <param name="chatroom"></param>
+    /// <returns></returns>
+    public Task NotifyNewChatroomAsync(ChatRoom chatroom);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="chatroom"></param>
+    /// <returns></returns>
+    public Task NotifyDeleteChatroomAsync(ChatRoom chatroom);
+
+    /// <summary>
     /// Notifies the client of a deleted message.
     /// </summary>
     /// <param name="roomId">The ID of the chat room.</param>

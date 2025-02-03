@@ -18,7 +18,7 @@ public interface IMessagingPersistance
     /// Gets all chat rooms.
     /// </summary>
     /// <returns>All chat rooms.</returns>
-    IQueryable<Model.Messaging.ChatRoom> GetRooms();
+    Task<IEnumerable<ChatRoom>> GetRooms();
     
     /// <summary>
     /// Gets all messages in a chat room.
@@ -35,6 +35,14 @@ public interface IMessagingPersistance
     Task SubmitMessageAsync(ChatMessage message, CancellationToken ct = default);
 
     /// <summary>
+    /// Delete a chatroom
+    /// </summary>
+    /// <param name="id">Chatroom to delete</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns></returns>
+    Task<ChatRoom?> DeleteChatroomAsync(Guid id, CancellationToken ct = default);
+
+    /// <summary>
     /// Creates a new chat room.
     /// </summary>
     /// <param name="room">Room to create.</param>
@@ -49,6 +57,13 @@ public interface IMessagingPersistance
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The chat room.</returns>
     Task<Model.Messaging.ChatRoom?> GetChatRoomAsync(Guid roomId, CancellationToken ct = default);
+
+    /// <summary>
+    /// Gets all chat room.
+    /// </summary>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns></returns>
+    Task<ChatRoom[]> GetChatRoomsAsync(CancellationToken ct);
 
     /// <summary>
     /// Gets a specific chat message.

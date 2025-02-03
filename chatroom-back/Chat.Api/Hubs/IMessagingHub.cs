@@ -12,6 +12,21 @@ public interface IMessagingHubPush
     /// </summary>
     /// <param name="message">The message to push.</param>
     public Task NewMessage(ChatMessageDto message);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="chatroom"></param>
+    /// <returns></returns>
+    public Task NewChatroom(ChatRoomDto chatroom);
+
+
+    /// <summary>
+    /// Pushes a deleted chatroom to the client
+    /// </summary>
+    /// <param name="chatroom">The ID of the deleted chatroom.</param>
+    /// <returns></returns>
+    public Task DeletedChatroom(ChatRoomDto chatroom);
     
     /// <summary>
     /// Pushes an edited message to the client.
@@ -53,6 +68,11 @@ public interface IMessagingHubInvoke
     /// Get Chat rooom
     /// </summary>
     Task<ChatRoomDto> GetChatRoom(Guid roomId);
+
+    /// <summary>
+    /// Delete Chat rooom
+    /// </summary>
+    Task DeleteChatroom(Guid roomId);
 
     /// <summary>
     /// Create chat room

@@ -5,14 +5,20 @@
         <chat-svg-logo class="h-32 w-100" />
         <span class="sr-only">ChatRoom</span>
       </h1>
-      <p class="chat-main-index-paragraphe">
-        ChatRoom revolutionizes pharma trade by connecting buyers and suppliers across Europe.
-        Our platform offers seamless sourcing, instant communication, dynamic auctions,
-        and relationship management to build stronger partnerships and grow your business.
-      </p>
+			@for (chatroom of chatrooms; track chatroom.id) {
+				<button (click)="navigate(chatroom.id)">Rejoindre le chat : {{ chatroom.id }}</button>
+				<button (click)="deleteChatroom(chatroom.id)">Supprimer le chat</button>
+			} @empty {
+				<li>There are no items.</li>
+			}
       <div class="mt-10 flex items-center justify-center gap-x-6">
-        <button>Create chat room</button>
+        <button (click)="createChatRoom()">Create chat room</button>
+        <button (click)="getRooms()">List chat rooms</button>
       </div>
+			<div>
+				<input type="text" v-bind="message">
+
+			</div>
     </div>
   </div>
 </div>

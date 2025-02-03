@@ -27,7 +27,7 @@ public sealed class MessagingRepository : IMessagingPersistance
         await _context.ChatMessages.Where(m => m.RoomId == roomId).AsNoTracking().ToArrayAsync(ct);
 
     /// <inheritdoc />
-    public IQueryable<ChatRoom> GetRooms() => _context.ChatRooms.AsNoTracking();
+    public async Task<IEnumerable<ChatRoom>> GetRooms() => await _context.ChatRooms.AsNoTracking().ToArrayAsync();
 
     /// <inheritdoc />
     public IQueryable<ChatRoom> GetRoomsForCompany(Guid userId) =>
@@ -47,6 +47,20 @@ public sealed class MessagingRepository : IMessagingPersistance
     {
         _context.ChatMessages.Add(message);
         await _context.SaveChangesAsync(ct);
+    }
+
+    /// <inheritdoc />
+    public async Task<ChatRoom?> DeleteChatroomAsync(Guid id, CancellationToken ct = default)
+    {
+        var chatroom = _context.ChatRooms.FirstOrDefault(c => c.Id == id);
+        if(chatroom is null)
+        {
+            return null;
+        }
+
+        _context.ChatRooms.Remove(chatroom);
+        await _context.SaveChangesAsync(ct);
+        return chatroom;
     }
 
     /// <inheritdoc />
@@ -81,7 +95,23 @@ public sealed class MessagingRepository : IMessagingPersistance
     /// </summary>
     public async Task<ChatRoom?> GetChatRoomAsync(Guid roomId, CancellationToken ct)
     {
-        return await _context.ChatRooms
+        ChatRoom? chatroom = await _context.ChatRooms
             .Include(static r => r.Participants).FirstOrDefaultAsync(c => c.Id == roomId, ct);
+
+        if(chatroom is not null)
+        {
+            chatroom.Messages = GetMessagesInRoom(roomId).ToList();
+        }
+
+        return chatroom;
+    }
+
+    /// <summary>
+    /// Get all chat room with participants
+    /// </summary>
+    public async Task<ChatRoom[]> GetChatRoomsAsync(CancellationToken ct)
+    {
+        return await _context.ChatRooms
+            .Include(static r => r.Participants).ToArrayAsync();
     }
 }

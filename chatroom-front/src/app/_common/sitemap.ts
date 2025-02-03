@@ -1,6 +1,7 @@
 export const SITEMAP = {
 	main: { path: '', route: '/' },
 	account: { path: 'account', route: '/account' },
+	chatroom: { path: 'chatroom', route: '/chatroom/:id' },
 	dashboard: { path: 'dashboard', route: '/dashboard' },
 	admin: { path: 'admin', route: '/admin' },
 	auth: { path: 'auth', route: '/auth' },

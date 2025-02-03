@@ -3,11 +3,17 @@ import { environment } from 'src/environments/environment';
 import { ChatMessage } from '../../models/chat-message.model';
 import { ChatRoom } from '../../models/chat-room.model';
 import { SignalRClientBase } from '../signalr/signalr.client.base';
+import { Observable, Subject, switchMap } from 'rxjs';
 
 @Injectable({
 	providedIn: 'root',
 })
 export class MessagingService extends SignalRClientBase {
+
+	private chatroomsSubject = new Subject<ChatRoom>();
+	private messagesSubject = new Subject<ChatMessage>();
+	public chatrooms$ = this.chatroomsSubject.asObservable();
+	public messages$ = this.messagesSubject.asObservable();
 
 	constructor() {
 		super(environment.API_URL + '/hub/messaging');
@@ -15,10 +21,26 @@ export class MessagingService extends SignalRClientBase {
 		// Handle messaging events
 		this._hubConnection.on('NewMessage', (message: ChatMessage) => {
 			console.log('New message received:', message);
+			this.messagesSubject.next(message);
+		});
 
+		this._hubConnection.on('NewChatroom', (chatroom: ChatRoom) => {
+			console.log('New NewChatroom received:', chatroom.id);
+			this.chatroomsSubject.next(chatroom);
+		});
+
+		// this._hubConnection.on('DeletedMessage', (chatroom: ChatRoom) => {
+		// 	console.log('New DeletedMessage received:', chatroom.id);
+		// 	this.chatroomsSubject.next(chatroom);
+		// });
+
+		this._hubConnection.on('DeletedChatroom', (chatroom: ChatRoom) => {
+			console.log('New confirmation of DeleteChatroom received:', chatroom);
+			this.chatroomsSubject.next(chatroom);
 		});
 
 		this._hubConnection.on('EditedMessage', (message: ChatMessage) => {
+			console.log('EditedMessage received:', message);
 		});
 
 		this._hubConnection.on('DeletedMessage', (message: ChatMessage) => {
@@ -40,21 +62,37 @@ export class MessagingService extends SignalRClientBase {
 	}
 
 	/**
+	 * @returns chatroom[]
+	 */
+	public async getRooms(): Promise<ChatRoom[]> {
+		await this.getConnectionPromise;
+
+		return await this._hubConnection.invoke<ChatRoom[]>('GetRooms');
+	}
+
+	public async deleteChatroom(roomId : string): Promise<void> {
+		await this.getConnectionPromise;
+		await this._hubConnection.invoke('DeleteChatroom', roomId);
+	}
+
+	public getRoomsAsObservable(): Observable<ChatRoom> {
+		return this.chatroomsSubject.asObservable();
+	}
+
+	/**
 	 * Create a new chat room
 	 */
 	public async createChatRoom(): Promise<ChatRoom> {
 		await this.getConnectionPromise;
-
 		return await this._hubConnection.invoke<ChatRoom>('CreateChatRoom');
 	}
 
 	/**
 	 * Join the chat room and get all chat room message history
 	 */
-	public async joinChatRoom(roomId: string): Promise<void> {
+	public async joinChatRoom(roomId: string): Promise<ChatMessage[]> {
 		await this.getConnectionPromise;
-
-		const chatHistory = await this._hubConnection.invoke<ChatMessage[]>('JoinChatRoom', roomId);
+		return await this._hubConnection.invoke<ChatMessage[]>('JoinChatRoom', roomId);
 	}
 
 	/**

@@ -40,10 +40,22 @@ public sealed class MessagingHub : Hub<IMessagingHubPush>, IMessagingHubInvoke
     /// </summary>
     public async Task<ChatRoomDto> GetChatRoom(Guid roomId)
     {
+        Console.WriteLine("WRITE LINE : " + roomId);
         Model.Messaging.ChatRoom room = await _messagingService.GetChatRoom(roomId)
                                         ?? throw new ArgumentException("Offer not found");
 
         return _mapper.Map<ChatRoomDto>(room);
+    }
+
+    /// <summary>
+    /// Gets the chat room from an offer.
+    /// </summary>
+    public async Task<IEnumerable<ChatRoomDto>> GetRooms()
+    {
+        IEnumerable<Model.Messaging.ChatRoom> rooms = await _messagingService.GetRooms()
+                                        ?? throw new ArgumentException("Offer not found");
+
+        return rooms.Select(s => _mapper.Map<ChatRoomDto>(s)).ToArray();
     }
     
     /// <summary>
@@ -74,6 +86,12 @@ public sealed class MessagingHub : Hub<IMessagingHubPush>, IMessagingHubInvoke
     public async Task LeaveChatRoom(Guid roomId)
     {
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId.ToString());
+    }
+
+    /// <inheritdoc />
+    public async Task DeleteChatroom(Guid roomId)
+    {
+        var room = await _messagingService.DeleteChatroom(roomId);
     }
 
     /// <inheritdoc />

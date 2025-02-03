@@ -16,6 +16,11 @@ public sealed class ChatRoom : ICreateTimestamp
     public Guid Id { get; init; }
 
     /// <summary>
+    /// The name of the room
+    /// </summary>
+    public string? Name { get; set; }
+
+    /// <summary>
     /// Companies in the chat room
     /// </summary>
     public List<User> Participants { get; set; } = [];
