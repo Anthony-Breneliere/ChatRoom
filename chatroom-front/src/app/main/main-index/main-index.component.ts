@@ -4,11 +4,12 @@ import { ChatButtonComponent } from '../../_common/components/chat-button/chat-b
 import { MessagingService } from 'src/app/_common/services/messaging/messaging.service';
 import { ChatRoom } from 'src/app/_common/models/chat-room.model';
 import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 @Component({
 	selector: 'app-main-index',
 	standalone: true,
-	imports: [ChatSvgLogoComponent, ChatButtonComponent],
+	imports: [ChatSvgLogoComponent, ChatButtonComponent, FormsModule],
 	styleUrl: './main-index.component.scss',
 	templateUrl: './main-index.component.html',
 })
@@ -16,6 +17,7 @@ export class MainIndexComponent implements OnInit {
 
 	private router = inject(Router);
 	chatrooms: ChatRoom[] = [];
+	newChatroomName = "";
 
 	constructor(private messageService : MessagingService){}
 
@@ -25,11 +27,12 @@ export class MainIndexComponent implements OnInit {
 		});
 
 		this.messageService.chatrooms$.subscribe(chatroom => {
-			console.log(chatroom)
 			// Si on connait l'id, c'est une suppression, sinon c'est une création
-			if(this.chatrooms.filter(cr => cr.id == chatroom.id).length > 0)
+			if(this.chatrooms.some(cr => cr.id == chatroom.id))
 			{
-				this.chatrooms.splice(this.chatrooms.indexOf(chatroom), 1)
+				let deletedChatroom = this.chatrooms.find(cr => cr.id == chatroom.id)!;
+				let indexToRemove = this.chatrooms.indexOf(deletedChatroom);
+				this.chatrooms.splice(indexToRemove, 1)
 			} else {
 				this.chatrooms.push(chatroom)
 			}
@@ -38,7 +41,11 @@ export class MainIndexComponent implements OnInit {
 	}
 
 	async createChatRoom(){
-		this.messageService.createChatRoom();
+		if(this.newChatroomName != "")
+		{
+			this.messageService.createChatRoom(this.newChatroomName);
+			this.newChatroomName = "";
+		}
 	}
 
 	async getRooms(){
@@ -51,7 +58,7 @@ export class MainIndexComponent implements OnInit {
 		await this.messageService.deleteChatroom(id);
 	}
 
-	navigate(id: string){
-		this.messageService.joinChatRoom(id).then(result => this.router.navigate(["/chatroom", {id: id}]));
+	navigate(id: string, name: string){
+		this.messageService.joinChatRoom(id).then(result => this.router.navigate(["/chatroom", {id: id, name: name}]));
 	}
 }

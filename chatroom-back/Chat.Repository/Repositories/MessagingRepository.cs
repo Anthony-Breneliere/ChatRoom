@@ -64,6 +64,35 @@ public sealed class MessagingRepository : IMessagingPersistance
     }
 
     /// <inheritdoc />
+    public async Task<ChatMessage?> DeleteMessageAsync(Guid id, CancellationToken ct = default)
+    {
+        var message = _context.ChatMessages.FirstOrDefault(c => c.Id == id);
+        if(message is null)
+        {
+            return null;
+        }
+
+        _context.ChatMessages.Remove(message);
+        await _context.SaveChangesAsync(ct);
+        return message;
+    }
+
+    /// <inheritdoc />
+    public async Task<ChatMessage?> EditedMessageAsync(Guid id, string content, CancellationToken ct = default)
+    {
+        var message = _context.ChatMessages.FirstOrDefault(c => c.Id == id);
+        if(message is null)
+        {
+            return null;
+        }
+        message.Content = content;
+
+        _context.ChatMessages.Update(message);
+        await _context.SaveChangesAsync(ct);
+        return message;
+    }
+
+    /// <inheritdoc />
     public async Task<ChatRoom> CreateRoomAsync(ChatRoom room, CancellationToken ct = default)
     {
         // Get the company IDs from the participants
@@ -98,10 +127,10 @@ public sealed class MessagingRepository : IMessagingPersistance
         ChatRoom? chatroom = await _context.ChatRooms
             .Include(static r => r.Participants).FirstOrDefaultAsync(c => c.Id == roomId, ct);
 
-        if(chatroom is not null)
-        {
-            chatroom.Messages = GetMessagesInRoom(roomId).ToList();
-        }
+        // if(chatroom is not null)
+        // {
+        //     chatroom.Messages = GetMessagesInRoom(roomId).ToList();
+        // }
 
         return chatroom;
     }

@@ -58,8 +58,9 @@ public sealed class MessagingHubNotificationHandler : IMessagingNotificationHand
 
 
     /// <inheritdoc />
-    public async Task NotifyDeletedMessageAsync(long roomId, Guid id)
+    public async Task NotifyDeletedMessageAsync(ChatMessage message)
     {
-        await _hubContext.Clients.Group(roomId.ToString()).DeletedMessage(id);
+        ChatMessageDto dto = _mapper.Map<ChatMessageDto>(message);
+        await _hubContext.Clients.Group(message.RoomId.ToString()).DeletedMessage(dto);
     }
 }

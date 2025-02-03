@@ -114,6 +114,36 @@ public sealed class MessagingService
         return true;
     }
 
+    /// <summary>
+    /// delete chat room.
+    /// </summary>
+    /// <returns>boolean</returns>
+    public async Task<bool> DeleteMessage(Guid messageId, CancellationToken ct = default)
+    {
+        var result = await _messagingPersistance.DeleteMessageAsync(messageId, ct);
+        if(result is null)
+        {
+            return false;
+        }
+        await _notificationHandler.NotifyDeletedMessageAsync(result);
+        return true;
+    }
+
+    /// <summary>
+    /// edit chat message.
+    /// </summary>
+    /// <returns>boolean</returns>
+    public async Task<bool> EditedMessage(Guid messageId, string content, CancellationToken ct = default)
+    {
+        var result = await _messagingPersistance.EditedMessageAsync(messageId, content, ct);
+        if(result is null)
+        {
+            return false;
+        }
+        await _notificationHandler.NotifyEditedMessageAsync(result);
+        return true;
+    }
+
 
 
     /// <summary>
@@ -131,7 +161,7 @@ public sealed class MessagingService
     /// create chat room for an offer.
     /// </summary>
     /// <returns>The chat room.</returns>
-    public async Task<Model.Messaging.ChatRoom?> CreateChatRoom( string nameIdentifier,
+    public async Task<Model.Messaging.ChatRoom?> CreateChatRoom( string nameIdentifier, string name, 
         CancellationToken ct = default)
     {
         User user = await GetUserFromNameIdentifier(nameIdentifier);
@@ -141,6 +171,7 @@ public sealed class MessagingService
         
         ChatRoom chatRoom = new Model.Messaging.ChatRoom
         {
+            Name = name,
             Participants = participants.ToList()
         };
 

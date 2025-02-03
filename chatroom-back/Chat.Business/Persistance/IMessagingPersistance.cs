@@ -43,6 +43,23 @@ public interface IMessagingPersistance
     Task<ChatRoom?> DeleteChatroomAsync(Guid id, CancellationToken ct = default);
 
     /// <summary>
+    /// Delete a message
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    Task<ChatMessage?> DeleteMessageAsync(Guid id, CancellationToken ct = default);
+
+    /// <summary>
+    /// Update the content of a message
+    /// </summary>
+    /// <param name="id">Id of message</param>
+    /// <param name="content">new content of the message</param>
+    /// <param name="ct">CancellationToken</param>
+    /// <returns></returns>
+    Task<ChatMessage?> EditedMessageAsync(Guid id, string content, CancellationToken ct = default);
+
+    /// <summary>
     /// Creates a new chat room.
     /// </summary>
     /// <param name="room">Room to create.</param>

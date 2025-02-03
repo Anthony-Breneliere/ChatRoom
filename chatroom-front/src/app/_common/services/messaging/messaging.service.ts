@@ -20,30 +20,28 @@ export class MessagingService extends SignalRClientBase {
 
 		// Handle messaging events
 		this._hubConnection.on('NewMessage', (message: ChatMessage) => {
-			console.log('New message received:', message);
+			console.log('NewMessage received:', message);
 			this.messagesSubject.next(message);
 		});
 
 		this._hubConnection.on('NewChatroom', (chatroom: ChatRoom) => {
-			console.log('New NewChatroom received:', chatroom.id);
+			console.log('NewChatroom received:', chatroom.id);
 			this.chatroomsSubject.next(chatroom);
 		});
 
-		// this._hubConnection.on('DeletedMessage', (chatroom: ChatRoom) => {
-		// 	console.log('New DeletedMessage received:', chatroom.id);
-		// 	this.chatroomsSubject.next(chatroom);
-		// });
-
 		this._hubConnection.on('DeletedChatroom', (chatroom: ChatRoom) => {
-			console.log('New confirmation of DeleteChatroom received:', chatroom);
+			console.log('DeleteChatroom received:', chatroom);
 			this.chatroomsSubject.next(chatroom);
 		});
 
 		this._hubConnection.on('EditedMessage', (message: ChatMessage) => {
 			console.log('EditedMessage received:', message);
+			this.messagesSubject.next(message);
 		});
 
 		this._hubConnection.on('DeletedMessage', (message: ChatMessage) => {
+			console.log('DeletedMessage received:', message);
+			this.messagesSubject.next(message);
 		});
 
 		this._hubConnection.on('UserWriting', (user: ChatMessage) => {
@@ -75,6 +73,16 @@ export class MessagingService extends SignalRClientBase {
 		await this._hubConnection.invoke('DeleteChatroom', roomId);
 	}
 
+	public async deleteMessage(messageId : string): Promise<void> {
+		await this.getConnectionPromise;
+		await this._hubConnection.invoke('DeleteMessage', messageId);
+	}
+
+	public async updateMessage(messageId : string, content: string): Promise<void> {
+		await this.getConnectionPromise;
+		await this._hubConnection.invoke('EditedMessage', messageId, content);
+	}
+
 	public getRoomsAsObservable(): Observable<ChatRoom> {
 		return this.chatroomsSubject.asObservable();
 	}
@@ -82,9 +90,9 @@ export class MessagingService extends SignalRClientBase {
 	/**
 	 * Create a new chat room
 	 */
-	public async createChatRoom(): Promise<ChatRoom> {
+	public async createChatRoom(name: string): Promise<ChatRoom> {
 		await this.getConnectionPromise;
-		return await this._hubConnection.invoke<ChatRoom>('CreateChatRoom');
+		return await this._hubConnection.invoke<ChatRoom>('CreateChatRoom', name);
 	}
 
 	/**

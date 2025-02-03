@@ -36,7 +36,6 @@ public interface IMessagingNotificationHandler
     /// <summary>
     /// Notifies the client of a deleted message.
     /// </summary>
-    /// <param name="roomId">The ID of the chat room.</param>
-    /// <param name="id">The ID of the deleted message.</param>
-    public Task NotifyDeletedMessageAsync(long roomId, Guid id);
+    /// <param name="message">The deleted message</param>
+    public Task NotifyDeletedMessageAsync(ChatMessage message);
 }
