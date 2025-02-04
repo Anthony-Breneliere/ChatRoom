@@ -122,6 +122,13 @@ public sealed class MessagingService
     }
 
     /// <summary>
+    /// Notify room
+    /// </summary>
+    public async Task NotifyNewRoom(ChatRoom chatRoom){
+      await _notificationHandler.NotifyNewRoomAsync(chatRoom);
+    }
+
+    /// <summary>
     /// Gets a specific chat room.
     /// </summary>
     /// <returns>The chat room.</returns>

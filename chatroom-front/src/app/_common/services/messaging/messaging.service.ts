@@ -1,21 +1,22 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { environment } from 'src/environments/environment';
-import { ChatMessage } from '../../models/chat-message.model';
 import { ChatRoom } from '../../models/chat-room.model';
 import { SignalRClientBase } from '../signalr/signalr.client.base';
+import { ChatMessage } from '../../models/chat-message.model';
 
 @Injectable({
 	providedIn: 'root',
 })
 export class MessagingService extends SignalRClientBase {
-
+	messages = signal<ChatMessage[]>([])
+	rooms = signal<ChatRoom[]>([])
 	constructor() {
 		super(environment.API_URL + '/hub/messaging');
 
 		// Handle messaging events
 		this._hubConnection.on('NewMessage', (message: ChatMessage) => {
 			console.log('New message received:', message);
-
+			this.messages.update(old => [...old, message])
 		});
 
 		this._hubConnection.on('EditedMessage', (message: ChatMessage) => {
@@ -24,8 +25,15 @@ export class MessagingService extends SignalRClientBase {
 		this._hubConnection.on('DeletedMessage', (message: ChatMessage) => {
 		});
 
+		this._hubConnection.on('NewChatRoom', (newRoom: ChatRoom) => {
+			console.log(newRoom)
+			this.rooms.update(old => [...old, newRoom])
+		});
+
 		this._hubConnection.on('UserWriting', (user: ChatMessage) => {
 		});
+
+		this.listChatRoom().then((res) => this.rooms.set(res))
 	}
 
 	/**
@@ -55,15 +63,17 @@ export class MessagingService extends SignalRClientBase {
 		await this.getConnectionPromise;
 
 		const chatHistory = await this._hubConnection.invoke<ChatMessage[]>('JoinChatRoom', roomId);
+		this.messages.set(chatHistory)
 	}
 
 	/**
-	 * Get all chat room messages
+	 * Leave room
 	 */
 	public async leaveChatRoom(roomId: string): Promise<void> {
 		await this.getConnectionPromise;
 
 		await this._hubConnection.invoke('LeaveChatRoom', roomId);
+		this.messages.set([])
 	}
 
 	/**

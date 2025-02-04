@@ -1,4 +1,26 @@
 <div>
-	<chat-label label="hahah"></chat-label>
-	<chat-input />
+	<button class="rounded-lg bg-blue-700 text-white p-3 m-3" (click)="this.createRoom()">Créer salle</button>
+	<button class="rounded-lg bg-red-700 text-white p-3 m-3" (click)="this.leaveRoom()">Sortir de la salle</button>
+
+	<chat-label label="{{ this.room()?.id }}"></chat-label>
+	<div class="flex justify-between">
+		<ul>
+			@for (message of this.messages(); track message.id) {
+				<h2>{{ message.authorFullName }}</h2>
+				<p>{{ message.content }}</p>
+			}
+		</ul>
+		<form (submit)="this.sendMessage()">
+			<input id="newMessageInput" name="messageContent" class="border m-2 h-8"/>
+		</form>
+	</div>
+
+	<ul>
+		@for (room of this.rooms(); track room.id) {
+			<li>
+				<button class="rounded-lg bg-green-700 p-2 m-2" (click)="this.joinRoom(room.id)">Join room: {{ room.id }}</button>
+			</li>
+		}
+	</ul>
+
 </div>

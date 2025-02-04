@@ -55,6 +55,8 @@ public sealed class MessagingHub : Hub<IMessagingHubPush>, IMessagingHubInvoke
         Model.Messaging.ChatRoom room = await _messagingService.CreateChatRoom(NameIdentifier)
                                         ?? throw new ArgumentException("Offer not created");
 
+        await _messagingService.NotifyNewRoom(room);
+
         return _mapper.Map<ChatRoomDto>(room);
     }
 

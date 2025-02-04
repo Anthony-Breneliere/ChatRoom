@@ -48,4 +48,11 @@ public sealed class MessagingHubNotificationHandler : IMessagingNotificationHand
     {
         await _hubContext.Clients.Group(roomId.ToString()).DeletedMessage(id);
     }
+
+    /// <inheritdoc />
+    public async Task NotifyNewRoomAsync(Model.Messaging.ChatRoom chatRoom)
+    {
+      ChatRoomDto dto = _mapper.Map<ChatRoomDto>(chatRoom);
+      await _hubContext.Clients.All.NewChatRoom(dto);
+    }
 }

@@ -20,6 +20,11 @@ public interface IMessagingHubPush
     public Task EditedMessage(ChatMessageDto message);
 
     /// <summary>
+    /// Pushes an edited message to the client.
+    /// </summary>
+    public Task NewChatRoom(ChatRoomDto room);
+
+    /// <summary>
     /// Pushes a deleted message to the client.
     /// </summary>
     /// <param name="id">The ID of the deleted message.</param>
