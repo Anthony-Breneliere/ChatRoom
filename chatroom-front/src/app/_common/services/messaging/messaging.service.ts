@@ -3,11 +3,16 @@ import { environment } from 'src/environments/environment';
 import { ChatMessage } from '../../models/chat-message.model';
 import { ChatRoom } from '../../models/chat-room.model';
 import { SignalRClientBase } from '../signalr/signalr.client.base';
+import { Observable, Subject } from 'rxjs';
 
 @Injectable({
 	providedIn: 'root',
 })
 export class MessagingService extends SignalRClientBase {
+
+	private chatRoomsCreated = new Subject<ChatRoom>();
+
+	private chatRoomsDeleted = new Subject<string>();
 
 	constructor() {
 		super(environment.API_URL + '/hub/messaging');
@@ -26,6 +31,16 @@ export class MessagingService extends SignalRClientBase {
 
 		this._hubConnection.on('UserWriting', (user: ChatMessage) => {
 		});
+
+		this._hubConnection.on('NewChatRoomCreated', (chatRoom: ChatRoom) => {
+			this.chatRoomsCreated.next(chatRoom);
+		});
+
+		this._hubConnection.on('DeletedChatRoom', (roomId: string) => {
+			this.chatRoomsDeleted.next(roomId);
+		});
+
+
 	}
 
 	/**
@@ -40,12 +55,38 @@ export class MessagingService extends SignalRClientBase {
 	}
 
 	/**
-	 * Create a new chat room
+	 * Get all chat rooms
+	 * @returns chatroom[]
 	 */
-	public async createChatRoom(): Promise<ChatRoom> {
+	public async getRooms(): Promise<ChatRoom[]> {
 		await this.getConnectionPromise;
 
-		return await this._hubConnection.invoke<ChatRoom>('CreateChatRoom');
+		return await this._hubConnection.invoke<ChatRoom[]>('GetRooms');
+	}
+
+	/**
+	 * Get new chat room created from the server
+	 * @returns un Observable<ChatRoom> pour les évènement de création de chat room
+	 */
+	public getChatRoomsCreated(): Observable<ChatRoom> {
+		return this.chatRoomsCreated.asObservable();
+	}
+
+	/**
+	 * Get chat room deleted from the server
+	 * @returns un Observable<ChatRoom> pour les évènement de suppression de chat room
+	 */
+	public getChatRoomsDeleted(): Observable<string> {
+		return this.chatRoomsDeleted.asObservable();
+	}
+
+	/**
+	 * Create a new chat room
+	 */
+	public async createChatRoom(chatRoomName : string): Promise<ChatRoom> {
+		await this.getConnectionPromise;
+
+		return await this._hubConnection.invoke<ChatRoom>('CreateChatRoom', chatRoomName);
 	}
 
 	/**
@@ -73,5 +114,11 @@ export class MessagingService extends SignalRClientBase {
 		await this.getConnectionPromise;
 
 		await this._hubConnection.invoke('SendMessage', roomId, message);
+	}
+
+	public async deleteChatRoom(roomId: string): Promise<void> {
+		await this.getConnectionPromise;
+
+		await this._hubConnection.invoke('DeleteChatRoom', roomId);
 	}
 }

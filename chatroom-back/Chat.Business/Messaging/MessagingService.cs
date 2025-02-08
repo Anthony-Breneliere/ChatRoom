@@ -42,7 +42,7 @@ public sealed class MessagingService
     /// Gets all chat rooms.
     /// </summary>
     /// <returns>All chat rooms.</returns>
-    public IQueryable<Model.Messaging.ChatRoom> GetRooms() => _messagingPersistance.GetRooms();
+    public async Task<IEnumerable<Model.Messaging.ChatRoom>> GetRooms() => await _messagingPersistance.GetRooms();
 
     /// <summary>
     /// Gets all messages in a chat room.
@@ -105,7 +105,7 @@ public sealed class MessagingService
     /// create chat room for an offer.
     /// </summary>
     /// <returns>The chat room.</returns>
-    public async Task<Model.Messaging.ChatRoom?> CreateChatRoom( string nameIdentifier,
+    public async Task CreateChatRoom( string nameIdentifier, string chatRoomName,
         CancellationToken ct = default)
     {
         User user = await GetUserFromNameIdentifier(nameIdentifier);
@@ -115,10 +115,13 @@ public sealed class MessagingService
         
         ChatRoom chatRoom = new Model.Messaging.ChatRoom
         {
+            Name = chatRoomName,
             Participants = participants.ToList()
         };
 
-        return await _messagingPersistance.CreateRoomAsync(chatRoom, ct);
+        _ = await _messagingPersistance.CreateRoomAsync(chatRoom, ct) ?? throw new ArgumentException("Offer not created");
+
+        await _notificationHandler.NotifyNewChatRoomCreatedAsync(chatRoom);
     }
     
     
@@ -137,4 +140,18 @@ public sealed class MessagingService
     /// <returns>The chat message.</returns>
     public async Task<ChatMessage?> GetMessageAsync(Guid id, CancellationToken ct = default) =>
         await _messagingPersistance.GetMessageAsync(id, ct);
+
+    /// <summary>
+    /// Delete a specific chat room.
+    /// </summary>
+    /// <param name="roomId">ID of the chat message.</param>
+    /// <param name="ct">Cancellation token.</param>
+    public async Task DeleteChatRoomAsync(Guid roomId, CancellationToken ct = default)
+    {
+        ChatRoom c = await _messagingPersistance.DeleteChatRoomAsync(roomId, ct);
+
+        await _notificationHandler.NotifyChatRoomDeletedAsync(c.Id);
+    }
+        
+
 }

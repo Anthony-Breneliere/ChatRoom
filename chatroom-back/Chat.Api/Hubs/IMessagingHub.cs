@@ -24,6 +24,18 @@ public interface IMessagingHubPush
     /// </summary>
     /// <param name="id">The ID of the deleted message.</param>
     public Task DeletedMessage(Guid id);
+
+    /// <summary>
+    /// Pushes a new chat room
+    /// </summary>
+    /// <param name="chatRoom">the created chat room</param>
+    Task NewChatRoomCreated(ChatRoomDto chatRoom);
+
+    /// <summary>
+    /// Pushes the id of the deleted chat room to the client
+    /// </summary>
+    /// <param name="roomId">the id of the deleted chat room</param>
+    Task DeletedChatRoom(Guid roomId);
 }
 
 /// <summary>
@@ -57,5 +69,5 @@ public interface IMessagingHubInvoke
     /// <summary>
     /// Create chat room
     /// </summary>
-    Task<ChatRoomDto> CreateChatRoom();
+    Task CreateChatRoom(string chatRoomName);
 }

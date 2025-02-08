@@ -45,16 +45,24 @@ public sealed class MessagingHub : Hub<IMessagingHubPush>, IMessagingHubInvoke
 
         return _mapper.Map<ChatRoomDto>(room);
     }
-    
+
+    /// <summary>
+    /// Gets chat rooms.
+    /// </summary>
+    public async Task<IEnumerable<ChatRoomDto>> GetRooms()
+    {
+        IEnumerable<Model.Messaging.ChatRoom> rooms = await _messagingService.GetRooms();
+
+        return _mapper.Map<IEnumerable<ChatRoomDto>>(rooms);
+    }
+
     /// <summary>
     /// Gets the chat room from an offer.
     /// </summary>
-    public async Task<ChatRoomDto> CreateChatRoom()
+    public async Task CreateChatRoom(string chatRoomName)
     {
-        Model.Messaging.ChatRoom room = await _messagingService.CreateChatRoom(NameIdentifier)
-                                        ?? throw new ArgumentException("Offer not created");
+        await _messagingService.CreateChatRoom(NameIdentifier, chatRoomName);
 
-        return _mapper.Map<ChatRoomDto>(room);
     }
     
     /// <inheritdoc />
@@ -80,5 +88,11 @@ public sealed class MessagingHub : Hub<IMessagingHubPush>, IMessagingHubInvoke
     public async Task SendMessage(string roomId, string message)
     {
         await _messagingService.SubmitMessageAsync(roomId, message, NameIdentifier);
+    }
+
+    /// <inheritdoc />
+    public async Task DeleteChatRoom(string roomId)
+    {
+        await _messagingService.DeleteChatRoomAsync(new Guid(roomId));
     }
 }

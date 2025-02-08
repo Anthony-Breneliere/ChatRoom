@@ -4,6 +4,7 @@ using Chat.Model;
 using Chat.Model.Messaging;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Throw;
 
 namespace Chat.Repository.Repositories;
 
@@ -27,7 +28,7 @@ public sealed class MessagingRepository : IMessagingPersistance
         await _context.ChatMessages.Where(m => m.RoomId == roomId).AsNoTracking().ToArrayAsync(ct);
 
     /// <inheritdoc />
-    public IQueryable<ChatRoom> GetRooms() => _context.ChatRooms.AsNoTracking();
+    public async Task<IEnumerable<ChatRoom>> GetRooms() => await _context.ChatRooms.AsNoTracking().ToArrayAsync();
 
     /// <inheritdoc />
     public IQueryable<ChatRoom> GetRoomsForCompany(Guid userId) =>
@@ -83,5 +84,22 @@ public sealed class MessagingRepository : IMessagingPersistance
     {
         return await _context.ChatRooms
             .Include(static r => r.Participants).FirstOrDefaultAsync(c => c.Id == roomId, ct);
+    }
+
+    /// <summary>
+    /// Delete the chat room
+    /// </summary>
+    public async Task<ChatRoom> DeleteChatRoomAsync(Guid roomId, CancellationToken ct)
+    {
+        ChatRoom? c = await _context.ChatRooms.FirstOrDefaultAsync(c => c.Id == roomId, ct);
+
+        if (c is null)
+            throw new NullReferenceException();
+
+        _context.ChatRooms.Remove(c);
+
+        await _context.SaveChangesAsync(ct);
+
+        return c;
     }
 }

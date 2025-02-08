@@ -25,4 +25,16 @@ public interface IMessagingNotificationHandler
     /// <param name="roomId">The ID of the chat room.</param>
     /// <param name="id">The ID of the deleted message.</param>
     public Task NotifyDeletedMessageAsync(long roomId, Guid id);
+
+    /// <summary>
+    /// Notifies the client of a new chat room.
+    /// </summary>
+    /// <param name="chatRoom">The new chat room</param>
+    public Task NotifyNewChatRoomCreatedAsync(Chat.Model.Messaging.ChatRoom chatRoom);
+
+    /// <summary>
+    /// Notifies the client of a deleted chat room.
+    /// </summary>
+    /// <param name="roomId">The id of deleted chat room</param>
+    public Task NotifyChatRoomDeletedAsync(Guid roomId);
 }

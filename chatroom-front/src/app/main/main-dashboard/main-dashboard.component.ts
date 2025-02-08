@@ -14,6 +14,9 @@ import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ChatSvgIconComponent } from '../../_common/components/chat-svg-icon/chat-svg-icon.component';
 import { MessagingService } from 'src/app/_common/services/messaging/messaging.service';
+import { ChatRoom } from 'src/app/_common/models/chat-room.model';
+import { Signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 
 @Component({
 	selector: 'app-main-dashboard',
@@ -25,6 +28,7 @@ import { MessagingService } from 'src/app/_common/services/messaging/messaging.s
 		ChatButtonGroupComponent,
 		ChatButtonComponent,
 		ChatSvgIconComponent,
+		FormsModule
 	],
 	providers: [
 		provideIcons({
@@ -38,7 +42,7 @@ import { MessagingService } from 'src/app/_common/services/messaging/messaging.s
 	styleUrl: './main-dashboard.component.scss',
 	templateUrl: './main-dashboard.component.html',
 })
-export class MainDashboardComponent {
+export class MainDashboardComponent implements OnInit {
 
 	private readonly _accountSvc = inject(AccountService);
 
@@ -50,15 +54,36 @@ export class MainDashboardComponent {
 
 	public readonly buttons: MHPButton<number>[] = [
 		{ text: 'Requests', value: 1 },
-		// { text: 'Products', value: 2 },
+		{ text: 'Products', value: 2 },
 	];
 
 	public viewSelected: number = 1;
 
+	chatRooms = signal<ChatRoom[]>([]);
+	createChatRoomName !: string;
+
 	constructor() {}
 
-	createRoom() {
-		this._messagingSvc.createChatRoom().then(chat => console.log(chat));
+	ngOnInit(): void {
+		this._messagingSvc.getRooms().then(rooms => this.chatRooms.set(rooms));
+		
+		this._messagingSvc.getChatRoomsCreated().subscribe((newChatRoom) => {
+			this.chatRooms.update(rooms => [...rooms, newChatRoom]);
+		});
+
+		this._messagingSvc.getChatRoomsDeleted().subscribe((DeletedChatRoomId) => {
+			this.chatRooms.update(rooms => rooms.filter(room => room.id !== DeletedChatRoomId));
+		});
+
+	}
+
+	async createRoom() {
+		await this._messagingSvc.createChatRoom(this.createChatRoomName);
+	}
+
+	async DeleteRoom(roomId : string) {
+		await this._messagingSvc.deleteChatRoom(roomId);
 	}
 
 }
+
