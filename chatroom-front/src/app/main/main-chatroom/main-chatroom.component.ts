@@ -31,6 +31,7 @@ export class MainChatroomComponent implements OnInit {
 	isMessageOnEdit = false;
 	editedMessageId = "";
 	newMessageContent = "";
+	originalMessageContent = "";
 	whoIsWritting : string = "";
 	private writingTimeout: any; // Stocke l'identifiant du setTimeout
 	private router = inject(Router);
@@ -41,12 +42,14 @@ export class MainChatroomComponent implements OnInit {
 		this.router.navigate(["/"]);
 	}
 
+	// To push a notification than someone is writting (we use the id of the room and the fullname of the connected user who is writting)
 	onInputChange(){
 			this.messageService.someoneIsWritting(this.id, getUserFullNameBySessionStorage());
 	}
 
+	// Use to show who is writting and till 1s after he stoped to write
 	setWrittingUser(userFullName: string) {
-			// Annule le précédent timeout s'il existe
+			// Annule le précédent timeout s'il existe, important pour eviter des comportement d'affichages hasardeux
 			if (this.writingTimeout) {
 					clearTimeout(this.writingTimeout);
 			}
@@ -60,24 +63,32 @@ export class MainChatroomComponent implements OnInit {
 	}
 
 	ngOnInit() {
+
+		// GET THE IMPORTANT PARAMS
     this.route.params.subscribe(params => {
        this.id = params['id'];
 			 this.name = params['name'];
     });
 
-		this.messageService.userWritting$.subscribe(userFullName => {
-			this.setWrittingUser(userFullName);
-		})
-
-		this.messageService.joinChatRoom(this.id, getUserIdBySessionStorage()).then(messageHistory => {
-			this.messages = messageHistory;
-		});
-
+		// USE TO GET THE ACTUAL PARTICIPANTS OF THE CHATROOM
 		this.messageService.getChatRoom(this.id).then(chatroom => {
 			this.participants = chatroom.participants;
 		});
 
+		// GET THE MESSAGE HISTORY OF THE CHATROOM
+		this.messageService.joinChatRoom(this.id, getUserIdBySessionStorage()).then(messageHistory => {
+			this.messages = messageHistory;
+		});
+
+		// HANDLE EVENT WHEN SOMEONE IS WRITTING AND SHOW IT ON UI
+		this.messageService.userWritting$.subscribe(userFullName => {
+			this.setWrittingUser(userFullName);
+		})
+
+		// OBSERVABLE TO HANDLE USER WHO IS LEAVING THE CHATROOM
 		this.messageService.getUserLeaveChatroomAsObservable(this.id).subscribe(obj => {
+
+			// To push a specific line to show the user who is leaving the chatroom
 			this.messages.push({
 				id: generateGUID(),
 				roomId: this.id,
@@ -91,6 +102,7 @@ export class MainChatroomComponent implements OnInit {
 				isNotificationForUser : true
 			});
 
+			// To remove and show the leaved participant on UI
 			if(this.participants.some(p => p.id == obj.userId))
 			{
 				let userLeave = this.participants.find(p => p.id == obj.userId)!;
@@ -100,7 +112,10 @@ export class MainChatroomComponent implements OnInit {
 			}
 		});
 
+		// OBSERVABLE TO HANDLE USER WHO IS ENTERRING THE CHATROOM
 		this.messageService.getUserEnterChatroomAsObservable(this.id).subscribe(obj => {
+
+			// To push a specific line to show the user who is enterring the chatroom
 			this.messages.push({
 				id: generateGUID(),
 				roomId: this.id,
@@ -114,6 +129,7 @@ export class MainChatroomComponent implements OnInit {
 				isNotificationForUser : true
 			});
 
+			// To push and show the new participant on UI
 			if(!this.participants.some(p => p.id == obj.userId))
 			{
 				this.participants.push({
@@ -128,6 +144,7 @@ export class MainChatroomComponent implements OnInit {
 			}
 		});
 
+		// OBSERVABLE TO HANDLE WHEN A MESSAGE IS CREATED / UDATED / DELETED
 		this.messageService.messages$.subscribe(message => {
 			// Si le message ne concerne pas ce chat
 			if(this.id != message.roomId)
@@ -157,27 +174,41 @@ export class MainChatroomComponent implements OnInit {
 		});
   }
 
+	// Set the edited message id
 	setEditedMessageId(messageId: string){
 		this.isMessageOnEdit = true;
 		this.editedMessageId = messageId;
 	}
 
-	setnewMessageContent(newMessageContent: string){
-		this.newMessageContent = newMessageContent;
+	// Set on the input the content of the message than the user want to edit (to get at least the original message content before any modification)
+	setnewMessageContent(originalMessageContent: string){
+		this.originalMessageContent = originalMessageContent;
+		this.newMessageContent = originalMessageContent;
 	}
 
+	// Send a new message
 	async sendMessage(){
 		this.messageService.sendMessage(this.id, this.newMessage);
 		this.newMessage = "";
 	}
 
+	// update a message with a new content
 	async updateMessage(){
-		if(!this.newMessageContent)
+		if(this.isEmptyMessageOrContentIsntDifferentFromOriginal())
+		{
+			this.isMessageOnEdit = false;
 			return;
+		}
 		this.messageService.updateMessage(this.editedMessageId, this.newMessageContent);
 		this.isMessageOnEdit = false;
 	}
 
+	// Check if the edited message is empty or if the content haven't changed
+	isEmptyMessageOrContentIsntDifferentFromOriginal() : boolean{
+		return !this.newMessageContent || this.originalMessageContent == this.newMessageContent;
+	}
+
+	// delete a message
 	async deleteMessage(messageId : string){
 		this.messageService.deleteMessage(messageId);
 	}

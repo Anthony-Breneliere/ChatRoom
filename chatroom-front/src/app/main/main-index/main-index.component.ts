@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, Signal } from '@angular/core';
+import { Component, inject, input, OnInit, signal, Signal } from '@angular/core';
 import { ChatSvgLogoComponent } from '../../_common/components/chat-svg-logo/chat-svg-logo.component';
 import { ChatButtonComponent } from '../../_common/components/chat-button/chat-button.component';
 import { MessagingService } from 'src/app/_common/services/messaging/messaging.service';
@@ -6,6 +6,8 @@ import { ChatRoom } from 'src/app/_common/models/chat-room.model';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { getUserIdBySessionStorage } from 'src/app/_common/utils/functions';
+import { User } from 'src/app/_common/models/user.model';
+import { AccountService } from 'src/app/_common/services/account/account.service';
 
 @Component({
 	selector: 'app-main-index',
@@ -17,6 +19,8 @@ import { getUserIdBySessionStorage } from 'src/app/_common/utils/functions';
 export class MainIndexComponent implements OnInit {
 
 	private router = inject(Router);
+	public accountService = inject(AccountService);
+	public readonly user = signal(this.accountService.user);
 	chatrooms: ChatRoom[] = [];
 	newChatroomName = "";
 

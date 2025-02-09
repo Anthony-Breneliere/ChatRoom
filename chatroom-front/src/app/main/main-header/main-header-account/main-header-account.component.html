@@ -1,32 +1,22 @@
 @if (this.user(); as user) {
   <div class="main-header-account">
-    <a class="flex items-center relative" [routerLink]="[ this.sitemap.main.route ]">
-  
-      @if (this.newMessage) {
-        <span class="absolute flex h-2 w-2 right-0 top-0">
-          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-          <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-        </span>
-      }
-  
-      <ng-icon name="saxSmsOutline" />
-    </a>
-  
+
+
     <!-- <a
       class="flex items-center relative"
       [routerLink]="[ this.sitemap.main.route ]"
     >
-  
+
       @if (this.newNotification) {
         <span class="absolute flex h-2 w-2 right-0 top-0">
           <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
           <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
         </span>
       }
-  
+
       <ng-icon name="saxNotificationOutline" />
     </a> -->
-  
+
     <div class="relative shrink-0">
       <a
         class="flex items-center cursor-pointer"
@@ -39,7 +29,7 @@
         />
         <ng-icon name="saxArrowDown1Outline" size="1.25rem" />
       </a>
-  
+
       @if (this.isSubMenuOpen) {
         <div
           class="absolute flex flex-col w-52 lg:left-auto sm:left-0 lg:right-0 top-10 overflow-hidden rounded-2xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800"
@@ -52,7 +42,7 @@
             <ng-icon class="mr-2 shrink-0" name="saxProfileCircleOutline" />
             <span class="shrink-0">Account</span>
           </button>
-  
+
           <button
             class="flex flex-row p-3 items-center text-red-600 hover:bg-red-100 dark:text-red-500 dark:hover:bg-red-950"
             (click)="this.signOut()"

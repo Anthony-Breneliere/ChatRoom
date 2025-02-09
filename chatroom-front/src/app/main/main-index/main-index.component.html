@@ -1,39 +1,37 @@
 <div class="chat-main-index">
-  <div class="mx-auto max-w-2xl py-16 sm:py-24 lg:py-38">
+  <div class="mx-auto max-w-2xl py-3 sm:py-24 lg:py-38">
     <div class="text-center">
-      <h1 class="chat-main-index-title">
-        <chat-svg-logo class="h-32 w-100" />
-        <span class="sr-only">ChatRoom</span>
-      </h1>
-			@for (chatroom of chatrooms; track chatroom.id) {
-				<div class="card m-3" id="{{ chatroom.id }}">
-					<div class="card-body">
-						<div class="card-title">Nom de la salle : {{ chatroom.name }}</div>
-						<button class="btn btn-primary btn-sm" (click)="navigate(chatroom.id, chatroom.name)">Rejoindre la salle de discussion</button>
-					</div>
-					<button class="btn btn-warning" (click)="deleteChatroom(chatroom.id)">Supprimer la salle</button>
+			@if (this.accountService.user() != null){
 
-				</div>
-			} @empty {
-				<li>There are no items.</li>
-			}
-      <div class="mt-10 flex items-center justify-center gap-x-6">
-				<div class="card">
-					<div class="card-body">
-						<div class="input-group mb-3">
-							<div class="input-group-prepend">
-								<span class="input-group-text" id="inputGroup-sizing-default">Nom de la salle</span>
-							</div>
-							<input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" name="name" id="newName" [(ngModel)]="newChatroomName">
+				@for (chatroom of chatrooms; track chatroom.id) {
+					<div class="card m-3" id="{{ chatroom.id }}">
+						<div class="card-body">
+							<div class="card-title">Nom de la salle : <b>{{ chatroom.name }}</b></div>
+							<button class="btn btn-primary btn-sm" (click)="navigate(chatroom.id, chatroom.name)">Rejoindre la salle de discussion</button>
 						</div>
-						<button class="btn btn-primary" (click)="createChatRoom()" [disabled]="newChatroomName == ''">Create chat room</button>
+						<button class="btn btn-warning" (click)="deleteChatroom(chatroom.id)">Supprimer la salle</button>
+
+					</div>
+				} @empty {
+					<li>Aucune salle de discussion</li>
+				}
+				<div class="mt-10 flex items-center justify-center gap-x-6">
+					<div class="card">
+						<div class="card-body">
+							<div class="input-group mb-3">
+								<div class="input-group-prepend">
+									<span class="input-group-text" id="inputGroup-sizing-default">Nom de la salle</span>
+								</div>
+								<input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" name="name" id="newName" [(ngModel)]="newChatroomName">
+							</div>
+							<button class="btn btn-primary" (click)="createChatRoom()" [disabled]="newChatroomName == ''">Create chat room</button>
+						</div>
 					</div>
 				</div>
-      </div>
-			<div>
-				<input type="text" v-bind="message">
-
-			</div>
+			}
+			@else {
+				<div>Vous devez vous logger avec un compte pour pouvoir utiliser le chat</div>
+			}
     </div>
   </div>
 </div>
