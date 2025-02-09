@@ -19,6 +19,6 @@ export class AuthLoginComponent {
 	constructor() {}
 
 	public provide(provider: 'Microsoft' | 'Google'): void {
-		this._authSvc.getLoginProvider(provider, `${window.location.origin}/`);
+		this._authSvc.getLoginProvider(provider, `${window.location.origin}/dashboard`);
 	}
 }

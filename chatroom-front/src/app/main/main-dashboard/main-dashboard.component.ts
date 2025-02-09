@@ -10,7 +10,7 @@ import { ChatButtonGroupComponent } from '../../_common/components/chat-button-g
 import { MHPButton } from 'src/app/_common/components/chat-button-group/chat-button.interface';
 import { ChatButtonComponent } from '../../_common/components/chat-button/chat-button.component';
 import { SITEMAP } from 'src/app/_common/sitemap';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ChatSvgIconComponent } from '../../_common/components/chat-svg-icon/chat-svg-icon.component';
 
@@ -39,6 +39,7 @@ import { ChatSvgIconComponent } from '../../_common/components/chat-svg-icon/cha
 })
 export class MainDashboardComponent {
 	private readonly _accountSvc = inject(AccountService);
+	private readonly router = inject(Router);
 
 	public readonly sitemap = SITEMAP;
 
@@ -51,6 +52,11 @@ export class MainDashboardComponent {
 
 	public viewSelected: number = 1;
 
-	constructor() {}
+	constructor()
+	{
+		// To keep the first redirect on dashboard which it is necessary for authentification "redirecturl"
+		// But redirect where we wanna work
+		this.router.navigate([this.sitemap.main.route]);
+	}
 
 }
