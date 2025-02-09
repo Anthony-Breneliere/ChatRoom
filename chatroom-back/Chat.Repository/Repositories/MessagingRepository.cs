@@ -36,11 +36,23 @@ public sealed class MessagingRepository : IMessagingPersistance
         select room;
 
     /// <inheritdoc />
-    public IEnumerable<ChatMessage> GetMessagesInRoom(Guid roomId) =>
-        (from message in _context.ChatMessages
+    public IEnumerable<ChatMessage> GetMessagesInRoom(Guid roomId){
+        var messages = (from message in _context.ChatMessages
         where message.RoomId == roomId
         orderby message.CreatedAt
         select message).AsNoTracking().ToArray();
+
+        // We add this part to link a message with a name in the front chatroom project
+        foreach(var message in messages)
+        {
+            var author = _context.Users.FirstOrDefault(f => f.Id == message.AuthorId);
+            if(author is null)
+                continue;
+            message.Author = author;
+        }
+
+        return messages;
+    }
 
     /// <inheritdoc />
     public async Task SubmitMessageAsync(ChatMessage message, CancellationToken ct = default)
@@ -107,8 +119,6 @@ public sealed class MessagingRepository : IMessagingPersistance
             throw new ArgumentException("Invalid participants.");
         }
 
-        room.Participants = participants;
-
         EntityEntry<ChatRoom> entityEntry = _context.ChatRooms.Add(room);
         await _context.SaveChangesAsync(ct);
 
@@ -127,12 +137,39 @@ public sealed class MessagingRepository : IMessagingPersistance
         ChatRoom? chatroom = await _context.ChatRooms
             .Include(static r => r.Participants).FirstOrDefaultAsync(c => c.Id == roomId, ct);
 
-        // if(chatroom is not null)
-        // {
-        //     chatroom.Messages = GetMessagesInRoom(roomId).ToList();
-        // }
-
         return chatroom;
+    }
+
+    /// <summary>
+    /// Add a participant from a chatroom
+    /// </summary>
+    public async Task SetParticipantAsync(Guid roomId, User user)
+    {
+        ChatRoom? chatroom = await _context.ChatRooms
+            .Include(static r => r.Participants).FirstOrDefaultAsync(c => c.Id == roomId);
+
+        if(chatroom is null)
+            return;
+
+        chatroom.Participants.Add(user);
+        _context.ChatRooms.Update(chatroom);
+        await _context.SaveChangesAsync();
+    }
+
+    /// <summary>
+    /// Remove a participant from a chatroom
+    /// </summary>
+    public async Task RemoveParticipantAsync(Guid roomId, User user)
+    {
+        ChatRoom? chatroom = await _context.ChatRooms
+            .Include(static r => r.Participants).FirstOrDefaultAsync(c => c.Id == roomId);
+        
+        if(chatroom is null)
+            return;
+
+        chatroom.Participants.Remove(user);
+        _context.ChatRooms.Update(chatroom);
+        await _context.SaveChangesAsync();
     }
 
     /// <summary>
@@ -142,5 +179,14 @@ public sealed class MessagingRepository : IMessagingPersistance
     {
         return await _context.ChatRooms
             .Include(static r => r.Participants).ToArrayAsync();
+    }
+
+    /// <summary>
+    /// Get a user by his id
+    /// </summary>
+    public async Task<User?> GetUserAsync(Guid userId)
+    {
+        return await _context.Users
+            .FirstOrDefaultAsync(u => u.Id == userId);
     }
 }

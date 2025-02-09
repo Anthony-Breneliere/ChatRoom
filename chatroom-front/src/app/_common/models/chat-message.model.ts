@@ -8,4 +8,5 @@ export interface ChatMessage {
 	content: string;
 	createdAt: Date;
 	updatedAt: Date;
+	isNotificationForUser?: boolean;
 }

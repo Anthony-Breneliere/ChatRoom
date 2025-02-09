@@ -40,7 +40,6 @@ public sealed class MessagingHub : Hub<IMessagingHubPush>, IMessagingHubInvoke
     /// </summary>
     public async Task<ChatRoomDto> GetChatRoom(Guid roomId)
     {
-        Console.WriteLine("WRITE LINE : " + roomId);
         Model.Messaging.ChatRoom room = await _messagingService.GetChatRoom(roomId)
                                         ?? throw new ArgumentException("Offer not found");
 
@@ -70,22 +69,37 @@ public sealed class MessagingHub : Hub<IMessagingHubPush>, IMessagingHubInvoke
     }
     
     /// <inheritdoc />
-    public async Task<IEnumerable<ChatMessageDto>> JoinChatRoom(Guid roomId)
+    public async Task<IEnumerable<ChatMessageDto>> JoinChatRoom(Guid roomId, Guid userId)
     {
         if (await _messagingService.GetChatRoomAsync(roomId, Context.ConnectionAborted) is not { } room)
             throw new KeyNotFoundException("Chatroom not found.");
 
         await Groups.AddToGroupAsync(Context.ConnectionId, roomId.ToString());
+        await _messagingService.EnterChatRoom(roomId.ToString(), userId);
 
         var messages = _messagingService.GetMessagesInRoom(roomId);
 
-        return messages.Adapt<IEnumerable<ChatMessageDto>>(_mapper.Config);
+        List<ChatMessageDto> messagesDto = new List<ChatMessageDto>();
+
+        foreach(var m in messages)
+        {
+            messagesDto.Add(new ChatMessageDto(){
+                Id = m.Id,
+                Content = m.Content,
+                RoomId = m.RoomId,
+                CreatedAt = m.CreatedAt,
+                AuthorFullName = m.Author?.FirstName + " " + m.Author?.LastName
+            });
+        }
+
+        return messagesDto;
     }
 
     /// <inheritdoc />
-    public async Task LeaveChatRoom(Guid roomId)
+    public async Task LeaveChatRoom(Guid roomId, Guid userId)
     {
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId.ToString());
+        await _messagingService.LeaveChatRoom(roomId.ToString(), userId);
     }
 
     /// <inheritdoc />
@@ -97,7 +111,7 @@ public sealed class MessagingHub : Hub<IMessagingHubPush>, IMessagingHubInvoke
     /// <inheritdoc />
     public async Task DeleteMessage(Guid messageId)
     {
-        var room = await _messagingService.DeleteMessage(messageId);
+        await _messagingService.DeleteMessage(messageId);
     }
 
     /// <inheritdoc />
@@ -110,5 +124,11 @@ public sealed class MessagingHub : Hub<IMessagingHubPush>, IMessagingHubInvoke
     public async Task EditedMessage(Guid messageId, string newContent)
     {
         await _messagingService.EditedMessage(messageId, newContent);
+    }
+
+    /// <inheritdoc />
+    public async Task SomeoneIsWritting(string roomId, string userFullname)
+    {
+        await _messagingService.SomeoneIsWritting(roomId, userFullname);
     }
 }

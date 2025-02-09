@@ -1,3 +1,4 @@
+using Chat.Model;
 using Chat.Model.Messaging;
 
 namespace Chat.Business.Persistance;
@@ -89,4 +90,27 @@ public interface IMessagingPersistance
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The chat message.</returns>
     Task<ChatMessage?> GetMessageAsync(Guid id, CancellationToken ct = default);
+
+    /// <summary>
+    /// Add a participant of the chatroom
+    /// </summary>
+    /// <param name="roomId">id of the chatroom</param>
+    /// <param name="user">user to add</param>
+    /// <returns></returns>
+    Task SetParticipantAsync(Guid roomId, User user);
+
+    /// <summary>
+    /// Remove a participant of the chatroom
+    /// </summary>
+    /// <param name="roomId">id of the chatroom</param>
+    /// <param name="user">user to remove</param>
+    /// <returns></returns>
+    Task RemoveParticipantAsync(Guid roomId, User user);
+
+    /// <summary>
+    /// Get a user
+    /// </summary>
+    /// <param name="userId">This id of the user to get</param>
+    /// <returns>The user or null</returns>
+    Task<User?> GetUserAsync(Guid userId);
 }

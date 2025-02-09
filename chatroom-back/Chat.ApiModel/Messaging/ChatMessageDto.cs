@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using ChatRoom.ApiModel;
 
 namespace Chat.ApiModel.Messaging;
 

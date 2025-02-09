@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 using Chat.Business.Persistance;
 using Chat.Model;
 using Chat.Model.Messaging;
@@ -49,8 +50,43 @@ public sealed class MessagingService
     /// </summary>
     /// <param name="roomId">ID of the chat room.</param>
     /// <returns>All messages in the chat room.</returns>
-    public IEnumerable<ChatMessage> GetMessagesInRoom(Guid roomId) =>
-        _messagingPersistance.GetMessagesInRoom(roomId);
+    public IEnumerable<ChatMessage> GetMessagesInRoom(Guid roomId){
+        return _messagingPersistance.GetMessagesInRoom(roomId);
+    }
+
+    /// <summary>
+    /// Remove the user who is living from the participants and notify
+    /// </summary>
+    /// <param name="roomId">id of the chatroom</param>
+    /// <param name="userId">id of the user</param>
+    /// <returns></returns>
+    public async Task LeaveChatRoom(string roomId, Guid userId){
+
+        var user = await _messagingPersistance.GetUserAsync(userId);
+
+        if(user is null)
+            return;
+        
+        await _messagingPersistance.RemoveParticipantAsync(Guid.Parse(roomId), user);
+        await _notificationHandler.NotifyLeaveChatRoomAsync(roomId, $"{user.FirstName} {user.LastName}", user.Id.ToString());
+    }
+
+    /// <summary>
+    /// Add the user who is living from the participants and notify
+    /// </summary>
+    /// <param name="roomId">id of the chatroom</param>
+    /// <param name="userId">id of the user</param>
+    /// <returns></returns>
+    public async Task EnterChatRoom(string roomId, Guid userId){
+
+        var user = await _messagingPersistance.GetUserAsync(userId);
+
+        if(user is null)
+            return;
+
+        await _messagingPersistance.SetParticipantAsync(Guid.Parse(roomId), user);
+        await _notificationHandler.NotifyEnterChatRoomAsync(roomId, $"{user.FirstName} {user.LastName}", user.Id.ToString());
+    }
 
     /// <summary>
     /// Submits a new chat message.
@@ -115,9 +151,11 @@ public sealed class MessagingService
     }
 
     /// <summary>
-    /// delete chat room.
+    /// delete a message from a chatroom.
     /// </summary>
-    /// <returns>boolean</returns>
+    /// <param name="messageId">The id of the message to delete</param>
+    /// <param name="ct">CancellationToken</param>
+    /// <returns></returns>
     public async Task<bool> DeleteMessage(Guid messageId, CancellationToken ct = default)
     {
         var result = await _messagingPersistance.DeleteMessageAsync(messageId, ct);
@@ -144,21 +182,20 @@ public sealed class MessagingService
         return true;
     }
 
-
-
     /// <summary>
-    /// create chat room for an offer.
+    /// Use to notify someone is writting
     /// </summary>
-    /// <returns>The chat room.</returns>
-    public async Task<IEnumerable<ChatRoom>> GetChatRooms(CancellationToken ct = default)
+    /// <param name="fullname">The name of the person who are writting</param>
+    /// <param name="roomId">The id of the room who the person is writting</param>
+    /// <returns></returns>
+    public async Task SomeoneIsWritting(string roomId, string fullname)
     {
-        ChatRoom[] chatRooms = await _messagingPersistance.GetChatRoomsAsync(ct);
-
-        return chatRooms;
+        await _notificationHandler.NotifySomeoneIsWrittingAsync(roomId, fullname);
     }
+
     
     /// <summary>
-    /// create chat room for an offer.
+    /// create chat room.
     /// </summary>
     /// <returns>The chat room.</returns>
     public async Task<Model.Messaging.ChatRoom?> CreateChatRoom( string nameIdentifier, string name, 
@@ -189,13 +226,6 @@ public sealed class MessagingService
     /// <returns>The chat room.</returns>
     public async Task<Model.Messaging.ChatRoom?> GetChatRoomAsync(Guid roomId, CancellationToken ct = default)
         => await _messagingPersistance.GetChatRoomAsync(roomId, ct);
-
-    /// <summary>
-    /// Gets all chat room.
-    /// </summary>
-    /// <returns>All the chat room.</returns>
-    public async Task<Model.Messaging.ChatRoom[]> GetChatRoomsAsync(Guid roomId, CancellationToken ct = default)
-        => await _messagingPersistance.GetChatRoomsAsync(ct);
         
     /// <summary>
     /// Gets a specific chat message.

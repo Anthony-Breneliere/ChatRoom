@@ -5,6 +5,7 @@ import { MessagingService } from 'src/app/_common/services/messaging/messaging.s
 import { ChatRoom } from 'src/app/_common/models/chat-room.model';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { getUserIdBySessionStorage } from 'src/app/_common/utils/functions';
 
 @Component({
 	selector: 'app-main-index',
@@ -59,6 +60,6 @@ export class MainIndexComponent implements OnInit {
 	}
 
 	navigate(id: string, name: string){
-		this.messageService.joinChatRoom(id).then(result => this.router.navigate(["/chatroom", {id: id, name: name}]));
+		this.router.navigate(["/chatroom", {id: id, name: name}]);
 	}
 }

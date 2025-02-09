@@ -35,7 +35,7 @@ public sealed class ChatMessage : ICreateTimestamp
     /// <summary>
     /// Author of the message
     /// </summary>
-    public User Author { get; init; } = new();
+    public User? Author { get; set; }
 
     /// <summary>
     /// Message content
