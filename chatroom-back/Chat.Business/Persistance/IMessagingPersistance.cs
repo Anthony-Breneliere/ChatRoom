@@ -1,3 +1,4 @@
+using Chat.Model;
 using Chat.Model.Messaging;
 
 namespace Chat.Business.Persistance;
@@ -65,4 +66,13 @@ public interface IMessagingPersistance
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The deleted chat room.</returns>
     Task<ChatRoom> DeleteChatRoomAsync(Guid roomId, CancellationToken ct = default);
+
+    /// <summary>
+    /// Join a specific chat room
+    /// </summary>
+    /// <param name="roomId">ID of the chat room.</param>
+    /// <param name="joiner">the user who want to join the chat room.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>The deleted chat room.</returns>
+    Task<ChatRoom> JoinChatRoomAsync(Guid roomId,User joiner, CancellationToken ct = default);
 }

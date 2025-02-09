@@ -1,4 +1,5 @@
 using Chat.ApiModel.Messaging;
+using ChatRoom.ApiModel;
 
 namespace Chat.Api.Hubs;
 
@@ -29,13 +30,19 @@ public interface IMessagingHubPush
     /// Pushes a new chat room
     /// </summary>
     /// <param name="chatRoom">the created chat room</param>
-    Task NewChatRoomCreated(ChatRoomDto chatRoom);
+    public Task NewChatRoomCreated(ChatRoomDto chatRoom);
 
     /// <summary>
     /// Pushes the id of the deleted chat room to the client
     /// </summary>
     /// <param name="roomId">the id of the deleted chat room</param>
-    Task DeletedChatRoom(Guid roomId);
+    public Task DeletedChatRoom(Guid roomId);
+
+    /// <summary>
+    /// Pushes >the chat room updated with the new participant
+    /// </summary>
+    /// <param name="chatRoom">the chat room updated with the new participant</param>
+    public Task NewJoiner(ChatRoomDto chatRoom);
 }
 
 /// <summary>
@@ -47,8 +54,9 @@ public interface IMessagingHubInvoke
     /// Join a chat room to receive new messages, and get the chat history.
     /// </summary>
     /// <param name="roomId">The ID of the chatroom.</param>
+    /// /// <param name="userId">The ID of the user who want to join the chat room.</param>
     /// <returns>The chat history</returns>
-    public Task<IEnumerable<ChatMessageDto>> JoinChatRoom(Guid roomId);
+    public Task<IEnumerable<ChatMessageDto>> JoinChatRoom(Guid roomId, string userId);
 
     /// <summary>
     /// Leave the chat room

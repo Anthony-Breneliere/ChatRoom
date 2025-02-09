@@ -37,4 +37,10 @@ public interface IMessagingNotificationHandler
     /// </summary>
     /// <param name="roomId">The id of deleted chat room</param>
     public Task NotifyChatRoomDeletedAsync(Guid roomId);
+
+    /// <summary>
+    /// Notifies the client of a new participant in chatroom.
+    /// </summary>
+    /// <param name="chatRoom">the chat room with the new participant</param>
+    public Task NotifyNewJoinerAsync(ChatRoom chatRoom);
 }

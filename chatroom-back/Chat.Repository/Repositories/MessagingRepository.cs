@@ -28,7 +28,7 @@ public sealed class MessagingRepository : IMessagingPersistance
         await _context.ChatMessages.Where(m => m.RoomId == roomId).AsNoTracking().ToArrayAsync(ct);
 
     /// <inheritdoc />
-    public async Task<IEnumerable<ChatRoom>> GetRooms() => await _context.ChatRooms.AsNoTracking().ToArrayAsync();
+    public async Task<IEnumerable<ChatRoom>> GetRooms() => await _context.ChatRooms.Include(r => r.Participants).ToArrayAsync();
 
     /// <inheritdoc />
     public IQueryable<ChatRoom> GetRoomsForCompany(Guid userId) =>
@@ -101,5 +101,26 @@ public sealed class MessagingRepository : IMessagingPersistance
         await _context.SaveChangesAsync(ct);
 
         return c;
+    }
+
+    /// <inheritdoc />
+    public async Task<ChatRoom> JoinChatRoomAsync(Guid roomId, User joiner, CancellationToken ct = default)
+    {
+
+        ChatRoom room = await GetChatRoomAsync(roomId, ct) ?? throw new NullReferenceException();
+
+        if (!room.Participants.Any(p => p.Id == joiner.Id))
+        {
+            room.Participants.Add(joiner);
+            await _context.SaveChangesAsync(ct);
+
+            return room;
+        }
+        else
+        {
+            throw new InvalidOperationException("L'utilisateur est déjà un participant de la chat room");
+        }
+
+        
     }
 }

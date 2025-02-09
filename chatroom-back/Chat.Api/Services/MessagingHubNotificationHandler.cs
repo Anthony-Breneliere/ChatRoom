@@ -4,6 +4,8 @@ using Chat.ApiModel.Messaging;
 using Chat.Business.Messaging;
 using Chat.Model.Messaging;
 using Microsoft.AspNetCore.SignalR;
+using Chat.Model;
+using ChatRoom.ApiModel;
 
 namespace Chat.Api.Services;
 
@@ -60,5 +62,12 @@ public sealed class MessagingHubNotificationHandler : IMessagingNotificationHand
     public async Task NotifyChatRoomDeletedAsync(Guid roomId)
     {
         await _hubContext.Clients.All.DeletedChatRoom(roomId);
+    }
+
+    /// <inheritdoc />
+    public async Task NotifyNewJoinerAsync(Chat.Model.Messaging.ChatRoom chatRoom)
+    {
+        ChatRoomDto dto = _mapper.Map<ChatRoomDto>(chatRoom);
+        await _hubContext.Clients.Group(dto.Id.ToString()).NewJoiner(dto);
     }
 }

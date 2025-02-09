@@ -61,15 +61,23 @@ public sealed class MessagingHub : Hub<IMessagingHubPush>, IMessagingHubInvoke
     /// </summary>
     public async Task CreateChatRoom(string chatRoomName)
     {
-        await _messagingService.CreateChatRoom(NameIdentifier, chatRoomName);
+        Model.Messaging.ChatRoom c = await _messagingService.CreateChatRoom(NameIdentifier, chatRoomName);
+        await Groups.AddToGroupAsync(Context.ConnectionId, c.Id.ToString());
 
+    }
+
+    /// <inheritdoc />
+    public async Task<IEnumerable<ChatMessageDto>> GetAllMessages(Guid roomId)
+    {
+        var messages = await _messagingService.GetMessagesAsync(roomId);
+
+        return messages.Adapt<IEnumerable<ChatMessageDto>>(_mapper.Config);
     }
     
     /// <inheritdoc />
-    public async Task<IEnumerable<ChatMessageDto>> JoinChatRoom(Guid roomId)
+    public async Task<IEnumerable<ChatMessageDto>> JoinChatRoom(Guid roomId, string userId)
     {
-        if (await _messagingService.GetChatRoomAsync(roomId, Context.ConnectionAborted) is not { } room)
-            throw new KeyNotFoundException("Chatroom not found.");
+        await _messagingService.JoinChatRoomAsync(roomId, NameIdentifier);
 
         await Groups.AddToGroupAsync(Context.ConnectionId, roomId.ToString());
 

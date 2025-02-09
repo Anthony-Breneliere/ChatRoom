@@ -40,7 +40,7 @@ export class ChatButtonComponent {
 	public prefix = input<iconsRef>();
 	public suffix = input<iconsRef>();
 	public text = input<string>('');
-	public type = input<'primary' | 'secondary' | 'tertiary'>('primary');
+	public type = input<'primary' | 'secondary' | 'tertiary' | 'danger' | 'green'>('primary');
 	public size = input<'normal' | 'large'>('normal');
-	public disabled = input(false);
+	public disabled = input<boolean>(false);
 }

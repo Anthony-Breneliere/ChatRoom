@@ -14,13 +14,16 @@ export class MessagingService extends SignalRClientBase {
 
 	private chatRoomsDeleted = new Subject<string>();
 
+	private newJoiner = new Subject<ChatRoom>();
+
+	private newMessage = new Subject<ChatMessage>();
+
 	constructor() {
 		super(environment.API_URL + '/hub/messaging');
 
 		// Handle messaging events
 		this._hubConnection.on('NewMessage', (message: ChatMessage) => {
-			console.log('New message received:', message);
-
+			this.newMessage.next(message);
 		});
 
 		this._hubConnection.on('EditedMessage', (message: ChatMessage) => {
@@ -38,6 +41,11 @@ export class MessagingService extends SignalRClientBase {
 
 		this._hubConnection.on('DeletedChatRoom', (roomId: string) => {
 			this.chatRoomsDeleted.next(roomId);
+		});
+
+		this._hubConnection.on('NewJoiner', (room: ChatRoom) => {
+			//quelqu'un vient de rejoindre une chat room dont je suis le participant
+			this.newJoiner.next(room);
 		});
 
 
@@ -60,10 +68,19 @@ export class MessagingService extends SignalRClientBase {
 	 */
 	public async getRooms(): Promise<ChatRoom[]> {
 		await this.getConnectionPromise;
-
+		//initialiser les groupes de connexion signalR ? pour chaque chat room et chaque participant ajouter au groupe de connexion de la chatroom
 		return await this._hubConnection.invoke<ChatRoom[]>('GetRooms');
 	}
 
+	/**
+	 * Get all messages from a chat room
+	 * @returns ChatMessage[]
+	 */
+	public async GetAllMessages(roomId : string): Promise<ChatMessage[]> {
+		await this.getConnectionPromise;
+		//initialiser les groupes de connexion signalR ? pour chaque chat room et chaque participant ajouter au groupe de connexion de la chatroom
+		return await this._hubConnection.invoke<ChatMessage[]>('GetAllMessages', roomId);
+	}
 	/**
 	 * Get new chat room created from the server
 	 * @returns un Observable<ChatRoom> pour les évènement de création de chat room
@@ -81,21 +98,37 @@ export class MessagingService extends SignalRClientBase {
 	}
 
 	/**
+	 * Get new joiners in a chat room from the server
+	 * @returns un Observable<ChatRoom> pour les évènement de nouveaux participants dans une chat room
+	 */
+	public getNewJoiners(): Observable<ChatRoom> {
+		return this.newJoiner.asObservable();
+	}
+
+	/**
+	 * Get new message from the server
+	 * @returns un Observable<ChatMessage> pour les évènement de nouveaux messages
+	 */
+	public getNewMessage(): Observable<ChatMessage> {
+		return this.newMessage.asObservable();
+	}
+
+	/**
 	 * Create a new chat room
 	 */
-	public async createChatRoom(chatRoomName : string): Promise<ChatRoom> {
+	public async createChatRoom(chatRoomName : string): Promise<void> {
 		await this.getConnectionPromise;
 
-		return await this._hubConnection.invoke<ChatRoom>('CreateChatRoom', chatRoomName);
+		await this._hubConnection.invoke<ChatRoom>('CreateChatRoom', chatRoomName);
 	}
 
 	/**
 	 * Join the chat room and get all chat room message history
 	 */
-	public async joinChatRoom(roomId: string): Promise<void> {
+	public async joinChatRoom(roomId: string, userId: string): Promise<ChatMessage[]> {
 		await this.getConnectionPromise;
 
-		const chatHistory = await this._hubConnection.invoke<ChatMessage[]>('JoinChatRoom', roomId);
+		return await this._hubConnection.invoke<ChatMessage[]>('JoinChatRoom', roomId, userId);
 	}
 
 	/**
@@ -121,4 +154,5 @@ export class MessagingService extends SignalRClientBase {
 
 		await this._hubConnection.invoke('DeleteChatRoom', roomId);
 	}
+
 }
