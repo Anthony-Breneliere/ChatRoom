@@ -5,7 +5,7 @@ export interface ChatMessage {
 	authorFullName?: string;
 	authorCompanyId?: number;
 	authorCompanyName?: string;
-	content?: string;
+	content: string;
 	createdAt?: Date;
 	updatedAt?: Date;
 	isNotificationForUser?: boolean;

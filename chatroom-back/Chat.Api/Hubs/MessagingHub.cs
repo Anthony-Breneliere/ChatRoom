@@ -83,13 +83,20 @@ public sealed class MessagingHub : Hub<IMessagingHubPush>, IMessagingHubInvoke
 
         foreach(var m in messages)
         {
-            messagesDto.Add(new ChatMessageDto(){
+            var message = new ChatMessageDto(){
                 Id = m.Id,
                 Content = m.Content,
                 RoomId = m.RoomId,
                 CreatedAt = m.CreatedAt,
                 AuthorFullName = m.Author?.FirstName + " " + m.Author?.LastName
-            });
+            };
+
+            if(m.Author is not null)
+            {
+                message.AuthorFullName = m.Author.FirstName + " " + m.Author.LastName;
+                message.AuthorId = m.Author.Id;
+            }
+            messagesDto.Add(message);
         }
 
         return messagesDto;

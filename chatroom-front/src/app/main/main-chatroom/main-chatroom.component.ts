@@ -23,6 +23,7 @@ export class MainChatroomComponent implements OnInit {
 	private route = inject(ActivatedRoute);
 
 	id: string = "Nothing";
+	userId: string = "";
 	name: string = "";
 	chatroom!: ChatRoom;
 	messages: ChatMessage[] = [];
@@ -69,6 +70,8 @@ export class MainChatroomComponent implements OnInit {
        this.id = params['id'];
     });
 
+		this.userId = getUserIdBySessionStorage();
+
 		// USE TO GET THE ACTUAL PARTICIPANTS OF THE CHATROOM
 		this.messageService.getChatRoom(this.id).then(chatroom => {
 			this.name = chatroom.name;
@@ -77,6 +80,7 @@ export class MainChatroomComponent implements OnInit {
 
 		// GET THE MESSAGE HISTORY OF THE CHATROOM
 		this.messageService.joinChatRoom(this.id, getUserIdBySessionStorage()).then(messageHistory => {
+			console.log(messageHistory)
 			this.messages = messageHistory;
 		});
 
