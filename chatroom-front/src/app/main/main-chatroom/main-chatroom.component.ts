@@ -67,11 +67,11 @@ export class MainChatroomComponent implements OnInit {
 		// GET THE IMPORTANT PARAMS
     this.route.params.subscribe(params => {
        this.id = params['id'];
-			 this.name = params['name'];
     });
 
 		// USE TO GET THE ACTUAL PARTICIPANTS OF THE CHATROOM
 		this.messageService.getChatRoom(this.id).then(chatroom => {
+			this.name = chatroom.name;
 			this.participants = chatroom.participants;
 		});
 
@@ -92,24 +92,13 @@ export class MainChatroomComponent implements OnInit {
 			this.messages.push({
 				id: generateGUID(),
 				roomId: this.id,
-				authorId: "",
-				authorFullName: "",
-				authorCompanyId: 0,
-				authorCompanyName: "",
 				content: `${obj.username} a quitté la discussion`,
-				createdAt: new Date(),
-				updatedAt: new Date(),
 				isNotificationForUser : true
 			});
 
 			// To remove and show the leaved participant on UI
-			if(this.participants.some(p => p.id == obj.userId))
-			{
-				let userLeave = this.participants.find(p => p.id == obj.userId)!;
-				let indexToRemove = this.participants.indexOf(userLeave);
-				this.participants.splice(indexToRemove, 1)
-				return;
-			}
+			const index = this.participants.findIndex(p => p.id === obj.userId);
+    	if (index !== -1) this.participants.splice(index, 1);
 		});
 
 		// OBSERVABLE TO HANDLE USER WHO IS ENTERRING THE CHATROOM
@@ -119,13 +108,7 @@ export class MainChatroomComponent implements OnInit {
 			this.messages.push({
 				id: generateGUID(),
 				roomId: this.id,
-				authorId: "",
-				authorFullName: "",
-				authorCompanyId: 0,
-				authorCompanyName: "",
 				content: `${obj.username} a rejoint la discussion`,
-				createdAt: new Date(),
-				updatedAt: new Date(),
 				isNotificationForUser : true
 			});
 
@@ -134,11 +117,8 @@ export class MainChatroomComponent implements OnInit {
 			{
 				this.participants.push({
 					id: obj.userId,
-					email: "",
 					firstName: obj.username.split(" ")[0],
 					lastName: obj.username.split(" ")[1],
-					phoneNumber: "",
-					roles: []
 				})
 				return;
 			}
