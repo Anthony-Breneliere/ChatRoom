@@ -1,5 +1,34 @@
 @if (this.user(); as user) {
-	<div>
-		<h1 class="text-center text-xl text-white">Voici la liste des canaux de discussion !</h1>
+	<div class="flex flex-col items-center gap-2 mb-16">
+		<button (click)="createChannel()" #createchannelbtn class="bg-blue-800 text-white rounded-full px-4 py-2 w-1/3 sm:w-3/5 hover:bg-blue-900 transition">Créer un canal de discussion</button>
 	</div>
 }
+
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+	<div class="col-span-4 overflow-auto max-h-60">
+			<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+					<div *ngFor="let chatRoom of chatRooms" class="col-span-1">
+							<div class="bg-gray-200 dark:bg-gray-800 rounded-md shadow px-5 py-3 flex flex-col">
+								<h5 class="text-black dark:text-white">Id: {{ chatRoom.id }}</h5>
+								<p class="text-black dark:text-gray-200">Participants: {{ chatRoom.participants.length }}</p>
+								<div class="flex justify-end">
+									<button *ngIf="!isRoomJoined(chatRoom.id)" (click)="joinChatRoom(chatRoom.id)" class="bg-blue-800 text-white rounded-full px-3 py-1.5 hover:bg-blue-900 transition">
+										Rejoindre
+									</button>
+									<button *ngIf="isRoomJoined(chatRoom.id)" (click)="leaveChatRoom(chatRoom)" class="bg-red-800 text-white rounded-full px-3 py-1.5 hover:bg-red-900 transition">
+										Quitter
+									</button>
+								</div>
+							</div>
+					</div>
+			</div>
+	</div>
+
+	<div class="col-span-4">
+		<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+				<div *ngFor="let room of chatRoomsJoigned" class="col-span-1 sm:col-span-2 lg:col-span-2">
+						<app-channel-details [room]="room" [chatRoomsJoigned]="chatRoomsJoigned"></app-channel-details>
+				</div>
+		</div>
+	</div>
+</div>

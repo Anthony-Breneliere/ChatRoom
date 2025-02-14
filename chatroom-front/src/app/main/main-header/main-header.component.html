@@ -1,33 +1,20 @@
 <header class="fixed top-0 w-full z-10 bg-white dark:bg-gray-800">
   <nav class="flex items-center justify-between px-6 py-4 lg:px-24 chat-header-nav" aria-label="Global">
-    <div class="inline-flex flex-row items-center lg:flex-1">
-      <a [routerLink]="[ this.user() ? this.sitemap.dashboard.route : this.sitemap.main.route ]" class="flex -m-1.5 p-1.5">
-        <span class="sr-only">ChatRoom</span>
-        <chat-svg-logo class="w-[149px] h-[40px]" />
-      </a>
+    <div class="inline-flex flex-row items-center">
+			<h1 class="font-bold dark:text-white">ChatRoomsClient</h1>
     </div>
 
-    <div class="flex lg:hidden">
-      <button (click)="this.isMenuOpened = true" type="button" class="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700 dark:text-white">
-        <span class="sr-only">Open main menu</span>
-        <svg class="size-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-        </svg>
-      </button>
-    </div>
-    <div class="hidden lg:flex lg:gap-x-6">
+    <div class="flex">
       <a
         [routerLink]="[ this.sitemap.channelslist.route ]"
-        [ngClass]="this.router.url === this.sitemap.channelslist.route ? 'bg-blue-50 dark:bg-blue-900': ''"
+        [ngClass]="this.router.url === this.sitemap.channelslist.route ? '': ''"
         class="chat-header-nav-link"
       >
         Channels List
       </a>
-
-
     </div>
 
-    <div class="items-center hidden lg:flex lg:flex-1 lg:justify-end">
+    <div class="items-center flex">
       <chat-theme-switch class="mr-6" />
 
       @if(this.user()) {

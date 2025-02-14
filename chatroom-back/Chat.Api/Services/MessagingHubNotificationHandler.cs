@@ -4,6 +4,8 @@ using Chat.ApiModel.Messaging;
 using Chat.Business.Messaging;
 using Chat.Model.Messaging;
 using Microsoft.AspNetCore.SignalR;
+using Chat.Model;
+using ChatRoom.ApiModel;
 
 namespace Chat.Api.Services;
 
@@ -29,9 +31,10 @@ public sealed class MessagingHubNotificationHandler : IMessagingNotificationHand
     }
 
     /// <inheritdoc />
-    public async Task NotifyNewMessageAsync(ChatMessage message)
+    public async Task NotifyNewMessageAsync(ChatMessage message, User user)
     {
         ChatMessageDto dto = _mapper.Map<ChatMessageDto>(message);
+        dto.AuthorFullName = user.FirstName;
         await _hubContext.Clients.Group(message.RoomId.ToString()).NewMessage(dto);
     }
 
@@ -47,5 +50,33 @@ public sealed class MessagingHubNotificationHandler : IMessagingNotificationHand
     public async Task NotifyDeletedMessageAsync(long roomId, Guid id)
     {
         await _hubContext.Clients.Group(roomId.ToString()).DeletedMessage(id);
+    }
+
+    /// <inheritdoc />
+    public async Task NotifyCreatedChatRoomAsync(Chat.Model.Messaging.ChatRoom chatRoom)
+    {
+        ChatRoomDto dto = _mapper.Map<ChatRoomDto>(chatRoom);
+        await _hubContext.Clients.All.NewChatRoom(dto);
+    }
+
+    /// <inheritdoc />
+    public async Task NotifyJoignedChatRoomAsync(Guid roomId, User user)
+    {
+        UserDto dto = _mapper.Map<UserDto>(user);
+        await _hubContext.Clients.All.JoignedChatRoom(roomId, dto);
+    }
+
+    /// <inheritdoc />
+    public async Task NotifyLeavedChatRoomAsync(Guid roomId, User user)
+    {
+        UserDto dto = _mapper.Map<UserDto>(user);
+        await _hubContext.Clients.All.LeavedChatRoom(roomId, dto);
+    }
+
+    /// <inheritdoc />
+    public async Task NotifyUserTypingAsync(Guid roomId, User user)
+    {
+        UserDto dto = _mapper.Map<UserDto>(user);
+        await _hubContext.Clients.Group(roomId.ToString()).UserIsTyping(roomId, dto);
     }
 }

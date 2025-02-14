@@ -1,0 +1,6 @@
+@if (this.user(); as user) {
+	<div class="flex flex-col items-center gap-10">
+		<h1 class="text-center text-xl text-black dark:text-white">Créer un canal de discussion</h1>
+		<button (click)="createChannel()" #createchannelbtn class="dark:bg-blue-50 bg-blue-900 dark:text-black text-white rounded px-4 py-2">Créer</button>
+	</div>
+}

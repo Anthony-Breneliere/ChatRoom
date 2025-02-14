@@ -1,5 +1,11 @@
 <app-main-header></app-main-header>
 
 <main class="chat-main">
+  <div *ngFor="let notification of notifications; let i = index"
+    class="fixed top-20 right-5 bg-blue-500 text-white p-4 rounded-lg shadow-md max-w-md w-auto mb-2"
+    [ngStyle]="{ 'top': calculateTopPosition(i) }">
+    <app-notification-message [message]="notification"></app-notification-message>
+  </div>
+
   <router-outlet></router-outlet>
 </main>

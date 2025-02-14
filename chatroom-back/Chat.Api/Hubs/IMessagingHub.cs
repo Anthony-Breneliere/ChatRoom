@@ -1,4 +1,5 @@
 using Chat.ApiModel.Messaging;
+using ChatRoom.ApiModel;
 
 namespace Chat.Api.Hubs;
 
@@ -24,6 +25,34 @@ public interface IMessagingHubPush
     /// </summary>
     /// <param name="id">The ID of the deleted message.</param>
     public Task DeletedMessage(Guid id);
+
+    /// <summary>
+    /// Pushes a newly created chatroom to the clients.
+    /// </summary>
+    /// <param name="chatRoom">The new chatroom.</param>
+    public Task NewChatRoom(ChatRoomDto chatRoom);
+
+    /// <summary>
+    /// Pushes a user who had joigned a room to the clients.
+    /// </summary>
+    /// <param name="roomId"></param>
+    /// <param name="user"></param>
+    public Task JoignedChatRoom(Guid roomId, UserDto user);
+
+    /// <summary>
+    /// Pushes a user who had left a room to the clients.
+    /// </summary>
+    /// <param name="roomId"></param>
+    /// <param name="user"></param>
+    public Task LeavedChatRoom(Guid roomId, UserDto user);
+
+    /// <summary>
+    /// Pushes a user who is typing to the clients.
+    /// </summary>
+    /// <param name="roomId"></param>
+    /// <param name="user"></param>
+    public Task UserIsTyping(Guid roomId, UserDto user);
+
 }
 
 /// <summary>
@@ -58,4 +87,9 @@ public interface IMessagingHubInvoke
     /// Create chat room
     /// </summary>
     Task<ChatRoomDto> CreateChatRoom();
+
+    /// <summary>
+    /// Get all messages in a chat room.
+    /// </summary>
+    public Task<IEnumerable<ChatMessageDto>> GetMessagesInRoom(Guid roomId);
 }

@@ -23,6 +23,7 @@ import { MaintenanceComponent } from './maintenance/maintenance.component';
 import { NotFoundComponent } from './not-found/not-found.component';
 import { UnauthorizedComponent } from './unauthorized/unauthorized.component';
 import { ForbiddenComponent } from './forbidden/forbidden.component';
+import { MainCreateChannelComponent } from './main-create-channel/main-create-channel.component';
 
 
 export const routes: Routes = [
@@ -48,6 +49,11 @@ export const routes: Routes = [
 				path: SITEMAP.channelslist.path,
 				canActivate: [isAuthenticatedGuard],
 				component: MainChannelsListComponent,
+			},
+			{
+				path: SITEMAP.createchannel.path,
+				canActivate: [isAuthenticatedGuard],
+				component: MainCreateChannelComponent,
 			}
 		],
 	},

@@ -35,8 +35,29 @@ public sealed class MessagingService
     /// Gets all messages.
     /// </summary>
     /// <returns>All messages.</returns>
-    public async Task<IEnumerable<ChatMessage>> GetMessagesAsync(Guid roomId, CancellationToken ct) => 
-        await _messagingPersistance.GetMessages(roomId, ct);
+    public async Task<IEnumerable<ChatMessage>> GetMessagesAsync(Guid roomId, CancellationToken ct)
+    {
+        var newMessages = new List<ChatMessage>();
+        var messages = await _messagingPersistance.GetMessages(roomId, ct);
+        foreach (var message in messages)
+        {
+            User? user = _userPersistance.GetUserById(message.AuthorId);
+            if (user != null)
+            {
+                var newMessage = new ChatMessage
+                {
+                    Id = message.Id,
+                    Content = message.Content,
+                    CreatedAt = message.CreatedAt,
+                    Author = user,
+                    AuthorId = message.AuthorId,
+                    RoomId = message.RoomId
+                };
+                newMessages.Add(newMessage);
+            }
+        }
+        return newMessages;
+    }
 
     /// <summary>
     /// Gets all chat rooms.
@@ -76,13 +97,13 @@ public sealed class MessagingService
         
         await _messagingPersistance.SubmitMessageAsync(chatMessage, ct);
         
-        await _notificationHandler.NotifyNewMessageAsync(chatMessage);
+        await _notificationHandler.NotifyNewMessageAsync(chatMessage, user);
     }
 
     /// <summary>
     ///  Get user from name identifier.
     /// </summary>
-    private async Task<User> GetUserFromNameIdentifier(string nameIdentifier)
+    public async Task<User> GetUserFromNameIdentifier(string nameIdentifier)
     {
         User user = await _userPersistance.GetUserByUsernameAsync(nameIdentifier) 
                     ?? throw new ArgumentException($"User {nameIdentifier} not found");
@@ -99,6 +120,16 @@ public sealed class MessagingService
         ChatRoom? chatRoom = await _messagingPersistance.GetChatRoomAsync(roomId, ct);
 
         return chatRoom;
+    }
+
+    /// <summary>
+    /// get all chat rooms.
+    /// </summary>
+    /// <returns>All chat rooms.</returns>
+    public async Task<List<ChatRoom>> GetAllChatRooms(CancellationToken ct = default)
+    {
+        ChatRoom[] rooms = await Task.Run(() => _messagingPersistance.GetRooms().ToArray(), ct);
+        return rooms.ToList();
     }
     
     /// <summary>
@@ -117,10 +148,11 @@ public sealed class MessagingService
         {
             Participants = participants.ToList()
         };
-
-        return await _messagingPersistance.CreateRoomAsync(chatRoom, ct);
+        await _messagingPersistance.CreateRoomAsync(chatRoom, ct);
+        await _notificationHandler.NotifyCreatedChatRoomAsync(chatRoom);
+        
+        return chatRoom;
     }
-    
     
     /// <summary>
     /// Gets a specific chat room.
@@ -128,6 +160,13 @@ public sealed class MessagingService
     /// <returns>The chat room.</returns>
     public async Task<Model.Messaging.ChatRoom?> GetChatRoomAsync(Guid roomId, CancellationToken ct = default)
         => await _messagingPersistance.GetChatRoomAsync(roomId, ct);
+    
+    /// <summary>
+    /// Gets a specific chat room.
+    /// </summary>
+    /// <returns>The chat room.</returns>
+    public async Task<Model.Messaging.ChatRoom[]> GetAllChatRoomAsync(CancellationToken ct = default)
+        => await _messagingPersistance.GetAllChatRoomsAsync(ct);
         
     /// <summary>
     /// Gets a specific chat message.
@@ -137,4 +176,40 @@ public sealed class MessagingService
     /// <returns>The chat message.</returns>
     public async Task<ChatMessage?> GetMessageAsync(Guid id, CancellationToken ct = default) =>
         await _messagingPersistance.GetMessageAsync(id, ct);
+
+    /// <summary>
+    /// Adds a user to a chat room.
+    /// </summary>
+    /// <param name="roomId">The ID of the chat room.</param>
+    /// <param name="userId">The ID of the user to add.</param>
+    /// <param name="ct">Cancellation token.</param>
+    public async Task AddUserToRoomAsync(Guid roomId, Guid userId, CancellationToken ct = default)
+    {
+        var room = await _messagingPersistance.GetChatRoomAsync(roomId, ct)
+                    ?? throw new KeyNotFoundException("Chatroom not found.");
+
+        var user = _userPersistance.GetUserById(userId)
+                    ?? throw new KeyNotFoundException("User not found.");
+
+        room.Participants.Add(user);
+        await _messagingPersistance.UpdateRoomAsync(room, ct);
+    }
+
+    /// <summary>
+    /// Removes a user from a chat room.
+    /// </summary>
+    /// <param name="roomId">The ID of the chat room.</param>
+    /// <param name="userId">The ID of the user to remove.</param>
+    /// <param name="ct">Cancellation token.</param>
+    public async Task RemoveUserFromRoomAsync(Guid roomId, Guid userId, CancellationToken ct = default)
+    {
+        var room = await _messagingPersistance.GetChatRoomAsync(roomId, ct)
+                    ?? throw new KeyNotFoundException("Chatroom not found.");
+
+        var user = _userPersistance.GetUserById(userId)
+                    ?? throw new KeyNotFoundException("User not found.");
+
+        room.Participants.Remove(user);
+        await _messagingPersistance.UpdateRoomAsync(room, ct);
+    }
 }

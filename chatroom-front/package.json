@@ -32,6 +32,7 @@
     "crypto-js": "^4.2.0",
     "csvtojson": "^2.0.10",
     "dayjs": "^1.11.13",
+    "font-awesome": "^4.7.0",
     "micromatch": ">=4.0.8",
     "ngx-cookie-service": "^18.0.0",
     "ngxtension": "^4.2.0",

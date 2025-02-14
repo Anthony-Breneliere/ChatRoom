@@ -84,4 +84,36 @@ public sealed class MessagingRepository : IMessagingPersistance
         return await _context.ChatRooms
             .Include(static r => r.Participants).FirstOrDefaultAsync(c => c.Id == roomId, ct);
     }
+
+    /// <summary>
+    /// Get chat rooms with participants
+    /// </summary>
+    public async Task<ChatRoom[]> GetAllChatRoomsAsync(CancellationToken ct)
+    {
+        return await _context.ChatRooms
+            .Include(r => r.Participants)
+            .Select(r => new ChatRoom
+            {
+                Id = r.Id,
+                CreatedAt = r.CreatedAt,
+                ReadOnly = r.ReadOnly,
+                Participants = r.Participants.Select(p => new User
+                {
+                    Id = p.Id,
+                    FirstName = p.FirstName,
+                    LastName = p.LastName,
+                    Email = p.Email,
+                    UserName = p.UserName,
+                }).ToList()
+            }).ToArrayAsync(ct);
+    }
+    
+    /// <summary>
+    /// Updates a chat room.
+    /// </summary>
+    public async Task UpdateRoomAsync(ChatRoom room, CancellationToken ct = default)
+    {
+        _context.ChatRooms.Update(room);
+        await _context.SaveChangesAsync(ct);
+    }
 }

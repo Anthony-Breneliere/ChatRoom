@@ -1,0 +1,10 @@
+<div [ngClass]="{
+	'bg-blue-300 dark:text-white ml-auto': isMessageSendFromUser(),
+	'bg-white text-black dark:text-white': !isMessageSendFromUser()
+	}" class="bg-blue-300 dark:bg-white-300 text-black dark:text-white p-4 rounded-xl shadow relative max-w-[80%]">
+  <div class="flex justify-between items-center">
+    <div class="font-semibold text-gray-800 text-sm">{{message.authorFullName}}</div>
+    <div class="text-xs text-black">{{formatFrenchDate(message.createdAt)}}</div>
+  </div>
+  <div class="text-gray-700 text-sm break-words">{{message.content}}</div>
+</div>
