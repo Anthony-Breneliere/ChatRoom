@@ -178,8 +178,26 @@ public sealed class MessagingService
             Logger.LogDebug(e.Message); 
         }
 
-        
+    }
 
+    /// <summary>
+    /// verify if the user is a participant of the room.
+    /// </summary>
+    /// <param name="roomId">ID of the chat room</param>
+    /// <param name="nameIdentifier">The name identifier of the user who want to join the chat room</param>
+    /// <returns>true if the user is a participant of the room otherwise false</returns>
+    public async Task<bool> isParticipant(Guid roomId, string nameIdentifier) {
+
+        ChatRoom room = await GetChatRoom(roomId) ?? throw new ArgumentException("La chat room n'existe pas");
+
+        User user = await GetUserFromNameIdentifier(nameIdentifier);
+
+        if (room.Participants.Any(p => p.Id == user.Id))
+        {
+            return true;
+        }
+
+        return false;
     }
 
 

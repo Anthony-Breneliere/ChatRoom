@@ -67,11 +67,18 @@ public sealed class MessagingHub : Hub<IMessagingHubPush>, IMessagingHubInvoke
     }
 
     /// <inheritdoc />
-    public async Task<IEnumerable<ChatMessageDto>> GetAllMessages(Guid roomId)
+    public async Task<IEnumerable<ChatMessageDto>> InitConnexionAndGetMessages(Guid roomId)
     {
-        var messages = await _messagingService.GetMessagesAsync(roomId);
 
-        return messages.Adapt<IEnumerable<ChatMessageDto>>(_mapper.Config);
+        if (await _messagingService.isParticipant(roomId, NameIdentifier))
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, roomId.ToString());
+
+            var messages = await _messagingService.GetMessagesAsync(roomId);
+            return messages.Adapt<IEnumerable<ChatMessageDto>>(_mapper.Config);
+        }
+
+        throw new UnauthorizedAccessException("L'utilisateur ne peut pas récuperer les messages si il n'est pas participant à la chat room");
     }
     
     /// <inheritdoc />

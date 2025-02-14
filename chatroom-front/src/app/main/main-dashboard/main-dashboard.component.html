@@ -2,73 +2,101 @@
   <div class="chat-dashboard">
 
     @if (this.joinedChatRoomsButtons().length > 0) {
-      <div class="flex flex-row pt-8 pb-6">
-        <div class="flex flex-row items-center w-full">
-          <chat-button-group
+      <div class="flex flex-row items-center pb-2">
+        <chat-button-group
             [buttons]="this.joinedChatRoomsButtons()"
             [(choice)]="this.roomSelected"
           />
-        </div>
       </div>
     }
 
     @if (this.roomSelected(); as room) {
-      <div class="flex flex-row items-center">
-        <input
-          
-          type="text"
-          class="bg-white rounded-lg p-2 border"
-          placeholder="Message"
-        />
-        <chat-button
-          
-          type="green"
-          class="mx-4 w-fit"
-          prefix="iconoirSend"
-          text="Send"
-        />
-      </div>
-
-      <div>
-        <div>
-          @for (m of room.messages; track $index) {
-            @if (m.content.startsWith("#SYSTEM#:")) {
-              <div class="text-center text-gray-500">{{m.content}}</div>
-            } @else if(m.authorId === user.id) {
-              <div class="flex flex-row justify-end">
-                <div class="bg-green-500 text-white p-2 rounded-lg m-2">
-                  {{m.content}}
-                </div>
-              </div>
-            } @else {
-              <div class="flex flex-row justify-start">
-                <div class="bg-gray-200 p-2 rounded-lg m-2">
-                  {{m.content}}
-                </div>
-              </div>
-            }
+      <div class="flex flex-row gap-4 h-80">
+        <div class="w-full max-h-full flex flex-col justify-between">
+          <div class="flex flex-col bg-white p-4 rounded-lg h-64 max-h-64 shadow-md gap-2 ">
+            <div class="flex flex-col gap-2 max-h-full overflow-y-auto pr-2">
+              @for (m of room.messages; track $index) {
+                @if (m.content.startsWith("#SYSTEM#:")) {
+                  <div class="text-center text-gray-500">
+                    {{m.content.replace("#SYSTEM#:", "")}}
+                  </div>
+                } @else if(m.authorId === user.id) {
+                  <div class="flex flex-row justify-end">
+                    <div class="bg-green-500 text-white p-2 rounded-lg">
+                      {{m.content}}
+                    </div>
+                  </div>
+                } @else {
+                  <div class="flex flex-row justify-start">
+                    <div class="bg-gray-200 p-2 rounded-lg">
+                      {{m.content}}
+                    </div>
+                  </div>
+                }
+              }
+            </div>
+          </div>
+    
+          <div class="flex flex-row items-center justify-end mt-4">
+            <input
+              #messageInput
+              type="text"
+              class="bg-white rounded-lg p-2 border w-full"
+              placeholder="Message"
+            />
+            <chat-button
+              type="primary"
+              class="ml-4 w-fit"
+              prefix="iconoirSend"
+              text="Send"
+              (click)="sendMessage(room.id)"
+              [disabled]="!messageInput.value"
+            />
+          </div>
+        </div>
+    
+        <div id="participants" class="flex flex-col gap-2 bg-white rounded-lg p-4 shadow-md min-w-fit min-h-full max-h-full overflow-y-auto">
+          <div class="text-lg font-bold">Participants</div>
+          @for (p of room.participants; track p.id) {
+            <div class="flex flex-row items-center">
+              <div class="bg-slate-200 p-2 rounded-lg shadow-md">{{p.firstName}}</div>
+              @if (p.id === user.id) {
+                <chat-button
+                  class="ml-2"
+                  type="danger"
+                  prefix="saxLogout1Bulk"
+                  text="Leave"
+                />
+              }
+            </div>
           }
         </div>
       </div>
     }
     
 
-    <div class="flex flex-row items-center">
-      <input [(ngModel)]="createChatRoomName" type="text" class="bg-white rounded-lg p-2 border" placeholder="Nom du chat room" />
-      <chat-button (click)="createRoom()" type="green" class="mx-4 w-fit" prefix="iconoirPlus" text="Create chat room"></chat-button>
-    </div>
-
-    <div class="flex flex-wrap gap-2 mt-4">
-      @for (room of chatRooms(); track room.id) {
-        <div class="bg-white p-3 rounded-lg shadow-md flex flex-col items-center">
-          <div class="mr-2">{{room.name}}</div>
-          <div class="flex flex-row mt-2">
-            <chat-button [disabled]="isJoined(room.id)" (click)="JoinRoom(room)" class="mx-1" prefix="iconoirNavArrowRight" text="Join"></chat-button>
-            <chat-button (click)="DeleteRoom(room.id)" class="mx-1" type="danger" prefix="saxTrashOutline" text="Delete"></chat-button>
+    
+    <div class="flex flex-col gap-4 mt-4">
+      <div><h3 class="text-lg font-bold">Créer un chatroom :</h3></div>
+      <div class="flex flex-row justify-start items-center">
+        <input #createChatRoomName type="text" class="bg-white rounded-lg p-2 border" placeholder="Nom du chat room" />
+        <chat-button (click)="createRoom()" [disabled]="!createChatRoomName.value" type="green" class="ml-4 w-fit" prefix="iconoirPlus" text="Create chat room"></chat-button>
+      </div>
+      <div><h3 class="text-lg font-bold">Chatrooms disponibles :</h3></div>
+      <div class="flex flex-wrap gap-2">
+      
+        @for (room of chatRooms(); track room.id) {
+          <div class="bg-white p-3 rounded-lg shadow-md flex flex-col items-center">
+            <div class="mr-2">{{room.name}}</div>
+            <div class="flex flex-row mt-2">
+              <chat-button [disabled]="isJoined(room.id)" (click)="JoinRoom(room)" class="mx-1" prefix="iconoirNavArrowRight" text="Join"></chat-button>
+              <chat-button (click)="DeleteRoom(room.id)" class="mx-1" type="danger" prefix="saxTrashOutline" text="Delete"></chat-button>
+            </div>
+            
           </div>
-          
-        </div>
-      }
+        }
+      </div>
     </div>
+    
   </div>
 }

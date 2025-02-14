@@ -76,10 +76,10 @@ export class MessagingService extends SignalRClientBase {
 	 * Get all messages from a chat room
 	 * @returns ChatMessage[]
 	 */
-	public async GetAllMessages(roomId : string): Promise<ChatMessage[]> {
+	public async InitConnexionAndGetMessages(roomId : string): Promise<ChatMessage[]> {
 		await this.getConnectionPromise;
 		//initialiser les groupes de connexion signalR ? pour chaque chat room et chaque participant ajouter au groupe de connexion de la chatroom
-		return await this._hubConnection.invoke<ChatMessage[]>('GetAllMessages', roomId);
+		return await this._hubConnection.invoke<ChatMessage[]>('InitConnexionAndGetMessages', roomId);
 	}
 	/**
 	 * Get new chat room created from the server

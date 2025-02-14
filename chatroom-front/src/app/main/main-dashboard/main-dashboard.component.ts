@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal, WritableSignal } from '@angular/core';
+import { Component, computed, ElementRef, inject, OnInit, signal, ViewChild, WritableSignal } from '@angular/core';
 import { NgIconComponent, provideIcons, provideNgIconsConfig } from '@ng-icons/core';
 import { saxCardsBulk, saxBuildingsBulk } from '@ng-icons/iconsax/bulk';
 import { bootstrapArrowDown, bootstrapArrowUp } from '@ng-icons/bootstrap-icons';
@@ -59,7 +59,10 @@ export class MainDashboardComponent implements OnInit {
 	public roomSelected : WritableSignal<ChatRoom | null> = signal<ChatRoom | null>(null);
 
 	chatRooms :  WritableSignal<ChatRoom[]> = signal<ChatRoom[]>([]);
-	createChatRoomName !: string;
+	@ViewChild('createChatRoomName') createChatRoomName !: ElementRef;
+ 
+	@ViewChild('messageInput') messageInput !: ElementRef;
+
 
 
 	constructor() {}
@@ -67,13 +70,20 @@ export class MainDashboardComponent implements OnInit {
 	ngOnInit(): void {
 		this._messagingSvc.getRooms()
 			.then(rooms => this.chatRooms.set(rooms))
-			.then(() => 
+			.then(() => {
 				this.chatRooms().forEach(room => {
 					if(room.participants.some(participant => participant.id === this.user()!.id)) {
 						this.createJoinedChatRoomsButtons(room);
 					}
 				})
-			);
+
+				this.joinedChatRoomsButtons().forEach(button => {
+					this._messagingSvc.InitConnexionAndGetMessages(button.value.id).then(messages => {
+						button.value.messages = messages;
+					});
+				});
+
+			});
 		
 		this._messagingSvc.getChatRoomsCreated().subscribe((newChatRoom) => {
 			this.chatRooms.update(rooms => [...rooms, newChatRoom]);
@@ -105,8 +115,8 @@ export class MainDashboardComponent implements OnInit {
 	}
 
 	async createRoom() {
-		await this._messagingSvc.createChatRoom(this.createChatRoomName);
-		this.createChatRoomName = "";
+		await this._messagingSvc.createChatRoom(this.createChatRoomName.nativeElement.value);
+		this.createChatRoomName.nativeElement.value = "";
 	}
 
 	async DeleteRoom(roomId : string) {
@@ -118,6 +128,11 @@ export class MainDashboardComponent implements OnInit {
 			room.messages = messages;
 		});
 		this.createJoinedChatRoomsButtons(room);
+
+		this.joinedChatRoomsButtons.update(buttons => {
+			buttons[buttons.findIndex(button => button.value.id === room.id)].value.participants.push(this.user()!);
+			return buttons
+		});
 	}
 
 	private async createJoinedChatRoomsButtons(room : ChatRoom) {
@@ -133,6 +148,11 @@ export class MainDashboardComponent implements OnInit {
 
 	public isJoined(roomId: string): boolean {
 		return this.joinedChatRoomsButtons().some(button => button.value.id === roomId).valueOf();
+	}
+
+	public async sendMessage(roomId: string) {
+		await this._messagingSvc.sendMessage(roomId, this.messageInput.nativeElement.value);
+		this.messageInput.nativeElement.value = "";
 	}
 
 }
