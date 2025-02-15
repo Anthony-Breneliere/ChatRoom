@@ -43,6 +43,19 @@ public interface IMessagingHubPush
     /// </summary>
     /// <param name="chatRoom">the chat room updated with the new participant</param>
     public Task NewJoiner(ChatRoomDto chatRoom);
+
+    /// <summary>
+    /// Pushes the chat room updated without the leaver
+    /// </summary>
+    /// <param name="chatRoom">the chat room updated without the leaver</param>
+    public Task NewLeaver(ChatRoomDto chatRoom);
+
+    /// <summary>
+    /// Pushes the writting user
+    /// </summary>
+    /// <param name="user">the writting user</param>
+    /// <param name="roomId">room id</param>
+    public Task UserWriting(string roomId, UserDto user);
 }
 
 /// <summary>
@@ -54,9 +67,8 @@ public interface IMessagingHubInvoke
     /// Join a chat room to receive new messages, and get the chat history.
     /// </summary>
     /// <param name="roomId">The ID of the chatroom.</param>
-    /// /// <param name="userId">The ID of the user who want to join the chat room.</param>
     /// <returns>The chat history</returns>
-    public Task<IEnumerable<ChatMessageDto>> JoinChatRoom(Guid roomId, string userId);
+    public Task<IEnumerable<ChatMessageDto>> JoinChatRoom(Guid roomId);
 
     /// <summary>
     /// Leave the chat room

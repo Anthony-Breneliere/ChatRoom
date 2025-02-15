@@ -70,4 +70,18 @@ public sealed class MessagingHubNotificationHandler : IMessagingNotificationHand
         ChatRoomDto dto = _mapper.Map<ChatRoomDto>(chatRoom);
         await _hubContext.Clients.Group(dto.Id.ToString()).NewJoiner(dto);
     }
+    
+    /// <inheritdoc />
+    public async Task NotifyLeaverAsync(Chat.Model.Messaging.ChatRoom chatRoom)
+    {
+        ChatRoomDto dto = _mapper.Map<ChatRoomDto>(chatRoom);
+        await _hubContext.Clients.Group(dto.Id.ToString()).NewLeaver(dto);
+    }
+
+    /// <inheritdoc />
+    public async Task NotifyUserWritingAsync(Guid roomId, User user)
+    {
+        UserDto dto = _mapper.Map<UserDto>(user);
+        await _hubContext.Clients.Group(roomId.ToString()).UserWriting(roomId.ToString(), dto);
+    }
 }

@@ -4,6 +4,7 @@ import { ChatMessage } from '../../models/chat-message.model';
 import { ChatRoom } from '../../models/chat-room.model';
 import { SignalRClientBase } from '../signalr/signalr.client.base';
 import { Observable, Subject } from 'rxjs';
+import { UserDto } from '../../dto/user.dto';
 
 @Injectable({
 	providedIn: 'root',
@@ -16,7 +17,11 @@ export class MessagingService extends SignalRClientBase {
 
 	private newJoiner = new Subject<ChatRoom>();
 
+	private newLeaver = new Subject<ChatRoom>();
+
 	private newMessage = new Subject<ChatMessage>();
+
+	private userWriting = new Subject<{room : string, user : UserDto}>();
 
 	constructor() {
 		super(environment.API_URL + '/hub/messaging');
@@ -32,7 +37,8 @@ export class MessagingService extends SignalRClientBase {
 		this._hubConnection.on('DeletedMessage', (message: ChatMessage) => {
 		});
 
-		this._hubConnection.on('UserWriting', (user: ChatMessage) => {
+		this._hubConnection.on('UserWriting', (roomId : string, user: UserDto) => {
+			this.userWriting.next({room:roomId, user:user })
 		});
 
 		this._hubConnection.on('NewChatRoomCreated', (chatRoom: ChatRoom) => {
@@ -46,6 +52,11 @@ export class MessagingService extends SignalRClientBase {
 		this._hubConnection.on('NewJoiner', (room: ChatRoom) => {
 			//quelqu'un vient de rejoindre une chat room dont je suis le participant
 			this.newJoiner.next(room);
+		});
+
+		this._hubConnection.on('NewLeaver', (room: ChatRoom) => {
+			//quelqu'un vient de partir d'une chat room dont je suis le participant
+			this.newLeaver.next(room);
 		});
 
 
@@ -106,11 +117,27 @@ export class MessagingService extends SignalRClientBase {
 	}
 
 	/**
+	 * Get leavers in a chat room from the server
+	 * @returns un Observable<ChatRoom> pour les évènement de participants sortant dans une chat room
+	 */
+	public getNewLeavers(): Observable<ChatRoom> {
+		return this.newLeaver.asObservable();
+	}
+
+	/**
 	 * Get new message from the server
 	 * @returns un Observable<ChatMessage> pour les évènement de nouveaux messages
 	 */
 	public getNewMessage(): Observable<ChatMessage> {
 		return this.newMessage.asObservable();
+	}
+
+	/**
+	 * Get new message from the server
+	 * @returns un Observable<ChatMessage> pour les évènement de nouveaux messages
+	 */
+	public getWritingUser(): Observable<{room : string, user : UserDto}> {
+		return this.userWriting.asObservable();
 	}
 
 	/**
@@ -125,10 +152,10 @@ export class MessagingService extends SignalRClientBase {
 	/**
 	 * Join the chat room and get all chat room message history
 	 */
-	public async joinChatRoom(roomId: string, userId: string): Promise<ChatMessage[]> {
+	public async joinChatRoom(roomId: string): Promise<ChatMessage[]> {
 		await this.getConnectionPromise;
 
-		return await this._hubConnection.invoke<ChatMessage[]>('JoinChatRoom', roomId, userId);
+		return await this._hubConnection.invoke<ChatMessage[]>('JoinChatRoom', roomId);
 	}
 
 	/**
@@ -153,6 +180,12 @@ export class MessagingService extends SignalRClientBase {
 		await this.getConnectionPromise;
 
 		await this._hubConnection.invoke('DeleteChatRoom', roomId);
+	}
+
+	public async imWriting(roomId : string){
+		await this.getConnectionPromise;
+
+		await this._hubConnection.invoke('SendUserWriting', roomId);
 	}
 
 }

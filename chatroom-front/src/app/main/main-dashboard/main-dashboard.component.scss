@@ -25,3 +25,26 @@
 	margin-bottom: 5px;
 	width: fit-content;
 }
+
+::-webkit-scrollbar {
+	width: 12px; /* Largeur de la scrollbar */
+	height: 12px; /* Hauteur de la scrollbar (pour les scrollbars horizontales) */
+  }
+  
+  /* Partie de la scrollbar qui se déplace */
+  ::-webkit-scrollbar-thumb {
+	background-color: #888; /* Couleur de la partie qui défile */
+	border-radius: 10px; /* Coins arrondis */
+	border: 3px solid #f1f1f1; /* Bordure autour de la partie qui défile */
+  }
+  
+  /* Partie de la scrollbar qui est fixe (l'arrière-plan) */
+  ::-webkit-scrollbar-track {
+	background: #f1f1f1; /* Couleur du fond de la scrollbar */
+	border-radius: 10px;
+  }
+  
+  /* Au survol de la scrollbar */
+  ::-webkit-scrollbar-thumb:hover {
+	background: #555; /* Couleur plus foncée au survol */
+  }

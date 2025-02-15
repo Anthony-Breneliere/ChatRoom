@@ -2,39 +2,69 @@
   <div class="chat-dashboard">
 
     @if (this.joinedChatRoomsButtons().length > 0) {
-      <div class="flex flex-row items-center pb-2">
+      <div class="flex flex-row items-center pb-2" >
         <chat-button-group
             [buttons]="this.joinedChatRoomsButtons()"
             [(choice)]="this.roomSelected"
+            (choiceChange)="scrollToBottom()"
           />
       </div>
     }
 
     @if (this.roomSelected(); as room) {
-      <div class="flex flex-row gap-4 h-80">
+      <div class="flex flex-row gap-4 h-96">
         <div class="w-full max-h-full flex flex-col justify-between">
-          <div class="flex flex-col bg-white p-4 rounded-lg h-64 max-h-64 shadow-md gap-2 ">
-            <div class="flex flex-col gap-2 max-h-full overflow-y-auto pr-2">
+          <div class="flex flex-col bg-white p-4 justify-end rounded-lg h-80 max-h-80 shadow-md gap-2 ">
+            <div #MessageContainer class="flex flex-col gap-2 max-h-full overflow-y-auto pr-2 scroll-smooth" (scroll)="onScroll()">
               @for (m of room.messages; track $index) {
                 @if (m.content.startsWith("#SYSTEM#:")) {
                   <div class="text-center text-gray-500">
                     {{m.content.replace("#SYSTEM#:", "")}}
                   </div>
                 } @else if(m.authorId === user.id) {
-                  <div class="flex flex-row justify-end">
-                    <div class="bg-green-500 text-white p-2 rounded-lg">
+                  <div class="flex flex-col justify-center items-end">
+                    <div class="w-fit">{{m.authorFullName}} :</div>
+                    <div class="bg-green-500 text-white p-2 rounded-lg w-fit">
                       {{m.content}}
                     </div>
+                    <div class="text-sm text-slate-400">{{m.createdAt}}</div>
                   </div>
                 } @else {
-                  <div class="flex flex-row justify-start">
-                    <div class="bg-gray-200 p-2 rounded-lg">
+                  <div class="flex flex-col justify-center items-start">
+                    <div class="w-fit">{{m.authorFullName}} :</div>
+                    <div class="bg-gray-200 p-2 rounded-lg w-fit">
                       {{m.content}}
                     </div>
+                    <div class="text-sm text-slate-400">{{m.createdAt}}</div>
                   </div>
                 }
               }
             </div>
+            <div #GoToBottom (click)="scrollButtonClick()" class="flex w-10 h-10 rounded-full border border-red-300 absolute self-center justify-center opacity-0 items-center duration-300 hover:bg-slate-100">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-down" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M8 1a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L7.5 13.293V1.5A.5.5 0 0 1 8 1"/>
+              </svg>
+            </div>
+
+            <div class="flex flex-row space-x-1">
+              @for (u of writingUsers(); track $index) {
+                @if (u.room === room.id) {
+                  <span>{{ u.user.firstName }}</span>
+                  @if ($index == writingUsers().length - 2) {
+                    <span>et</span>
+                  }@else if (!($index === writingUsers().length - 1)) {
+                    <span>,</span>
+                  }
+                }
+              }
+              @if (writingUsers().length === 1) {
+                <span>est en train d'écrire...</span>
+              }
+              @else if (writingUsers().length > 1) {
+                <span>sont en train d'écrire...</span>
+              }
+            </div>
+            
           </div>
     
           <div class="flex flex-row items-center justify-end mt-4">
@@ -43,6 +73,7 @@
               type="text"
               class="bg-white rounded-lg p-2 border w-full"
               placeholder="Message"
+              (input)="writting(room.id)"
             />
             <chat-button
               type="primary"
@@ -62,6 +93,7 @@
               <div class="bg-slate-200 p-2 rounded-lg shadow-md">{{p.firstName}}</div>
               @if (p.id === user.id) {
                 <chat-button
+                  (click)="leaveRoom(room.id)"
                   class="ml-2"
                   type="danger"
                   prefix="saxLogout1Bulk"
@@ -83,6 +115,9 @@
         <chat-button (click)="createRoom()" [disabled]="!createChatRoomName.value" type="green" class="ml-4 w-fit" prefix="iconoirPlus" text="Create chat room"></chat-button>
       </div>
       <div><h3 class="text-lg font-bold">Chatrooms disponibles :</h3></div>
+      <div #ErrorDeleteRoom class="bg-red-500 text-white rounded-lg p-2 w-fit hidden duration-300">Impossible de supprimer une ChatRoom si elle possède encore des participants.</div>
+      <div #ErrorJoinRoom class="bg-red-500 text-white rounded-lg p-2 w-fit hidden duration-300">Impossible de rejoindre plus de 4 ChatRooms.</div>
+
       <div class="flex flex-wrap gap-2">
       
         @for (room of chatRooms(); track room.id) {

@@ -73,6 +73,15 @@ public interface IMessagingPersistance
     /// <param name="roomId">ID of the chat room.</param>
     /// <param name="joiner">the user who want to join the chat room.</param>
     /// <param name="ct">Cancellation token.</param>
-    /// <returns>The deleted chat room.</returns>
+    /// <returns>The joined chat room.</returns>
     Task<ChatRoom> JoinChatRoomAsync(Guid roomId,User joiner, CancellationToken ct = default);
+
+    /// <summary>
+    /// Leave a specific chat room
+    /// </summary>
+    /// <param name="roomId">ID of the chat room.</param>
+    /// <param name="leaver">the user who want to leave the chat room.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>The left chat room.</returns>
+    Task<ChatRoom> LeaveChatRoomAsync(Guid roomId, User leaver, CancellationToken ct = default);
 }

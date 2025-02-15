@@ -75,6 +75,7 @@ public sealed class MessagingHub : Hub<IMessagingHubPush>, IMessagingHubInvoke
             await Groups.AddToGroupAsync(Context.ConnectionId, roomId.ToString());
 
             var messages = await _messagingService.GetMessagesAsync(roomId);
+            
             return messages.Adapt<IEnumerable<ChatMessageDto>>(_mapper.Config);
         }
 
@@ -82,7 +83,7 @@ public sealed class MessagingHub : Hub<IMessagingHubPush>, IMessagingHubInvoke
     }
     
     /// <inheritdoc />
-    public async Task<IEnumerable<ChatMessageDto>> JoinChatRoom(Guid roomId, string userId)
+    public async Task<IEnumerable<ChatMessageDto>> JoinChatRoom(Guid roomId)
     {
         await _messagingService.JoinChatRoomAsync(roomId, NameIdentifier);
 
@@ -96,7 +97,18 @@ public sealed class MessagingHub : Hub<IMessagingHubPush>, IMessagingHubInvoke
     /// <inheritdoc />
     public async Task LeaveChatRoom(Guid roomId)
     {
-        await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId.ToString());
+        if (await _messagingService.isParticipant(roomId, NameIdentifier))
+        {
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId.ToString());
+
+            await _messagingService.LeaveChatRoomAsync(roomId, NameIdentifier);
+
+        }
+        else
+        {
+            throw new UnauthorizedAccessException("L'utilisateur ne peut pas partir d'une chat room si il n'est pas participant à la chat room");
+        }
+
     }
 
     /// <inheritdoc />
@@ -109,5 +121,11 @@ public sealed class MessagingHub : Hub<IMessagingHubPush>, IMessagingHubInvoke
     public async Task DeleteChatRoom(string roomId)
     {
         await _messagingService.DeleteChatRoomAsync(new Guid(roomId));
+    }
+
+    /// <inheritdoc />
+    public async Task SendUserWriting(Guid roomId)
+    {
+        await _messagingService.UserWritingAsync(roomId, NameIdentifier);
     }
 }

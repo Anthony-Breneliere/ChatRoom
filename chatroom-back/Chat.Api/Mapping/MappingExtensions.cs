@@ -1,3 +1,7 @@
+using Chat.ApiModel.Messaging;
+using Chat.Model.Messaging;
+using Mapster;
+
 namespace Chat.Api.Mapping;
 
 /// <summary>
@@ -10,5 +14,7 @@ public static class MappingExtensions
     /// </summary>
     public static void ConfigureStaticMappings()
     {
+        TypeAdapterConfig<ChatMessage, ChatMessageDto>.NewConfig()
+                .Map(dest => dest.AuthorFullName, src => src.Author.FirstName + " " + src.Author.LastName);
     }
 }

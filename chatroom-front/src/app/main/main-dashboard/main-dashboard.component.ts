@@ -18,7 +18,8 @@ import { ChatRoom } from 'src/app/_common/models/chat-room.model';
 import { Signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MainChatRoomComponent } from "../main-chat-room/main-chat-room.component";
-import { ChatMessage } from 'src/app/_common/models/chat-message.model';
+import { Subscription, switchMap, tap, timer } from 'rxjs';
+import { UserDto } from 'src/app/_common/dto/user.dto';
 
 @Component({
 	selector: 'app-main-dashboard',
@@ -62,6 +63,14 @@ export class MainDashboardComponent implements OnInit {
 	@ViewChild('createChatRoomName') createChatRoomName !: ElementRef;
  
 	@ViewChild('messageInput') messageInput !: ElementRef;
+	@ViewChild('ErrorDeleteRoom') ErrorDeleteRoom !: ElementRef;
+	@ViewChild('ErrorJoinRoom') ErrorJoinRoom !: ElementRef;
+	@ViewChild('MessageContainer') MessageContainer !: ElementRef;
+	@ViewChild('GoToBottom') GoToBottom !: ElementRef;
+
+	public writingUsers : WritableSignal<{room : string, user:UserDto}[]> = signal<{room : string, user:UserDto}[]>([]);
+	private userTimers = new Map<string, Subscription>();
+
 
 
 
@@ -108,9 +117,51 @@ export class MainDashboardComponent implements OnInit {
 		this._messagingSvc.getNewMessage().subscribe((message) => {
 			this.joinedChatRoomsButtons.update(buttons => {
 				buttons[buttons.findIndex(button => button.value.id === message.roomId)].value.messages.push(message);
+				if(this.roomSelected()?.id === message.roomId) {
+					if (this.MessageContainer.nativeElement.scrollTop + this.MessageContainer.nativeElement.clientHeight > this.MessageContainer.nativeElement.scrollHeight - 25) {
+						this.scrollToBottom();
+					}
+					else {
+						this.GoToBottom.nativeElement.style.opacity = "1";
+						this.GoToBottom.nativeElement.style.transform = "translateY(-25px)";
+					}
+				}
+				return buttons;
+			});
+		});
+
+		this._messagingSvc.getNewLeavers().subscribe((room) => {
+			this.joinedChatRoomsButtons.update(buttons => {
+				buttons[buttons.findIndex(button => button.value.id === room.id)].value.participants = room.participants;
 				return buttons
 			});
 		});
+
+		this._messagingSvc.getWritingUser().pipe(
+			switchMap((info) => {
+
+				if(!this.writingUsers().some(i => i.user.id == info.user.id)){
+					this.writingUsers.set([...this.writingUsers(), info])
+				}
+
+				if (this.userTimers.has(info.user.id)) {
+					this.userTimers.get(info.user.id)?.unsubscribe();
+				}
+
+				const userTimer$ = timer(1000).pipe(
+					tap(() => {
+					  this.writingUsers.set(
+						this.writingUsers().filter(i => i.user.id !== info.user.id)
+					  );
+					})
+				);
+			  
+				this.userTimers.set(info.user.id, userTimer$.subscribe());
+			  
+				return userTimer$;
+			})	
+			
+		).subscribe()
 
 	}
 
@@ -120,19 +171,50 @@ export class MainDashboardComponent implements OnInit {
 	}
 
 	async DeleteRoom(roomId : string) {
-		await this._messagingSvc.deleteChatRoom(roomId);
+		await this._messagingSvc.getChatRoom(roomId).then(room => {
+			if(room.participants.length === 0) {
+				this._messagingSvc.deleteChatRoom(roomId);
+			}
+			else {
+				this.ErrorDeleteRoom.nativeElement.style.display = "block";
+				this.ErrorDeleteRoom.nativeElement.style.opacity = "1";
+				setTimeout(() => {
+					this.ErrorDeleteRoom.nativeElement.style.opacity = "0";
+					setTimeout(() => {
+						this.ErrorDeleteRoom.nativeElement.style.display = "none";
+					}, 300);
+				}, 3000);
+			}
+		});
 	}
 
 	async JoinRoom(room : ChatRoom) {
-		this._messagingSvc.joinChatRoom(room.id, this.user()!.id).then(messages => {
-			room.messages = messages;
-		});
-		this.createJoinedChatRoomsButtons(room);
+		if(this.joinedChatRoomsButtons().length < 4){
+			console.log(this.joinedChatRoomsButtons().length)
+			this._messagingSvc.joinChatRoom(room.id).then(messages => {
+				room.messages = messages;
+			});
+			this.createJoinedChatRoomsButtons(room);
 
-		this.joinedChatRoomsButtons.update(buttons => {
-			buttons[buttons.findIndex(button => button.value.id === room.id)].value.participants.push(this.user()!);
-			return buttons
-		});
+			await this._messagingSvc.getChatRoom(room.id).then(roomCurrent => {
+				this.joinedChatRoomsButtons.update(buttons => {
+					buttons[buttons.findIndex(button => button.value.id === room.id)].value.participants = roomCurrent.participants;
+					return buttons
+				});
+			})
+	
+			
+		}else{
+			this.ErrorJoinRoom.nativeElement.style.display = "block";
+				this.ErrorJoinRoom.nativeElement.style.opacity = "1";
+				setTimeout(() => {
+					this.ErrorJoinRoom.nativeElement.style.opacity = "0";
+					setTimeout(() => {
+						this.ErrorJoinRoom.nativeElement.style.display = "none";
+					}, 300);
+				}, 3000);
+		}
+		
 	}
 
 	private async createJoinedChatRoomsButtons(room : ChatRoom) {
@@ -153,6 +235,38 @@ export class MainDashboardComponent implements OnInit {
 	public async sendMessage(roomId: string) {
 		await this._messagingSvc.sendMessage(roomId, this.messageInput.nativeElement.value);
 		this.messageInput.nativeElement.value = "";
+	}
+
+	public async leaveRoom(roomId: string) {
+		await this._messagingSvc.leaveChatRoom(roomId);
+		this.deleteJoinedChatRoomsButtons(roomId);
+		this.roomSelected.set(null);
+	}
+
+	public async scrollToBottom() {
+		setTimeout(() => {
+			if(this.MessageContainer?.nativeElement){
+				this.MessageContainer.nativeElement.scrollTop = this.MessageContainer.nativeElement.scrollHeight;
+			}
+		}, 100);
+		
+	}
+
+	public async scrollButtonClick() {
+		this.scrollToBottom();
+		this.GoToBottom.nativeElement.style.opacity = "0";
+		this.GoToBottom.nativeElement.style.transform = "translateY(0)";
+	}
+
+	public async writting(roomId : string){
+		this._messagingSvc.imWriting(roomId);
+	}
+
+	public async onScroll(){
+		if(!(this.MessageContainer.nativeElement.scrollTop + this.MessageContainer.nativeElement.clientHeight === this.MessageContainer.nativeElement.scrollHeight)){
+			this.GoToBottom.nativeElement.style.opacity = "0";
+			this.GoToBottom.nativeElement.style.transform = "translateY(0)";
+		}
 	}
 
 }

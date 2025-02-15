@@ -25,7 +25,7 @@ public sealed class MessagingRepository : IMessagingPersistance
 
     /// <inheritdoc />
     public async  Task<IEnumerable<ChatMessage>> GetMessages(Guid roomId, CancellationToken ct) =>
-        await _context.ChatMessages.Where(m => m.RoomId == roomId).AsNoTracking().ToArrayAsync(ct);
+        await _context.ChatMessages.Where(m => m.RoomId == roomId).Include(u => u.Author).AsNoTracking().ToArrayAsync(ct);
 
     /// <inheritdoc />
     public async Task<IEnumerable<ChatRoom>> GetRooms() => await _context.ChatRooms.Include(r => r.Participants).ToArrayAsync();
@@ -122,5 +122,26 @@ public sealed class MessagingRepository : IMessagingPersistance
         }
 
         
+    }
+
+    /// <inheritdoc />
+    public async Task<ChatRoom> LeaveChatRoomAsync(Guid roomId, User leaver, CancellationToken ct = default)
+    {
+
+        ChatRoom room = await GetChatRoomAsync(roomId, ct) ?? throw new NullReferenceException();
+
+        if (room.Participants.Any(p => p.Id == leaver.Id))
+        {
+            room.Participants.Remove(leaver);
+            await _context.SaveChangesAsync(ct);
+
+            return room;
+        }
+        else
+        {
+            throw new InvalidOperationException("L'utilisateur n'est pas un participant de la chat room");
+        }
+
+
     }
 }

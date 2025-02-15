@@ -200,5 +200,44 @@ public sealed class MessagingService
         return false;
     }
 
+    /// <summary>
+    /// Join a specific chat room.
+    /// </summary>
+    /// <param name="roomId">ID of the chat room</param>
+    /// <param name="nameIdentifier">The name identifier of the user who want to join the chat room</param>
+    /// <param name="ct">Cancellation token.</param>
+    public async Task LeaveChatRoomAsync(Guid roomId, string nameIdentifier, CancellationToken ct = default)
+    {
+        User user = await GetUserFromNameIdentifier(nameIdentifier);
+
+        try
+        {
+            ChatRoom c = await _messagingPersistance.LeaveChatRoomAsync(roomId, user, ct);
+
+            await _notificationHandler.NotifyLeaverAsync(c);
+
+            await SubmitMessageAsync(roomId.ToString(), $"#SYSTEM#:{user.FirstName} est parti de la chat room !", nameIdentifier);
+        }
+        catch (InvalidOperationException e)
+        {
+            Logger.LogDebug(e.Message);
+        }
+
+    }
+    
+    /// <summary>
+    /// Send to a group who is writting.
+    /// </summary>
+    /// <param name="roomId">the room id</param>
+    /// <param name="nameIdentifier">user who write</param>
+    /// <param name="ct">Cancellation token.</param>
+    public async Task UserWritingAsync(Guid roomId, string nameIdentifier, CancellationToken ct = default)
+    {
+        User user = await GetUserFromNameIdentifier(nameIdentifier);
+
+        await _notificationHandler.NotifyUserWritingAsync(roomId, user);
+
+    }
+
 
 }
