@@ -26,7 +26,7 @@ public sealed class ChatRoomDto
     /// Date and time the chat room was created.
     /// </summary>
     public DateTimeOffset CreatedAt { get; set; }
-    
+
     /// <summary>
     /// Whether the chat room is read-only.
     /// </summary>
@@ -34,4 +34,9 @@ public sealed class ChatRoomDto
     /// This is used to lock chat rooms for system messages, or to prevent users from sending messages.
     /// </remarks>
     public bool ReadOnly { get; set; }
+
+    /// <summary>
+    /// Whether the chat room is read-only.
+    /// </summary>
+    public string Name { get; set; } = "";
 }

@@ -62,7 +62,7 @@ public interface IMessagingHubInvoke
     /// <summary>
     /// Create chat room
     /// </summary>
-    Task<ChatRoomDto> CreateChatRoom();
+    Task<ChatRoomDto> CreateChatRoom(string chatRoomName);
 
     /// <summary>
     /// Get chat room list

@@ -27,7 +27,7 @@ public sealed class ChatRoom : ICreateTimestamp
 
     /// <inheritdoc />
     public DateTimeOffset CreatedAt { get; set; }
-    
+
     /// <summary>
     /// Whether the chat room is read-only.
     /// </summary>
@@ -35,4 +35,9 @@ public sealed class ChatRoom : ICreateTimestamp
     /// This is used to lock chat rooms for system messages, or to prevent users from sending messages.
     /// </remarks>
     public bool ReadOnly { get; set; }
+
+    /// <summary>
+    /// Name of the Chatroom.
+    /// </summary>
+    public string Name { get; set; } = "";
 }

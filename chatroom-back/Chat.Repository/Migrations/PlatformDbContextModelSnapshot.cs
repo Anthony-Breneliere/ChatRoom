@@ -127,6 +127,10 @@ namespace Chat.Repository.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("read_only");
 
+                    b.Property<string>("Name")
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("name");
+
                     b.HasKey("Id")
                         .HasName("pk_chat_rooms");
 

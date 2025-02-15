@@ -105,7 +105,7 @@ public sealed class MessagingService
     /// create chat room for an offer.
     /// </summary>
     /// <returns>The chat room.</returns>
-    public async Task<Model.Messaging.ChatRoom?> CreateChatRoom( string nameIdentifier,
+    public async Task<Model.Messaging.ChatRoom?> CreateChatRoom( string nameIdentifier, string chatRoomName,
         CancellationToken ct = default)
     {
         User user = await GetUserFromNameIdentifier(nameIdentifier);
@@ -115,6 +115,7 @@ public sealed class MessagingService
 
         ChatRoom chatRoom = new Model.Messaging.ChatRoom
         {
+            Name = chatRoomName,
             Participants = participants.ToList()
         };
 
