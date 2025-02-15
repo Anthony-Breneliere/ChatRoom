@@ -2,26 +2,41 @@
 
 
 
-<div class="chat-message-wrapper">
+<div *ngIf="activeChatRoomId else noChatRoom" class="chat-message-wrapper">
     <div class="chat-info">
         <h1 class="chat-name">Chat Name</h1>
-        <button class="btn-base red">Quitter le chat</button>
+        <button class="btn-base red"(click)="leaveChatRoom()">Quitter le chat</button>
     </div>
     <div class="chat-history">
 
-        <div *ngFor="let message of messageHistory$ | async">
-            <div class="message">
+       <div *ngIf="messageHistory$ | async as messageHistory">
+          <div *ngIf="messageHistory && messageHistory.length > 0; else noMessages">
+            <div *ngFor="let message of messageHistory">
+              <div class="message">
                 <p class="auteur">{{ message.authorFullName }} :</p>
                 <p class="contenu">{{ message.content }}</p>
+              </div>
             </div>
+          </div>
         </div>
+
     </div>
     <div class="typing-indicator">
         <p>XXXXX est en train d'écrire...</p>
     </div>
     <div class="send-message">
-        <input type="text" name="message-input" id="message-input" placeholder="Ecrivez votre message" (keyup)="onKeyUp($event)">
-        <button class="btn-base">Envoyer</button>
+        <input #messageInput type="text" name="message-input" placeholder="Ecrivez votre message" (keyup)="onKeyUp($event)">
+        <button class="btn-base" (click)="sendMessage()">Envoyer</button>
     </div>
   
 </div> 
+
+
+<ng-template #noMessages>
+  <p>Aucun message à afficher.</p>
+</ng-template>
+
+
+<ng-template #noChatRoom>
+  <p>Veuillez rejoindre une conversation pour commencer à discuter.</p>
+</ng-template>

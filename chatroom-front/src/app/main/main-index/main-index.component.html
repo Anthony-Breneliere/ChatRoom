@@ -8,9 +8,9 @@
     <button class="btn-base" (click)="createNewChatRoom()">Creer un nouveau chat</button>
     
     <div class="chat-rooms">
-      @for (chat of chatRooms(); track chat.id) {
-        <app-chat-room-item [chatRoom]="chat" (chatClicked)="joinChat(chat.id)"></app-chat-room-item>
-      }
+      <div *ngFor="let chat of chatRooms$ | async">
+        <app-chat-room-item [chatRoom]="chat"></app-chat-room-item>
+      </div>
     </div>
   </div>
 

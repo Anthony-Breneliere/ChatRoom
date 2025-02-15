@@ -6,6 +6,8 @@ import { ChatRoom } from 'src/app/_common/models/chat-room.model';
 import { ChatRoomItemComponent } from "../../chat/chat-room-item/chat-room-item.component";
 import { distinctUntilChanged, filter, fromEvent, map, merge, Observable } from 'rxjs';
 import { ChatRoomContentComponent } from "../../chat/chat-room-content/chat-room-content.component";
+import { MessagingManagerService } from 'src/app/_common/services/messaging/messaging.manager.service';
+import { CommonModule } from '@angular/common';
 
 
 @Component({
@@ -13,44 +15,25 @@ import { ChatRoomContentComponent } from "../../chat/chat-room-content/chat-room
 	standalone: true,
 	imports: [
 		ChatRoomItemComponent,
-		ChatRoomContentComponent
+		ChatRoomContentComponent,
+		CommonModule
 	],
 	styleUrl: './main-index.component.scss',
 	templateUrl: './main-index.component.html',
 })
 export class MainIndexComponent {
 
-	//ensemble des chats rooms disponibles
-	public chatRooms: WritableSignal<ChatRoom[]> = signal<ChatRoom[]>([]);
+	chatRooms$: Observable<ChatRoom[]>;
 
-	// Service de chat
-	private _chatService: MessagingService
-
-
-
-	// Ctor
-	constructor(chatService: MessagingService) {
-		this._chatService = chatService
+	constructor(private messagingManagerService: MessagingManagerService) {
+		this.chatRooms$ = this.messagingManagerService.getAllChatRooms$();
 	}
 
-	ngOnInit() {
-		this._loadAllChatRooms();
+	ngOnInit(): void {
+		this.messagingManagerService.loadAllChatRooms();
 	}
 
-
-	async createNewChatRoom() {
-		try {
-			this.chatRooms().push(await this._chatService.createChatRoom());
-		} catch (e) {
-			console.log("Une erreur est survenue lors de la création du chat");
-		}
-	}
-
-	private async _loadAllChatRooms() {
-		this.chatRooms.set(await this._chatService.getAllChatRooms());
-	}
-
-	async joinChat(chatId: string) {
-		await this._chatService.joinChatRoom(chatId);
+	createNewChatRoom(): void {
+		this.messagingManagerService.createNewChatRoom();
 	}
 }

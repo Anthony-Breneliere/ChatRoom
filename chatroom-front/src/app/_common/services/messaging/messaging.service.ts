@@ -10,11 +10,10 @@ import { Observable, Subject } from 'rxjs';
 })
 export class MessagingService extends SignalRClientBase {
 
-	// pour l'émission quand on recoit depuis le hub
-	private _newMesssageSub = new Subject<ChatMessage>();
-
-	// Exposition pour que l'on puisse s'abonner notamment pour le messageManagerService qui gère nos chats
-	public newMessage$: Observable<ChatMessage> = this._newMesssageSub.asObservable();
+	private newMessageSubject = new Subject<ChatMessage>();
+	private editedMessageSubject = new Subject<ChatMessage>();
+	private deletedMessageSubject = new Subject<ChatMessage>();
+	private userWritingSubject = new Subject<ChatMessage>();
 
 
 	constructor() {
@@ -22,18 +21,19 @@ export class MessagingService extends SignalRClientBase {
 
 		// Handle messaging events
 		this._hubConnection.on('NewMessage', (message: ChatMessage) => {
-			console.log('New message received:', message);
-			this._newMesssageSub.next(message)
-
+			this.newMessageSubject.next(message);
 		});
 
 		this._hubConnection.on('EditedMessage', (message: ChatMessage) => {
+			this.editedMessageSubject.next(message);
 		});
 
 		this._hubConnection.on('DeletedMessage', (message: ChatMessage) => {
+			this.deletedMessageSubject.next(message)
 		});
 
 		this._hubConnection.on('UserWriting', (user: ChatMessage) => {
+			this.userWritingSubject.next(user)
 		});
 	}
 
@@ -93,5 +93,23 @@ export class MessagingService extends SignalRClientBase {
 		await this.getConnectionPromise;
 
 		await this._hubConnection.invoke('SendMessage', roomId, message);
+	}
+
+
+	/* Observables */
+	public onNewMessage(): Observable<ChatMessage> {
+		return this.newMessageSubject.asObservable();
+	}
+
+	public onEditedMessage(): Observable<ChatMessage> {
+		return this.editedMessageSubject.asObservable();
+	}
+
+	public onDeletedMessage(): Observable<ChatMessage> {
+		return this.deletedMessageSubject.asObservable();
+	}
+
+	public onUserWriting(): Observable<ChatMessage> {
+		return this.userWritingSubject.asObservable();
 	}
 }

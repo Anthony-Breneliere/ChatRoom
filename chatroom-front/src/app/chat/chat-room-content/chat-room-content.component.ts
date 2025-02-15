@@ -1,5 +1,5 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
-import { debounceTime, fromEvent, map, Subscription, tap, } from 'rxjs';
+import { BehaviorSubject, debounceTime, fromEvent, map, of, Subscription, tap } from 'rxjs';
 import { Observable } from 'rxjs/internal/Observable';
 import { ChatMessage } from 'src/app/_common/models/chat-message.model';
 import { MessagingManagerService } from 'src/app/_common/services/messaging/messaging.manager.service';
@@ -15,12 +15,15 @@ import { CommonModule } from '@angular/common';
 })
 export class ChatRoomContentComponent {
 
-  @ViewChild('message-input') messageInput!: ElementRef;
+  @ViewChild('messageInput') messageInput!: ElementRef;
 
-  public messageHistory$: Observable<ChatMessage[]>
-  private _userIsWriting: boolean = false;
+  public messageHistory$: Observable<ChatMessage[]> = of([]);
 
-  private _userWriteSubscription!: Subscription;
+  public activeChatRoomId: string | null = null;
+
+  /* SUbscriptions  */
+  private _userWriteSubscription: Subscription | null = null;
+  private _chatRoomIdSubscription: Subscription | null = null;
 
 
 
@@ -29,45 +32,51 @@ export class ChatRoomContentComponent {
 
   constructor(chatManagerService: MessagingManagerService) {
     this._chatManagerService = chatManagerService;
-    this.messageHistory$ = this._chatManagerService.messageHistory$;
+    this.loadChatRoom();
+    this.messageHistory$ = this._chatManagerService.getMessagesHistory$();
   }
 
 
+  loadChatRoom() {
+    this._chatRoomIdSubscription = this._chatManagerService.getActiveChatRoomId$()
+      .subscribe(id => {
+        this.activeChatRoomId = id
+        console.log("chatContent - Active chatroom recieve : ", id);
+      });
 
-  ngOnInit(): void {
-    this._userWriteSubscription = fromEvent(this.messageInput.nativeElement, 'input').pipe(
-      debounceTime(1000),  // Attendre 1 seconde d'inactivité avant d'envoyer l'événement "UserWriting"
-      map((event: any) => event.target.value),
-      tap((text: string) => {
-        // Envoi du message "UserWriting" lorsqu'on commence à taper
-        if (text.trim()) {
-          console.log("Envoie du message qu'on est en train d'ecrire toutes les X secondes: ", text)
-
-          // Envoyer que l'utilisateur écrit
-        }
-      })
-    ).subscribe();
   }
+
 
 
   ngOnDestroy(): void {
     if (this._userWriteSubscription) {
       this._userWriteSubscription.unsubscribe();
     }
-  }
-
-  sendMessage() {
-    const message = this.messageInput.nativeElement.value.trim();
-    if (message) {
-      console.log("Envoi du message :", message)
-      this._chatManagerService.sendMessage(message);
-      this.messageInput.nativeElement.value = '';  // Effacer l'input après l'envoi du message
+    if (this._chatRoomIdSubscription) {
+      this._chatRoomIdSubscription.unsubscribe();
     }
   }
 
+  sendMessage() {
+    if (this.messageInput && this.messageInput.nativeElement) {
+      const message = this.messageInput.nativeElement.value.trim();
+      if (message) {
+        console.log("Envoi du message :", message);
+        this._chatManagerService.sendMessage(message);
+        this.messageInput.nativeElement.value = '';  // Effacer l'input après l'envoi du message
+      }
+    } else {
+      console.error("messageInput n'est pas défini.");
+    }
+  }
+
+  leaveChatRoom() {
+    this._chatManagerService.leaveChatRoom(this.activeChatRoomId ?? "");
+  }
+
   onKeyUp(event: KeyboardEvent) {
-    console.log("pressKey : ", event.key);
     if (event.key === 'Enter') {
+      console.log("pressKey :  ", event.key);
       this.sendMessage();
     }
   }
