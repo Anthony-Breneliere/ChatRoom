@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, input, model } from '@angular/core';
+import { Component, input, model, NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgIconComponent, provideIcons, provideNgIconsConfig } from '@ng-icons/core';
 import {

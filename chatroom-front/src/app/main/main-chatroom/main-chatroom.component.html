@@ -1,25 +1,20 @@
-<div>
-	<button class="rounded-lg bg-blue-700 text-white p-3 m-3" (click)="this.createRoom()">Créer salle</button>
-	<button class="rounded-lg bg-red-700 text-white p-3 m-3" (click)="this.leaveRoom()">Sortir de la salle</button>
-
-	<chat-label label="{{ this.room()?.id }}"></chat-label>
-	<div class="flex justify-between">
-		<ul>
-			@for (message of this.messages(); track message.id) {
-				<h2>{{ message.authorFullName }}</h2>
-				<p>{{ message.content }}</p>
+<div class="flex flex-col gap-4">
+		<form (submit)="this.createRoom($event)" class="flex justify-between items-center p-2 flex-1 gap-4 rounded-md border-2">
+			<h1>ChatRoom</h1>
+			<input [(ngModel)]="newRoomName" name="newRoomName" id="newRoomName" type="text" placeholder="Room name" class="border rounded-sm w-full p-2"/>
+			<button type="submit" class="rounded-lg bg-blue-700 text-white p-3 m-3">Créer salle</button>
+		</form>
+		<ul class="h-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 p-4 rounded-md border-2 overflow-scroll">
+			@for (room of this.rooms(); track room.id) {
+				<li>
+					<button class="w-full h-full rounded-md bg-gray-200 p-2" (click)="this.joinRoom(room.id)">Salle {{ room.name }}</button>
+				</li>
 			}
 		</ul>
-		<form (submit)="this.sendMessage()">
-			<input id="newMessageInput" name="messageContent" class="border m-2 h-8"/>
-		</form>
-	</div>
 
-	<ul>
-		@for (room of this.rooms(); track room.id) {
-			<li>
-				<button class="rounded-lg bg-green-700 p-2 m-2" (click)="this.joinRoom(room.id)">Join room: {{ room.id }}</button>
-			</li>
+	<ul class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 mt-4">
+		@for (room of this.joinedRooms(); track room.id) {
+			<app-chatroom [roomId]="room.id" [user]="this.user"></app-chatroom>
 		}
 	</ul>
 
