@@ -88,6 +88,14 @@ In a second terminal, type the following commands:
 
 ## Update to database previous version
 
+After having modified model classes, if you want to update the database with changes, use the following command
+
+```bash
+~$ cd ./ChatRoom.Repository
+~$ dotnet ef migrations add ChatRoomName -s ..\Chat.Startup\ 
+```
+The launch of the app will execute the migration.
+
 In the case the migration you have to rollback to is 20241224111800_OfferBatchUpdateAt:
 
 ```bash
