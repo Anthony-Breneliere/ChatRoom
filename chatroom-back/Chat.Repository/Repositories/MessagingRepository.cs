@@ -27,7 +27,8 @@ public sealed class MessagingRepository : IMessagingPersistance
         await _context.ChatMessages.Where(m => m.RoomId == roomId).AsNoTracking().ToArrayAsync(ct);
 
     /// <inheritdoc />
-    public IQueryable<ChatRoom> GetRooms() => _context.ChatRooms.AsNoTracking();
+    public IQueryable<ChatRoom> GetRooms() => _context.ChatRooms
+        .Include(static r => r.Participants).AsNoTracking();
 
     /// <inheritdoc />
     public IQueryable<ChatRoom> GetRoomsForCompany(Guid userId) =>
@@ -81,6 +82,45 @@ public sealed class MessagingRepository : IMessagingPersistance
     /// </summary>
     public async Task<ChatRoom?> GetChatRoomAsync(Guid roomId, CancellationToken ct)
     {
+        return await _context.ChatRooms
+            .Include(static r => r.Participants).FirstOrDefaultAsync(c => c.Id == roomId, ct);
+    }
+
+    /// <summary>
+    /// Add participant to chat room
+    /// </summary>
+    public async Task<ChatRoom?> AddParticipantAsync(Guid roomId,Guid participantId, CancellationToken ct)
+    {
+        User? participant = await _context.Users.FindAsync(participantId);
+        ChatRoom? chatRoom = await _context.ChatRooms.FindAsync(roomId);
+        if (chatRoom != null && participant != null)
+        {
+          chatRoom.Participants.Add(participant);
+          await _context.SaveChangesAsync(ct);
+        }
+
+        return await _context.ChatRooms
+            .Include(static r => r.Participants).FirstOrDefaultAsync(c => c.Id == roomId, ct);
+    }
+
+    /// <summary>
+    /// Remove participant from chat room
+    /// </summary>
+    public async Task<ChatRoom?> RemoveParticipantAsync(Guid roomId, Guid participantId, CancellationToken ct)
+    {
+        Console.WriteLine("RemoveParticipantAsync: Repository");
+        User? participant = await _context.Users.FindAsync(participantId);
+        ChatRoom? chatRoom = await _context.ChatRooms
+            .Include(static r => r.Participants).FirstOrDefaultAsync(c => c.Id == roomId, ct);
+        if (chatRoom != null && participant != null)
+        {
+            Console.WriteLine(chatRoom);
+            Console.WriteLine(chatRoom.Participants.Count);
+            Console.WriteLine(participant);
+            chatRoom.Participants.Remove(participant);
+            await _context.SaveChangesAsync(ct);
+        }
+
         return await _context.ChatRooms
             .Include(static r => r.Participants).FirstOrDefaultAsync(c => c.Id == roomId, ct);
     }

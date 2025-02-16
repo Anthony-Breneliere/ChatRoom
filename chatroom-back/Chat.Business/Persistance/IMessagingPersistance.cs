@@ -57,4 +57,20 @@ public interface IMessagingPersistance
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The chat message.</returns>
     Task<ChatMessage?> GetMessageAsync(Guid id, CancellationToken ct = default);
+
+    /// <summary>
+    /// Add a participant to a chat room.
+    /// </summary>
+    /// <param name="roomId">ID of the chat room.</param>
+    /// <param name="participantId">ID of the participant.</param>
+    /// <param name="ct">Cancellation token.</param>
+    Task<ChatRoom?> AddParticipantAsync(Guid roomId, Guid participantId, CancellationToken ct = default);
+
+    /// <summary>
+    /// Remove a participant from a chat room.
+    /// </summary>
+    /// <param name="roomId">ID of the chat room.</param>
+    /// <param name="participantId">ID of the participant.</param>
+    /// <param name="ct">Cancellation token.</param>
+    Task<ChatRoom?> RemoveParticipantAsync(Guid roomId, Guid participantId, CancellationToken ct = default);
 }

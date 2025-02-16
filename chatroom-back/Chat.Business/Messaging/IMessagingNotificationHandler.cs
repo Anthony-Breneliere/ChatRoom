@@ -1,3 +1,4 @@
+using Chat.Model;
 using Chat.Model.Messaging;
 
 namespace Chat.Business.Messaging;
@@ -30,4 +31,14 @@ public interface IMessagingNotificationHandler
     /// Notifies the client of a new room.
     /// </summary>
     public Task NotifyNewRoomAsync(ChatRoom chatRoom);
+
+    /// <summary>
+    /// Notifies the client of an updated room.
+    /// </summary>
+    public Task NotifyUpdatedRoomAsync(ChatRoom chatRoom);
+
+    /// <summary>
+    /// Notifies the client of a user writing.
+    /// </summary>
+    public Task NotifyUserWritingAsync(ChatRoom chatRoom, User user);
 }

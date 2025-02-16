@@ -1,4 +1,5 @@
 using Chat.ApiModel.Messaging;
+using ChatRoom.ApiModel;
 
 namespace Chat.Api.Hubs;
 
@@ -20,9 +21,19 @@ public interface IMessagingHubPush
     public Task EditedMessage(ChatMessageDto message);
 
     /// <summary>
-    /// Pushes an edited message to the client.
+    /// Pushes a new chat room to the client.
     /// </summary>
     public Task NewChatRoom(ChatRoomDto room);
+
+    /// <summary>
+    /// Pushes an edited chat room to the client.
+    /// </summary>
+    public Task EditedChatRoom(ChatRoomDto room);
+
+    /// <summary>
+    /// Pushes a user writing to the client.
+    /// </summary>
+    public Task UserWriting(ChatRoomDto room, UserDto user);
 
     /// <summary>
     /// Pushes a deleted message to the client.
@@ -68,4 +79,9 @@ public interface IMessagingHubInvoke
     /// Get chat room list
     /// </summary>
     Task<ChatRoomDto[]> ListChatRoom();
+
+    /// <summary>
+    /// Send user writing
+    /// </summary>
+    Task SendUserWriting(Guid roomId);
 }

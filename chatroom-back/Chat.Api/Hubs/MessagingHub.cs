@@ -7,6 +7,7 @@ using Chat.Business.Messaging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using ChatRoom.ApiModel;
 
 namespace Chat.Api.Hubs;
 
@@ -61,15 +62,11 @@ public sealed class MessagingHub : Hub<IMessagingHubPush>, IMessagingHubInvoke
     }
 
     /// <summary>
-    /// Gets the chat room from an offer.
+    /// List all chat rooms
     /// </summary>
     public async Task<ChatRoomDto[]> ListChatRoom()
     {
         var rooms = await _messagingService.GetRooms().ToListAsync();
-        if (rooms == null)
-        {
-            throw new ArgumentException("Offer not created");
-        }
 
         return _mapper.Map<ChatRoomDto[]>(rooms);
     }
@@ -80,7 +77,11 @@ public sealed class MessagingHub : Hub<IMessagingHubPush>, IMessagingHubInvoke
         if (await _messagingService.GetChatRoomAsync(roomId, Context.ConnectionAborted) is not { } room)
             throw new KeyNotFoundException("Chatroom not found.");
 
+        Model.Messaging.ChatRoom? updatedRoom = await _messagingService.AddParticipantAsync(roomId, NameIdentifier);
         await Groups.AddToGroupAsync(Context.ConnectionId, roomId.ToString());
+
+        if (updatedRoom != null)
+          await _messagingService.NotifyUpdatedRoom(updatedRoom);
 
         var messages = _messagingService.GetMessagesInRoom(roomId);
 
@@ -90,12 +91,24 @@ public sealed class MessagingHub : Hub<IMessagingHubPush>, IMessagingHubInvoke
     /// <inheritdoc />
     public async Task LeaveChatRoom(Guid roomId)
     {
+        Model.Messaging.ChatRoom? room = await _messagingService.RemoveParticipantAsync(roomId, NameIdentifier);
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId.ToString());
+
+        if (room == null)
+            return;
+
+        await _messagingService.NotifyUpdatedRoom(room);
     }
 
     /// <inheritdoc />
     public async Task SendMessage(string roomId, string message)
     {
         await _messagingService.SubmitMessageAsync(roomId, message, NameIdentifier);
+    }
+
+    /// <inheritdoc />
+    public async Task SendUserWriting(Guid roomId)
+    {
+        await _messagingService.SubmitUserWritingAsync(roomId, NameIdentifier);
     }
 }

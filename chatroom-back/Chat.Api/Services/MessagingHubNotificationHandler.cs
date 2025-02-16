@@ -4,6 +4,7 @@ using Chat.ApiModel.Messaging;
 using Chat.Business.Messaging;
 using Chat.Model.Messaging;
 using Microsoft.AspNetCore.SignalR;
+using ChatRoom.ApiModel;
 
 namespace Chat.Api.Services;
 
@@ -54,5 +55,21 @@ public sealed class MessagingHubNotificationHandler : IMessagingNotificationHand
     {
       ChatRoomDto dto = _mapper.Map<ChatRoomDto>(chatRoom);
       await _hubContext.Clients.All.NewChatRoom(dto);
+    }
+
+    /// <inheritdoc />
+    public async Task NotifyUpdatedRoomAsync(Model.Messaging.ChatRoom chatRoom)
+    {
+        ChatRoomDto dto = _mapper.Map<ChatRoomDto>(chatRoom);
+        await _hubContext.Clients.All.EditedChatRoom(dto);
+    }
+
+    /// <inheritdoc />
+    public async Task NotifyUserWritingAsync(Model.Messaging.ChatRoom chatRoom, Model.User user)
+    {
+        ChatRoomDto chatroomDto = _mapper.Map<ChatRoomDto>(chatRoom);
+        UserDto userDto = _mapper.Map<UserDto>(user);
+
+        await _hubContext.Clients.Group(chatRoom.Id.ToString()).UserWriting(chatroomDto, userDto);
     }
 }

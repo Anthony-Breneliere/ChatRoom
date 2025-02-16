@@ -130,6 +130,13 @@ public sealed class MessagingService
     }
 
     /// <summary>
+    /// Notify room
+    /// </summary>
+    public async Task NotifyUpdatedRoom(ChatRoom chatRoom){
+      await _notificationHandler.NotifyUpdatedRoomAsync(chatRoom);
+    }
+
+    /// <summary>
     /// Gets a specific chat room.
     /// </summary>
     /// <returns>The chat room.</returns>
@@ -144,4 +151,34 @@ public sealed class MessagingService
     /// <returns>The chat message.</returns>
     public async Task<ChatMessage?> GetMessageAsync(Guid id, CancellationToken ct = default) =>
         await _messagingPersistance.GetMessageAsync(id, ct);
+
+    /// <summary>
+    /// Add a participant to a chat room.
+    /// </summary>
+    public async Task<ChatRoom?> AddParticipantAsync(Guid roomId, string nameIdentifier, CancellationToken ct = default)
+    {
+        User user = await GetUserFromNameIdentifier(nameIdentifier);
+        return await _messagingPersistance.AddParticipantAsync(roomId, user.Id, ct);
+    }
+
+    /// <summary>
+    /// Remove a participant from a chat room.
+    /// </summary>
+    public async Task<ChatRoom?> RemoveParticipantAsync(Guid roomId, string nameIdentifier, CancellationToken ct = default)
+    {
+        User user = await GetUserFromNameIdentifier(nameIdentifier);
+        return await _messagingPersistance.RemoveParticipantAsync(roomId, user.Id, ct);
+    }
+
+    /// <summary>
+    /// Submit user writing
+    /// </summary>
+    public async Task SubmitUserWritingAsync(Guid roomId, string nameIdentifier, CancellationToken ct = default)
+    {
+        User user = await GetUserFromNameIdentifier(nameIdentifier);
+        ChatRoom chatRoom = await _messagingPersistance.GetChatRoomAsync(roomId, ct)
+            ?? throw new ArgumentException("Chatroom not found");
+
+        await _notificationHandler.NotifyUserWritingAsync(chatRoom, user);
+    }
 }
