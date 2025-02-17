@@ -79,6 +79,8 @@ public sealed class MessagingHub : Hub<IMessagingHubPush>, IMessagingHubInvoke
 
         var messages = _messagingService.GetMessagesInRoom(roomId);
 
+        await _messagingService.UserJoinRoom(roomId, NameIdentifier);
+
         return messages.Adapt<IEnumerable<ChatMessageDto>>(_mapper.Config);
     }
 
@@ -86,6 +88,8 @@ public sealed class MessagingHub : Hub<IMessagingHubPush>, IMessagingHubInvoke
     public async Task LeaveChatRoom(Guid roomId)
     {
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId.ToString());
+
+        await _messagingService.UserLeftRoom(roomId, NameIdentifier);
     }
 
     /// <inheritdoc />

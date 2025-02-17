@@ -5,6 +5,7 @@ import { ChatMessage } from 'src/app/_common/models/chat-message.model';
 import { MessagingManagerService } from 'src/app/_common/services/messaging/messaging.manager.service';
 import { MessagingService } from 'src/app/_common/services/messaging/messaging.service';
 import { CommonModule } from '@angular/common';
+import { User } from 'src/app/_common/models/user.model';
 
 @Component({
   selector: 'app-chat-room-content',
@@ -18,6 +19,8 @@ export class ChatRoomContentComponent {
   @ViewChild('messageInput') messageInput!: ElementRef;
 
   public messageHistory$: Observable<ChatMessage[]> = of([]);
+
+  public participants$: Observable<User[]> = of([]);
 
   public activeChatRoomId: string | null = null;
 
@@ -34,6 +37,7 @@ export class ChatRoomContentComponent {
     this._chatManagerService = chatManagerService;
     this.loadChatRoom();
     this.messageHistory$ = this._chatManagerService.getMessagesHistory$();
+    this.participants$ = this._chatManagerService?.getParticipants$();
   }
 
 
@@ -71,7 +75,9 @@ export class ChatRoomContentComponent {
   }
 
   leaveChatRoom() {
-    this._chatManagerService.leaveChatRoom(this.activeChatRoomId ?? "");
+    if (this.activeChatRoomId != null) {
+      this._chatManagerService.leaveChatRoom(this.activeChatRoomId);
+    }
   }
 
   onKeyUp(event: KeyboardEvent) {

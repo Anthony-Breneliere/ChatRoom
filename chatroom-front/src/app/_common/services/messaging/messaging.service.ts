@@ -15,6 +15,9 @@ export class MessagingService extends SignalRClientBase {
 	private deletedMessageSubject = new Subject<ChatMessage>();
 	private userWritingSubject = new Subject<ChatMessage>();
 
+	private createChatRoomSubject = new Subject<ChatRoom>();
+	private userJoinChatRoomSubject = new Subject<ChatRoom>();
+	private userLeaveChatRoomSubject = new Subject<ChatRoom>();
 
 	constructor() {
 		super(environment.API_URL + '/hub/messaging');
@@ -34,6 +37,24 @@ export class MessagingService extends SignalRClientBase {
 
 		this._hubConnection.on('UserWriting', (user: ChatMessage) => {
 			this.userWritingSubject.next(user)
+		});
+
+		this._hubConnection.on('CreateChatRoom', (chatRoom: ChatRoom) => {
+			this.createChatRoomSubject.next(chatRoom)
+		});
+
+
+
+		// Techniquement je sais pas si je suis censé envoyer (ducoup recevoir) toute la chatRoom pour
+		// éviter l'incohérence entre le front et le back.
+		// ou juste envoyer l'utilisateur pour alléger les données
+		// ou le mieux serait une vérification périodique
+		this._hubConnection.on('UserJoinChatRoom', (chatRoom: ChatRoom) => {
+			this.userJoinChatRoomSubject.next(chatRoom)
+		});
+
+		this._hubConnection.on('UserLeaveChatRoom', (chatRoom: ChatRoom) => {
+			this.userLeaveChatRoomSubject.next(chatRoom)
 		});
 	}
 
@@ -112,4 +133,20 @@ export class MessagingService extends SignalRClientBase {
 	public onUserWriting(): Observable<ChatMessage> {
 		return this.userWritingSubject.asObservable();
 	}
+
+	public onCreateChatRoom(): Observable<ChatRoom> {
+		return this.createChatRoomSubject.asObservable();
+	}
+
+
+	// questionnement sur l'efficatité plus haut ^ entre user et chatRoom pour l'allegement des données (par ex on a pas besoin de tout l'historique quand un utilsateur rejoins)
+
+	public onUserJoinChatRoom(): Observable<ChatRoom> {
+		return this.userJoinChatRoomSubject.asObservable();
+	}
+
+	public onUserLeaveChatRoom(): Observable<ChatRoom> {
+		return this.userLeaveChatRoomSubject.asObservable();
+	}
+
 }

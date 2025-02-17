@@ -118,10 +118,53 @@ public sealed class MessagingService
             Participants = participants.ToList()
         };
 
-        return await _messagingPersistance.CreateRoomAsync(chatRoom, ct);
+        ChatRoom chatRoomCreated = await _messagingPersistance.CreateRoomAsync(chatRoom, ct);
+
+        await _notificationHandler.NotifyNewChatRoomAsync(chatRoomCreated);
+
+        return chatRoomCreated;
+
     }
-    
-    
+
+    /// <summary>
+    ///  Notifie qu'un utilisateur a rejoins une chatRoom.
+    /// </summary>
+    /// <param name="roomId">ChatRoom id</param>
+    /// <param name="nameIdentifier">Identifiant de l'utilisateur</param>
+    /// <param name="ct">Jeton d'annulation</param>
+    /// <returns></returns>
+    public async Task UserJoinRoom(Guid roomId, string nameIdentifier, CancellationToken ct = default)
+    {
+        User user = await GetUserFromNameIdentifier(nameIdentifier);
+
+        //TODO Debug
+        ChatRoom? chatRoom = await  GetChatRoomAsync(roomId, ct);
+        if (chatRoom != null)
+        {
+            await _notificationHandler.NotifyUserJoinChatRoomAsync(chatRoom);
+        } else
+        {
+            Logger.LogError("Room not found : roomid {roomId}", roomId);
+        }
+
+    }
+
+
+    /// <summary>
+    ///  Notifie qu'un utilisateur a quitté une chatRoom.
+    /// </summary>
+    /// <param name="roomId">ChatRoom id</param>
+    /// <param name="nameIdentifier">Identifiant de l'utilisateur</param>
+    /// <param name="ct">Jeton d'annulation</param>
+    /// <returns></returns>
+    public async Task UserLeftRoom(Guid roomId, string nameIdentifier, CancellationToken ct = default)
+    {
+        User user = await GetUserFromNameIdentifier(nameIdentifier);
+        //await _notificationHandler.NotifyUserLeftChatRoomAsync(roomId, user);
+    }
+
+
+
     /// <summary>
     /// Gets a specific chat room.
     /// </summary>

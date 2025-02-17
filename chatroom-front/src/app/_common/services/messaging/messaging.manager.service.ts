@@ -29,6 +29,7 @@ export class MessagingManagerService {
 
 
     private subscribeToHub() {
+        this.messagingService.onCreateChatRoom().subscribe(chatRoom => this.handleCreateChatRoom(chatRoom));
         this.messagingService.onNewMessage().subscribe(message => this.handleNewMessage(message));
     }
 
@@ -118,7 +119,6 @@ export class MessagingManagerService {
     /* Gestion de la réception des messages  */
     private handleNewMessage(message: ChatMessage) {
         const currentMessages = this.messages$.getValue();
-        console.log("Joined rooms", this.joinedChatRooms$)
         this.messages$.next([...currentMessages, message]);
     }
 
@@ -134,6 +134,18 @@ export class MessagingManagerService {
     //     this.messages$.next(updatedMessages);
     // }
 
+    private handleCreateChatRoom(chatRoom: ChatRoom) {
+        const allChatRoom = this.allChatRooms$.getValue();
+        this.allChatRooms$.next([...allChatRoom, chatRoom]);
+    }
+
+    private handleUserJoinChatRoom() {
+
+    }
+
+    private handleUserLeaveChatRoom() {
+
+    }
 
     /* Gestion de l'envoie des messages */
 
