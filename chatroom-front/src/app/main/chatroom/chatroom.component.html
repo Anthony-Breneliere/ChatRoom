@@ -1,53 +1,55 @@
 @if (this.room()) {
-	<div class="rounded-md border-2 p-4">
-		<header class="flex justify-between text-3xl gap-2 h-10 relative">
-			<h2 class="font-bold text-gray-900 overflow-ellipsis w-full overflow-hidden">{{ this.room()!.name }}</h2>
-			<div (click)="this.openChatroom()" class="hover:cursor-pointer">[{{ this.open ? '-' : '+' }}]</div>
-			<div (click)="this.leaveRoom()" class="hover:cursor-pointer">[x]</div>
-		</header>
-		<main [ngClass]="this.open ? 'flex' : 'hidden'" class="flex-col gap-4">
-			<section id="participants">
+<div class="rounded-md border-2 p-4">
+	<header class="flex justify-between text-3xl gap-2 h-10 relative">
+		<h2 class="font-bold text-gray-900 overflow-ellipsis w-full overflow-hidden">{{ this.room()!.name }}</h2>
+		<div (click)="this.openChatroom()" class="hover:cursor-pointer">[{{ this.open ? '-' : '+' }}]</div>
+		<div (click)="this.leaveRoom()" class="hover:cursor-pointer">[x]</div>
+	</header>
+	<main [ngClass]="this.open ? 'flex' : 'hidden'" class="flex-col gap-4">
+		<section id="{{ this.roomId }}-participants">
 			<div class="border-b-2 text-right text-xl pb-2">Participants: {{ this.room()!.participants.length }}</div>
 			<ul class="flex flex-col gap-4">
 				@for (participant of this.room()!.participants; track participant.id) {
-					<li class="flex gap-4">
-						<p>{{ participant.firstName }} {{ participant.lastName }}</p>
-					</li>
+				<li class="flex gap-4">
+					<p>{{ participant.firstName }} {{ participant.lastName }}</p>
+				</li>
 				}
 			</ul>
-			</section>
-			<div class="border-b-2 text-right text-xl pb-2">Messages: {{ this.room()!.messages.length }}</div>
-			<section id="messages">
-				<ul class="flex flex-col gap-4">
-					@for (message of this.room()!.messages; track message.id) {
-						@if (message.authorId === this.user()?.id) {
-							<li class="flex flex-row gap-4 justify-start">
-								<chat-label label="{{ message.content }}"></chat-label>
-							</li>
-						}
-						@else {
-							<li class="flex flex-col gap-1 items-end">
-								<p class="text-sm">{{ message.authorFullName }} at {{ message.createdAt | date:'short' }}: </p>
-								<chat-label label="{{ message.content }}"></chat-label>
-							</li>
-						}
-					}
-				</ul>
-			</section>
-			<section id="new-message-form">
-				<form (submit)="this.sendMessage($event)">
-					<input [(ngModel)]="newMessageContent" name="newMessageContent" id="new-message-input" class="text-wrap rounded bg-slate-100 border-2 w-full"/>
-				</form>
-			</section>
-			<section id="user-writing" class="flex flex-row gap-2 items-center">
-				@if (this.room()?.userWriting) {
-					<chat-svg-icon icon="spinner"></chat-svg-icon>
-					@if (this.room()?.userWriting?.id != this.user()?.id) {
-						<p>{{ this.room()?.userWriting!.firstName }} {{ this.room()?.userWriting!.lastName }}</p>
-					}
-				}
-			</section>
-		</main>
-
-	</div>
+		</section>
+		<div class="border-b-2 text-right text-xl pb-2">Messages: {{ this.room()!.messages.length }}</div>
+		<section id="{{ this.roomId }}-messages">
+			<ul class="flex flex-col gap-4 max-h-60 overflow-y-scroll">
+				@for (message of this.room()!.messages; track message.id) { @if (message.authorId === this.user()?.id) {
+				<li class="flex flex-col gap-1 items-start">
+					<p class="text-xs">Moi - {{ message.createdAt | date : 'short' }}:</p>
+					<chat-label label="{{ message.content }}"></chat-label>
+				</li>
+				} @else {
+				<li class="flex flex-col gap-1 items-end">
+					<p class="text-xs">{{ message.authorFullName }} - {{ message.createdAt | date : 'short' }}:</p>
+					<chat-label label="{{ message.content }}"></chat-label>
+				</li>
+				} }
+			</ul>
+		</section>
+		<section id="{{ this.roomId }}-new-message-form">
+			<form (submit)="this.sendMessage($event)">
+				<input
+					[(ngModel)]="newMessageContent"
+					name="newMessageContent"
+					id="{{ this.roomId }}-new-message-input"
+					class="text-wrap rounded bg-slate-100 border-2 w-full"
+				/>
+			</form>
+		</section>
+		<section id="{{ this.roomId }}-user-writing" class="flex flex-row gap-2 items-center">
+			@if (this.room()?.userWriting && this.room()?.userWriting?.id != this.user()?.id) {
+			<chat-svg-icon icon="spinner"></chat-svg-icon>
+			<p class="text-sm">
+				{{ (this.room()?.userWriting)!.firstName }} {{ (this.room()?.userWriting)!.lastName }} est en train d'écrire...
+			</p>
+			}
+		</section>
+	</main>
+</div>
 }

@@ -41,7 +41,7 @@ export const routes: Routes = [
 			{
 				path: SITEMAP.dashboard.path,
 				canActivate: [isAuthenticatedGuard],
-				component: MainDashboardComponent,
+				component: MainChatroomComponent,
 			},
 			{
 				path: SITEMAP.chatroom.path,

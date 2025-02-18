@@ -1,63 +1,51 @@
 import { Component, Input, Signal, computed } from '@angular/core';
-import { ChatRoom } from 'src/app/_common/models/chat-room.model';
-import { ChatLabelComponent } from "../../_common/components/chat-label/chat-label.component";
-import { ChatSvgIconComponent } from "../../_common/components/chat-svg-icon/chat-svg-icon.component";
+import { ChatLabelComponent } from '../../_common/components/chat-label/chat-label.component';
+import { ChatSvgIconComponent } from '../../_common/components/chat-svg-icon/chat-svg-icon.component';
 import { MessagingService } from 'src/app/_common/services/messaging/messaging.service';
 import { FormsModule } from '@angular/forms';
-import { debounceTime, distinct, distinctUntilChanged, fromEvent, switchMap, throttleTime } from 'rxjs';
+import { distinctUntilChanged, fromEvent, throttleTime } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { User } from 'src/app/_common/models/user.model';
 
-
-@Component({	selector: 'app-chatroom',
+@Component({
+	selector: 'app-chatroom',
 	standalone: true,
-	imports: [
-    ChatLabelComponent,
-    ChatSvgIconComponent,
-		FormsModule,
-		CommonModule
-],
+	imports: [ChatLabelComponent, ChatSvgIconComponent, FormsModule, CommonModule],
 	templateUrl: './chatroom.component.html',
 })
-
 export class ChatroomComponent {
-	@Input() roomId! : string
-	@Input() user!: Signal<User | null>
+	@Input() roomId!: string;
+	@Input() user!: Signal<User | null>;
 
-	room = computed(() => this.messagingService.joinedRooms().find(room => room.id === this.roomId))
+	room = computed(() => this.messagingService.joinedRooms().find(room => room.id === this.roomId));
 
-	newMessageContent = ""
-	open = false
+	newMessageContent = '';
+	open = true;
 
-	constructor ( private messagingService: MessagingService) {}
+	constructor(private messagingService: MessagingService) {}
 
 	ngAfterViewInit() {
-    const textInput = document.getElementById("new-message-textarea") as HTMLInputElement;
-
-		fromEvent(textInput, 'input').pipe(
-      throttleTime(1000),
-      distinctUntilChanged(),
-    ).subscribe(
-			(event) => {
-        this.messagingService.sendUserWriting(this.room()!.id)
-      }
-    )
-  }
+		const textInput = document.getElementById(this.roomId + '-new-message-input') as HTMLInputElement;
+		fromEvent(textInput, 'input')
+			.pipe(throttleTime(1000), distinctUntilChanged())
+			.subscribe(event => {
+				this.messagingService.sendUserWriting(this.room()!.id);
+			});
+	}
 
 	async leaveRoom() {
 		if (this.room()) {
-			await this.messagingService.leaveChatRoom(this.room()!.id)
+			await this.messagingService.leaveChatRoom(this.room()!.id);
 		}
 	}
 
-	async sendMessage(event : Event) {
-		event?.preventDefault()
-		if (this.room())
-			this.messagingService.sendMessage(this.room()!.id, this.newMessageContent)
-		this.newMessageContent = ""
+	async sendMessage(event: Event) {
+		event?.preventDefault();
+		if (this.room()) this.messagingService.sendMessage(this.room()!.id, this.newMessageContent);
+		this.newMessageContent = '';
 	}
 
 	openChatroom() {
-		this.open = !this.open
+		this.open = !this.open;
 	}
 }

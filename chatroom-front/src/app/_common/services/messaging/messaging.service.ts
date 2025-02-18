@@ -9,48 +9,33 @@ import { User } from '../../models/user.model';
 	providedIn: 'root',
 })
 export class MessagingService extends SignalRClientBase {
-	messages = signal<ChatMessage[]>([])
-	rooms = signal<ChatRoom[]>([])
-	joinedRooms = signal<ChatRoom[]>([])
+	messages = signal<ChatMessage[]>([]);
+	rooms = signal<ChatRoom[]>([]);
+	joinedRooms = signal<ChatRoom[]>([]);
 
 	constructor() {
 		super(environment.API_URL + '/hub/messaging');
 
 		// Handle messaging events
 		this._hubConnection.on('NewMessage', (message: ChatMessage) => {
-			console.log('New message received:', message);
 			this.handleReceivedMessage(message);
 		});
 
-		this._hubConnection.on('EditedMessage', (message: ChatMessage) => {
-		});
+		this._hubConnection.on('EditedMessage', (message: ChatMessage) => {});
 
-		this._hubConnection.on('DeletedMessage', (message: ChatMessage) => {
-		});
+		this._hubConnection.on('DeletedMessage', (message: ChatMessage) => {});
 
 		this._hubConnection.on('NewChatRoom', (newRoom: ChatRoom) => {
-			console.log("new room")
-			console.log(newRoom)
-			this.rooms.update(old => [...old, newRoom])
+			this.rooms.update(old => [...old, newRoom]);
 		});
 
 		this._hubConnection.on('EditedChatRoom', (newRoom: ChatRoom) => {
-			console.log("edited room")
-			console.log(newRoom)
-			const oldRoom = this.rooms().find(room => room.id === newRoom.id)
-			if (oldRoom) {
-				oldRoom.participants = newRoom.participants
-			}
+			this.updateRoomParticipants(newRoom);
 		});
 
 		this._hubConnection.on('UserWriting', (room: ChatRoom, user: User) => {
-			this.handleReceivedUserWriting(room, user)
+			this.handleReceivedUserWriting(room, user);
 		});
-
-		this._hubConnection.on('UserWriting', (user: User, room: ChatRoom) => {
-		});
-
-		this.listChatRoom().then((res) => this.rooms.set(res))
 	}
 
 	/**
@@ -67,7 +52,7 @@ export class MessagingService extends SignalRClientBase {
 	/**
 	 * Create a new chat room
 	 */
-	public async createChatRoom( name: string ): Promise<ChatRoom> {
+	public async createChatRoom(name: string): Promise<ChatRoom> {
 		await this.getConnectionPromise;
 
 		return await this._hubConnection.invoke<ChatRoom>('CreateChatRoom', name);
@@ -81,17 +66,16 @@ export class MessagingService extends SignalRClientBase {
 			return;
 		}
 
-		console.log('Joining room: ', roomId);
 		await this.getConnectionPromise;
 
 		const chatHistory = await this._hubConnection.invoke<ChatMessage[]>('JoinChatRoom', roomId);
-		const joinedRoom = this.rooms().find(room => room.id === roomId)!
+		const joinedRoom = this.rooms().find(room => room.id === roomId)!;
 		if (!joinedRoom) {
-			throw new Error(`Room ${roomId} not found`)
+			throw new Error(`Room ${roomId} not found`);
 		}
 
-		joinedRoom.messages = chatHistory
-		this.joinedRooms.set([...this.joinedRooms(), joinedRoom])
+		joinedRoom.messages = chatHistory;
+		this.joinedRooms.set([...this.joinedRooms(), joinedRoom]);
 	}
 
 	/**
@@ -101,7 +85,7 @@ export class MessagingService extends SignalRClientBase {
 		await this.getConnectionPromise;
 
 		await this._hubConnection.invoke('LeaveChatRoom', roomId);
-		this.joinedRooms.set(this.joinedRooms().filter(room => room.id !== roomId))
+		this.joinedRooms.set(this.joinedRooms().filter(room => room.id !== roomId));
 	}
 
 	/**
@@ -113,6 +97,9 @@ export class MessagingService extends SignalRClientBase {
 		await this._hubConnection.invoke('SendMessage', roomId, message);
 	}
 
+	/**
+	 * Send user writing to the chat room
+	 */
 	public async sendUserWriting(roomId: string): Promise<any> {
 		await this.getConnectionPromise;
 
@@ -128,21 +115,40 @@ export class MessagingService extends SignalRClientBase {
 		return await this._hubConnection.invoke<ChatRoom[]>('ListChatRoom');
 	}
 
+	/**
+	 * Initialize chat rooms based on the list of chat rooms received from the server
+	 */
+	public async initializeChatRooms(user: User) {
+		const chatRooms = await this.listChatRoom();
+		this.rooms.set(chatRooms);
+		chatRooms.forEach(chatRoom => {
+			if (chatRoom.participants.find(participant => participant.id === user.id)) {
+				this.leaveChatRoom(chatRoom.id);
+			}
+		});
+	}
+
 	private async handleReceivedMessage(message: ChatMessage) {
-		console.log(message)
-		const concernedRoom = this.joinedRooms().find(room => room.id === message.roomId)
+		const concernedRoom = this.joinedRooms().find(room => room.id === message.roomId);
 		if (concernedRoom) {
-			concernedRoom.messages.push(message)
+			concernedRoom.messages.push(message);
 		}
 	}
 
 	private async handleReceivedUserWriting(chatRoom: ChatRoom, user: User) {
-		const concernedRoom = this.joinedRooms().find(room => room.id === chatRoom.id)
+		const concernedRoom = this.joinedRooms().find(room => room.id === chatRoom.id);
 		if (concernedRoom) {
-			concernedRoom.userWriting = user
+			concernedRoom.userWriting = user;
 			setTimeout(() => {
-				concernedRoom.userWriting = undefined
+				concernedRoom.userWriting = undefined;
 			}, 1000);
+		}
+	}
+
+	private async updateRoomParticipants(newRoom: ChatRoom) {
+		const oldRoom = this.rooms().find(room => room.id === newRoom.id);
+		if (oldRoom) {
+			oldRoom.participants = newRoom.participants;
 		}
 	}
 }
