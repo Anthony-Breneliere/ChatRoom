@@ -19,7 +19,7 @@
       - POSTGRES_PASSWORD=myverysecurepassword
     shm_size: 128mb
     ports:
-      - "5433:5432"
+      - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
 

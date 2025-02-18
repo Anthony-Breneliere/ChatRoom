@@ -41,7 +41,7 @@ public sealed class MessagingRepository : IMessagingPersistance
         (from message in _context.ChatMessages
         where message.RoomId == roomId
         orderby message.CreatedAt
-        select message).AsNoTracking().ToArray();
+        select message).Include(static m => m.Author).AsNoTracking().ToArray();
 
     /// <inheritdoc />
     public async Task SubmitMessageAsync(ChatMessage message, CancellationToken ct = default)
@@ -108,15 +108,11 @@ public sealed class MessagingRepository : IMessagingPersistance
     /// </summary>
     public async Task<ChatRoom?> RemoveParticipantAsync(Guid roomId, Guid participantId, CancellationToken ct)
     {
-        Console.WriteLine("RemoveParticipantAsync: Repository");
         User? participant = await _context.Users.FindAsync(participantId);
         ChatRoom? chatRoom = await _context.ChatRooms
             .Include(static r => r.Participants).FirstOrDefaultAsync(c => c.Id == roomId, ct);
         if (chatRoom != null && participant != null)
         {
-            Console.WriteLine(chatRoom);
-            Console.WriteLine(chatRoom.Participants.Count);
-            Console.WriteLine(participant);
             chatRoom.Participants.Remove(participant);
             await _context.SaveChangesAsync(ct);
         }
