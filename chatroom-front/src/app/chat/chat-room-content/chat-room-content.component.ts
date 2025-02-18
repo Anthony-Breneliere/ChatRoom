@@ -36,7 +36,7 @@ export class ChatRoomContentComponent {
   constructor(chatManagerService: MessagingManagerService) {
     this._chatManagerService = chatManagerService;
     this.loadChatRoom();
-    this.messageHistory$ = this._chatManagerService.getMessagesHistory$();
+    this.messageHistory$ = this._chatManagerService.getMessagesHistoryOfCurrentChatRoom$();
     this.participants$ = this._chatManagerService?.getParticipants$();
   }
 
