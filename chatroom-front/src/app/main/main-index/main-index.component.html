@@ -15,16 +15,20 @@
 				} @empty {
 					<li>Aucune salle de discussion</li>
 				}
-				<div class="mt-10 flex items-center justify-center gap-x-6">
-					<div class="card">
-						<div class="card-body">
-							<div class="input-group mb-3">
-								<div class="input-group-prepend">
-									<span class="input-group-text" id="inputGroup-sizing-default">Nom de la salle</span>
+				<div class="row">
+					<div class="col-12">
+						<div class="mt-10 flex items-center justify-center gap-x-6">
+							<div class="card">
+								<div class="card-body">
+									<div class="input-group mb-3">
+										<div class="input-group-prepend">
+											<span class="input-group-text" id="inputGroup-sizing-default">Nom de la salle</span>
+										</div>
+										<input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" name="name" id="newName" [(ngModel)]="newChatroomName">
+									</div>
+									<button class="btn btn-primary" (click)="createChatRoom()" [disabled]="newChatroomName == ''">Create chat room</button>
 								</div>
-								<input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" name="name" id="newName" [(ngModel)]="newChatroomName">
 							</div>
-							<button class="btn btn-primary" (click)="createChatRoom()" [disabled]="newChatroomName == ''">Create chat room</button>
 						</div>
 					</div>
 				</div>
