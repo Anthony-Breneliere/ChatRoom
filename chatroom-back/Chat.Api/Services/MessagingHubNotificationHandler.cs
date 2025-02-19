@@ -60,10 +60,10 @@ public sealed class MessagingHubNotificationHandler : IMessagingNotificationHand
     }
 
     /// <inheritdoc />
-    public async Task NotifyUserJoinChatRoomAsync(Model.Messaging.ChatRoom chatRoom)
+    public async Task NotifyUserJoinChatRoomAsync(Guid chatRoomId, User user)
     {
-        ChatRoomDto chatRoomDto = _mapper.Map<ChatRoomDto>(chatRoom);
-        await _hubContext.Clients.Group(chatRoom.Id.ToString()).UserJoinChatRoom(chatRoomDto);
+        UserDto userDto = _mapper.Map<UserDto>(user);
+        await _hubContext.Clients.Group(chatRoomId.ToString()).UserJoinChatRoom(chatRoomId.ToString(), userDto);
     }
 
     /// <inheritdoc />

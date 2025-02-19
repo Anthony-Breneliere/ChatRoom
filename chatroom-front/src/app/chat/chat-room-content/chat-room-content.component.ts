@@ -18,7 +18,7 @@ export class ChatRoomContentComponent {
 
   @ViewChild('messageInput') messageInput!: ElementRef;
 
-  public messageHistory$: Observable<ChatMessage[]> = of([]);
+  public messageHistory: ChatMessage[] = [];
 
   public participants$: Observable<User[]> = of([]);
 
@@ -27,6 +27,7 @@ export class ChatRoomContentComponent {
   /* SUbscriptions  */
   private _userWriteSubscription: Subscription | null = null;
   private _chatRoomIdSubscription: Subscription | null = null;
+  private _chatRoomMessageHistory: Subscription | null = null;
 
 
 
@@ -36,8 +37,7 @@ export class ChatRoomContentComponent {
   constructor(chatManagerService: MessagingManagerService) {
     this._chatManagerService = chatManagerService;
     this.loadChatRoom();
-    this.messageHistory$ = this._chatManagerService.getMessagesHistoryOfCurrentChatRoom$();
-    this.participants$ = this._chatManagerService?.getParticipants$();
+    this.participants$ = this._chatManagerService.getParticipants$();
   }
 
 
@@ -45,9 +45,14 @@ export class ChatRoomContentComponent {
     this._chatRoomIdSubscription = this._chatManagerService.getActiveChatRoomId$()
       .subscribe(id => {
         this.activeChatRoomId = id
-        console.log("chatContent - Active chatroom recieve : ", id);
+        //console.log("chatContent - Active chatroom recieve : ", id);
       });
 
+    this._chatRoomMessageHistory = this._chatManagerService.getMessagesHistoryOfCurrentChatRoom$()
+      .subscribe(history => {
+        this.messageHistory = history
+        //console.log("chatContent - Réception de l'historique : ", history);
+      })
   }
 
 
@@ -61,12 +66,12 @@ export class ChatRoomContentComponent {
     }
   }
 
-  sendMessage() {
+  public async sendMessage() {
     if (this.messageInput && this.messageInput.nativeElement) {
       const message = this.messageInput.nativeElement.value.trim();
       if (message) {
         console.log("Envoi du message :", message);
-        this._chatManagerService.sendMessage(message);
+        await this._chatManagerService.sendMessage(message);
         this.messageInput.nativeElement.value = '';  // Effacer l'input après l'envoi du message
       }
     } else {
@@ -80,10 +85,10 @@ export class ChatRoomContentComponent {
     }
   }
 
-  onKeyUp(event: KeyboardEvent) {
+  async onKeyUp(event: KeyboardEvent) {
     if (event.key === 'Enter') {
       console.log("pressKey :  ", event.key);
-      this.sendMessage();
+      await this.sendMessage();
     }
   }
 

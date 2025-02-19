@@ -1,10 +1,11 @@
-import { Injectable } from "@angular/core";
+import { computed, inject, Injectable } from "@angular/core";
 import { MessagingService } from "./messaging.service";
 import { ChatRoom } from "../../models/chat-room.model";
-import { BehaviorSubject, map, Observable, of } from "rxjs";
+import { BehaviorSubject, map, Observable, of, tap } from "rxjs";
 import { ChatMessage } from "../../models/chat-message.model";
 import { subscribe } from "diagnostics_channel";
 import { User } from "../../models/user.model";
+import { AccountService } from "../account/account.service";
 
 @Injectable({
     providedIn: 'root',
@@ -23,9 +24,11 @@ export class MessagingManagerService {
     private messagesHistoryByChatRoom$ = new BehaviorSubject<Map<string, ChatMessage[]>>(new Map());
     private participants$ = new BehaviorSubject<User[]>([]); // Messages du chat actif
 
+    private readonly _accountService = inject(AccountService);
+    public readonly user = computed<User | null>(this._accountService.user);
 
 
-    constructor(private messagingService: MessagingService) {
+    constructor(private messagingService: MessagingService,) {
         this.subscribeToHub();
     }
 
@@ -33,7 +36,7 @@ export class MessagingManagerService {
     private subscribeToHub() {
         this.messagingService.onCreateChatRoom().subscribe(chatRoom => this.handleCreateChatRoom(chatRoom));
         this.messagingService.onNewMessage().subscribe(message => this.handleNewMessage(message));
-        this.messagingService.onUserJoinChatRoom().subscribe(chatRoom => this.handleUserJoinChatRoom(chatRoom));
+        this.messagingService.onUserJoinChatRoom().subscribe((joinedObj) => this.handleUserJoinChatRoom(joinedObj.chatRoomId, joinedObj.user));
         this.messagingService.onUserLeaveChatRoom().subscribe(chatRoom => this.handleUserLeaveChatRoom(chatRoom));
     }
 
@@ -41,10 +44,9 @@ export class MessagingManagerService {
     async createNewChatRoom(): Promise<void> {
 
         await this.messagingService.createChatRoom()
-            .then(async chatRoom => {
-                this.allChatRooms$
-                await this.joinChatRoom(chatRoom.id);
-                console.log("Normalement la room est affichée")
+            .then(chatRoom => {
+                this.addRoomToJoinedRoom(chatRoom.id);
+                this.activeChatRoomId$.next(chatRoom.id);
             })
             .catch(error => {
                 console.log("erreur lors de la creation du chat:", error)
@@ -55,6 +57,7 @@ export class MessagingManagerService {
     /* Récupère toutes les salles disponibles */
     async loadAllChatRooms(): Promise<void> {
         const chatRooms = await this.messagingService.getAllChatRooms();
+        console.log("Load all ChatRooms : ", chatRooms)
         this.allChatRooms$.next(chatRooms);
     }
 
@@ -62,36 +65,49 @@ export class MessagingManagerService {
     async joinChatRoom(roomId: string): Promise<void> {
         if (this.activeChatRoomId$.value === roomId) return;
 
-        await this.messagingService.joinChatRoom(roomId)
-            .then(chatMessage => {
-                this.addRoomToJoinedRoom(roomId);
-                this.updateMessageHistory(roomId, chatMessage);
-                this.activeChatRoomId$.next(roomId);
-            })
-            .catch((error) => {
-                console.log("Impossible de rejoindre la room, une erreur est survenue :", error.message)
-                // TODO notification la salle est innacessible, fermé lorsque le dernier utilateur a quitter la room ?
-                return;
-            });
-
-
+        if (this.joinedChatRooms$.getValue().some(r => r.id == roomId)) {
+            this.setJoinedRoomToCurrentChatRoom(roomId);
+        } else if (this.allChatRooms$.getValue().some(r => r.id == roomId)) {
+            this.addRoomToJoinedRoom(roomId);
+            this.setJoinedRoomToCurrentChatRoom(roomId);
+        } else {
+            await this.messagingService.joinChatRoom(roomId)
+                .then(chatMessage => {
+                    this.addRoomToJoinedRoom(roomId);
+                    this.updateMessageHistory(roomId, chatMessage);
+                    this.activeChatRoomId$.next(roomId);
+                })
+                .catch((error) => {
+                    console.log("Impossible de rejoindre la room, une erreur est survenue :", error.message)
+                    // TODO notification la salle est innacessible, fermé lorsque le dernier utilateur a quitter la room ?
+                    return;
+                });
+        }
     }
+
 
     /** Quitte une salle */
     async leaveChatRoom(roomId: string): Promise<void> {
         await this.messagingService.leaveChatRoom(roomId)
             .then(_ => {
                 if (this.activeChatRoomId$.getValue() === roomId) {
-                    this.removeChatRoom(roomId);
+                    this.removeChatRoomFromJoinedRooms(roomId);
                     this.loadFirstChatRoomAvailable();
+                } else {
+                    this.removeChatRoomFromJoinedRooms(roomId);
                 }
 
-                this.removeChatRoom(roomId);
-
-                console.log("chat rooms apres avoir cquitter :", this.joinedChatRooms$)
+            }).catch(error => {
+                console.log("Une erreur est survenue pour quitter la salle : ", error)
+                // TODO notification
             });
+    }
 
-
+    // Met une chatRoom rejointe en "active"
+    public setJoinedRoomToCurrentChatRoom(roomId: string) {
+        if (this.joinedChatRooms$.getValue().some(r => r.id == roomId)) {
+            this.activeChatRoomId$.next(roomId);
+        }
     }
 
 
@@ -114,6 +130,8 @@ export class MessagingManagerService {
     // Récupère les messages du chat Room
     public getMessagesHistoryOfCurrentChatRoom$(): Observable<ChatMessage[]> {
         return this.messagesHistoryByChatRoom$.pipe(
+            //tap(() => { console.log("Room joined : ", this.joinedChatRooms$.getValue()) }),
+            //tap(() => { console.log("Historique des room joined : ", this.activeChatRoomId$.getValue()) }),
             map(messagesMap => messagesMap.get(this.activeChatRoomId$.getValue() ?? " ") || [])
         );
     }
@@ -125,6 +143,8 @@ export class MessagingManagerService {
 
     /* Gestion de la réception des messages  */
     private handleNewMessage(message: ChatMessage) {
+        console.log("Notif nouveau message", message.roomId)
+
         this.addMessageToChatRoom(message.roomId, message);
     }
 
@@ -141,8 +161,7 @@ export class MessagingManagerService {
     // }
 
     private handleCreateChatRoom(chatRoom: ChatRoom) {
-        const allChatRoom = this.allChatRooms$.getValue();
-        this.allChatRooms$.next([...allChatRoom, chatRoom]);
+        this.addNewRoomToAllAvailableRoom(chatRoom);
     }
 
 
@@ -155,9 +174,25 @@ export class MessagingManagerService {
             : room
         );
     */
-    private handleUserJoinChatRoom(chatRoom: ChatRoom) {
-        this.updateChatRooms(chatRoom);
-        // TODO notification user join
+    private handleUserJoinChatRoom(chatRoomId: string, user: User) {
+        const joinedRooms = this.joinedChatRooms$.getValue();
+        const chatRoom = joinedRooms.find(r => r.id === chatRoomId);
+        if (chatRoom) {
+            const userAlreadyAdded = chatRoom.participants.some(u => u.id === user.id);
+            if (!userAlreadyAdded) {
+                const updatedRooms = joinedRooms.map(room =>
+                    room.id === chatRoomId
+                        ? { ...room, participants: [...room.participants, user] }
+                        : room
+                );
+
+                this.joinedChatRooms$.next(updatedRooms);
+            }
+        } else {
+            console.log("Données incohérentes : la chatRoom n'existe pas dans la liste des rooms rejointes.");
+        }
+
+
     }
     private handleUserLeaveChatRoom(chatRoom: ChatRoom) {
         this.updateChatRooms(chatRoom);
@@ -182,12 +217,15 @@ export class MessagingManagerService {
 
     /* Gestion des messages */
 
-    public sendMessage(message: string) {
+    public async sendMessage(message: string) {
+        console.log("envoie du message pour la room active :", this.activeChatRoomId$.value ?? "null")
         if (this.activeChatRoomId$.value == null) return;
         try {
-            this.messagingService.sendMessage(this.activeChatRoomId$.value, message)
+            console.log("Send message manager")
+            await this.messagingService.sendMessage(this.activeChatRoomId$.value, message)
         } catch (error) {
             // TODO notification message d'erreur
+            console.log("Erreur lors de l'envoie du message :", message)
         }
     }
 
@@ -201,6 +239,11 @@ export class MessagingManagerService {
     }
 
 
+    private addNewRoomToAllAvailableRoom(chatRoom: ChatRoom) {
+        const allRooms = this.allChatRooms$.getValue();
+        this.allChatRooms$.next([...allRooms, chatRoom]);
+    }
+
     // Ajouter la salle à la liste des salles rejointes si pas encore dedans
     private addRoomToJoinedRoom(roomId: string) {
         const allRooms = this.allChatRooms$.getValue();
@@ -208,7 +251,6 @@ export class MessagingManagerService {
         if (room) {
             const joinedRooms = this.joinedChatRooms$.getValue();
             if (!joinedRooms.some(r => r.id === roomId)) {
-                console.log("je rejoins la room");
                 this.joinedChatRooms$.next([...joinedRooms, room]);
             } else console.log("La salle est déjà présente dans la liste des chatRejoins")
         } else { throw new Error("La salle que vous essayer de rejoindre n'est pas dans la liste des chats disponibles.") }
@@ -217,10 +259,7 @@ export class MessagingManagerService {
 
 
     // Supprime un chatRoom de "tous les chats", rejoins et disponibles
-    private removeChatRoom(roomId: string) {
-        const updatedAllRooms = this.allChatRooms$.getValue().filter(room => room.id !== roomId);
-        this.allChatRooms$.next(updatedAllRooms);
-
+    private removeChatRoomFromJoinedRooms(roomId: string) {
         const updatedJoinedRooms = this.joinedChatRooms$.getValue().filter(room => room.id !== roomId);
         this.joinedChatRooms$.next(updatedJoinedRooms);
     }
@@ -232,6 +271,9 @@ export class MessagingManagerService {
         if (joinedRooms.length > 0) {
             const firstChatRoom = joinedRooms[0];
             this.activeChatRoomId$.next(firstChatRoom.id);
+        } else {
+            // pas de chat rejoins
+            this.activeChatRoomId$.next(null);
         }
     }
 

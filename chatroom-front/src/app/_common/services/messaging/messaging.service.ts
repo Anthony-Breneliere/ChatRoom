@@ -4,6 +4,7 @@ import { ChatMessage } from '../../models/chat-message.model';
 import { ChatRoom } from '../../models/chat-room.model';
 import { SignalRClientBase } from '../signalr/signalr.client.base';
 import { Observable, Subject } from 'rxjs';
+import { User } from '../../models/user.model';
 
 @Injectable({
 	providedIn: 'root',
@@ -16,7 +17,7 @@ export class MessagingService extends SignalRClientBase {
 	private userWritingSubject = new Subject<ChatMessage>();
 
 	private createChatRoomSubject = new Subject<ChatRoom>();
-	private userJoinChatRoomSubject = new Subject<ChatRoom>();
+	private userJoinChatRoomSubject = new Subject<{ chatRoomId: string, user: User }>();
 	private userLeaveChatRoomSubject = new Subject<ChatRoom>();
 
 	constructor() {
@@ -24,6 +25,7 @@ export class MessagingService extends SignalRClientBase {
 
 		// Handle messaging events
 		this._hubConnection.on('NewMessage', (message: ChatMessage) => {
+			console.log("HUB avec nouveau mesage : ", message)
 			this.newMessageSubject.next(message);
 		});
 
@@ -39,7 +41,8 @@ export class MessagingService extends SignalRClientBase {
 			this.userWritingSubject.next(user)
 		});
 
-		this._hubConnection.on('CreateChatRoom', (chatRoom: ChatRoom) => {
+		this._hubConnection.on('NewChatRoom', (chatRoom: ChatRoom) => {
+			console.log("HUB avec nouveau chatROOM : ", chatRoom.name)
 			this.createChatRoomSubject.next(chatRoom)
 		});
 
@@ -49,8 +52,8 @@ export class MessagingService extends SignalRClientBase {
 		// éviter l'incohérence entre le front et le back.
 		// ou juste envoyer l'utilisateur pour alléger les données
 		// ou le mieux serait une vérification périodique
-		this._hubConnection.on('UserJoinChatRoom', (chatRoom: ChatRoom) => {
-			this.userJoinChatRoomSubject.next(chatRoom)
+		this._hubConnection.on('UserJoinChatRoom', (chatRoomId: string, user: User) => {
+			this.userJoinChatRoomSubject.next({ chatRoomId, user })
 		});
 
 		this._hubConnection.on('UserLeaveChatRoom', (chatRoom: ChatRoom) => {
@@ -112,7 +115,6 @@ export class MessagingService extends SignalRClientBase {
 	 */
 	public async sendMessage(roomId: string, message: string): Promise<any> {
 		await this.getConnectionPromise;
-
 		await this._hubConnection.invoke('SendMessage', roomId, message);
 	}
 
@@ -141,7 +143,7 @@ export class MessagingService extends SignalRClientBase {
 
 	// questionnement sur l'efficatité plus haut ^ entre user et chatRoom pour l'allegement des données (par ex on a pas besoin de tout l'historique quand un utilsateur rejoins)
 
-	public onUserJoinChatRoom(): Observable<ChatRoom> {
+	public onUserJoinChatRoom(): Observable<{ chatRoomId: string, user: User }> {
 		return this.userJoinChatRoomSubject.asObservable();
 	}
 

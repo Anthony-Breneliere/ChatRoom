@@ -36,10 +36,11 @@ public interface IMessagingHubPush
     /// <summary>
     /// Pushes a new user to the client.
     /// </summary>
-    /// <param name="chatRoom">The chatRoom.</param>
+    /// <param name="chatRoomid">The chatRoom id.</param>
+    /// <param name="user">user who joined the room</param>
     /// <remarks>J'aurai pu passer que l'utilisateur pour plus d'efficatité ?</remarks>
 
-    public Task UserJoinChatRoom(ChatRoomDto chatRoom);
+    public Task UserJoinChatRoom(string chatRoomid, UserDto user);
 
     /// <summary>
     /// Pushes that user leave to the client.

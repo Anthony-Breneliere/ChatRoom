@@ -87,6 +87,7 @@ public sealed class MessagingHub : Hub<IMessagingHubPush>, IMessagingHubInvoke
     /// <inheritdoc />
     public async Task LeaveChatRoom(Guid roomId)
     {
+        
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId.ToString());
 
         await _messagingService.UserLeftRoom(roomId, NameIdentifier);

@@ -1,7 +1,7 @@
 
 
 <div *ngIf="chatRoom">
-  <div class="chat-room-item" (click)="isJoined$ ? loadJoinedChatRoom() : null">
+  <div class="chat-room-item" (click)="joinChatRoom()">
       <p class="chat-name">Name : {{ chatRoom.name}}</p>
 
       <p *ngIf="chatRoom.messages.length !== 0" class="chat-info">
@@ -12,10 +12,10 @@
         Participants : {{ chatRoom.participants.length }}
       </p>
 
-      <button (click)="chatRoomBtnClicked()">
-        <span *ngIf="isJoined$ | async; else joinLabel">Quitter</span>
-        <ng-template #joinLabel>Rejoindre</ng-template>
-      </button>
+      <div *ngIf="!(isJoined$ | async)">
+         <button (click)="chatRoomBtnClicked()">Rejoindre</button>
+      </div>
+     
   </div>
 </div>
 

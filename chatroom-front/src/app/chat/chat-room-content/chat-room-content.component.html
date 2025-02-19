@@ -9,16 +9,15 @@
     </div>
     <div class="chat-history">
 
-       <div *ngIf="messageHistory$ | async as messageHistory">
-          <div *ngIf="messageHistory && messageHistory.length > 0; else noMessages">
-            <div *ngFor="let message of messageHistory">
-              <div class="message">
-                <p class="auteur">{{ message.authorFullName }} :</p>
-                <p class="contenu">{{ message.content }}</p>
-              </div>
-            </div>
+      <div *ngIf="messageHistory.length > 0; else noMessages">
+        <div *ngFor="let message of messageHistory">
+          <div class="message">
+            <p class="auteur">{{ message.authorFullName }} :</p>
+            <p class="contenu">{{ message.content }}</p>
           </div>
         </div>
+      </div>
+   
 
     </div>
     <div class="typing-indicator">
