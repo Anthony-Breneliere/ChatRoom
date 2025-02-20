@@ -37,12 +37,10 @@ public interface IMessagingNotificationHandler
     /// <summary>
     /// Notifies the client of a new participant in a chatRoom.
     /// </summary>
-    /// <remarks>J'aurai pu passer que l'utilisateur pour plus d'efficatité ?</remarks>
     public Task NotifyUserJoinChatRoomAsync(Guid chatRoomId, User user);
 
     /// <summary>
     /// Notifies the client that user left the chatRoom.
     /// </summary>
-    /// <remarks>J'aurai pu passer que l'utilisateur pour plus d'efficatité ?</remarks>
-    public Task NotifyUserLeftChatRoomAsync(ChatRoom chatRoom);
+    public Task NotifyUserLeftChatRoomAsync(Guid chatRoomId, User user);
 }

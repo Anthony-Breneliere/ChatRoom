@@ -22,7 +22,8 @@
       </div>
     </div>
     
-    <div class="typing-indicator">
+
+    <div class="typing-indicator" [ngClass]="isTyping ? 'display' : 'hide'">
         <p>XXXXX est en train d'écrire...</p>
     </div>
     <div class="send-message">
@@ -32,7 +33,10 @@
   </div>
     
   <div class="chat-participant-wrapper">
-    Participants
+    <h1>Participants</h1>
+    <div *ngFor="let participant of (participants$ | async)">
+      {{participant.firstName}} {{participant.lastName}}
+    </div>
   </div>
   
 </div> 

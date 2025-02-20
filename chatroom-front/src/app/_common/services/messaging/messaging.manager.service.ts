@@ -1,16 +1,26 @@
 import { computed, inject, Injectable } from "@angular/core";
 import { MessagingService } from "./messaging.service";
 import { ChatRoom } from "../../models/chat-room.model";
-import { BehaviorSubject, combineLatest, map, Observable, of, tap } from "rxjs";
+import { BehaviorSubject, combineLatest, map, Observable } from "rxjs";
 import { ChatMessage } from "../../models/chat-message.model";
-import { subscribe } from "diagnostics_channel";
 import { User } from "../../models/user.model";
 import { AccountService } from "../account/account.service";
-import { join } from "path";
+import { NotificationService } from "../notification/notification.service";
+import { UserDto } from "../../dto/user.dto";
+import { has } from "lodash";
 
 @Injectable({
     providedIn: 'root',
 })
+
+/**
+ * Remarques sur mon propre code (qui n'est pas propre)
+ *   Amélioration sur les événemnts : j'ai des envoie de modification next() qui pourraient être regroupés addRoomToJoinedRoom, addUserToJoinedRoom, updateFullMessageHistory par exemple
+ *   Dans mes observables j'ai séparé les joinedrooms, des participants, de l'historique (j'ai fait au fur et a messure : besoin refacto pour regrouper + efficacité, maintenance)
+ *   
+ */
+
+
 
 /**
  * Service principale
@@ -26,10 +36,10 @@ export class MessagingManagerService {
     private participants$ = new BehaviorSubject<User[]>([]); // Messages du chat actif
 
     private readonly _accountService = inject(AccountService);
-    public readonly user = computed<User | null>(this._accountService.user);
+    private readonly _user = computed<User | null>(this._accountService.user);
 
 
-    constructor(private messagingService: MessagingService,) {
+    constructor(private messagingService: MessagingService, private notificationService: NotificationService) {
         this.subscribeToHub();
     }
 
@@ -37,8 +47,8 @@ export class MessagingManagerService {
     private subscribeToHub() {
         this.messagingService.onCreateChatRoom().subscribe(chatRoom => this.handleCreateChatRoom(chatRoom));
         this.messagingService.onNewMessage().subscribe(message => this.handleNewMessage(message));
-        this.messagingService.onUserJoinChatRoom().subscribe((joinedObj) => this.handleUserJoinChatRoom(joinedObj.chatRoomId, joinedObj.user));
-        this.messagingService.onUserLeaveChatRoom().subscribe(chatRoom => this.handleUserLeaveChatRoom(chatRoom));
+        this.messagingService.onUserJoinChatRoom().subscribe((obj) => this.handleUserJoinChatRoom(obj.chatRoomId, obj.user));
+        this.messagingService.onUserLeaveChatRoom().subscribe(obj => this.handleUserLeaveChatRoom(obj.chatRoomId, obj.user));
     }
 
 
@@ -48,15 +58,15 @@ export class MessagingManagerService {
 
         await this.messagingService.createChatRoom(chatName)
             .then(async chatRoom => {
-                // this.addRoomToJoinedRoom(chatRoom.id);
-                // this.updateFullMessageHistory(chatRoom.id, chatRoom.messages);
-                // this.activeChatRoomId$.next(chatRoom.id);
                 await this.joinChatRoom(chatRoom.id)
+
+                this.addUserToJoinedRoom(chatRoom.id, chatRoom.participants)
 
             })
             .catch(error => {
                 console.log("erreur lors de la creation du chat:", error)
                 // TODO notification erreur
+                // this.notificationService.showNotification("Le chat n'a pas pu être créé", "error", 3000);
             });
     }
 
@@ -75,13 +85,16 @@ export class MessagingManagerService {
         } else {
             await this.messagingService.joinChatRoom(roomId)
                 .then(chatMessage => {
+                    // Ajout de la room aux chats rejoins
                     this.addRoomToJoinedRoom(roomId);
+
+                    // Mise à jour des messages
                     this.updateFullMessageHistory(roomId, chatMessage);
                     this.activeChatRoomId$.next(roomId);
                 })
                 .catch((error) => {
                     console.log("Impossible de rejoindre la room, une erreur est survenue :", error.message)
-                    // TODO notification la salle est innacessible, fermé lorsque le dernier utilateur a quitter la room ?
+                    // TODO notification la salle est innacessible
                     return;
                 });
         }
@@ -151,69 +164,17 @@ export class MessagingManagerService {
         this.addMessageToChatRoom(message.roomId, message);
     }
 
-    // private handleDeletedMessage(message: ChatMessage) {
-    //     const updatedMessages = this.messages$.getValue().filter(m => m.id !== message.id);
-    //     this.messages$.next(updatedMessages);
-    // }
-
-    // private handleEditedMessage(message: ChatMessage) {
-    //     const updatedMessages = this.messages$.getValue().map(m =>
-    //         m.id === message.id ? message : m
-    //     );
-    //     this.messages$.next(updatedMessages);
-    // }
-
-
     // handler création d'un chatRoom
     private handleCreateChatRoom(chatRoom: ChatRoom) {
         this.addNewRoomToAllAvailableRoom(chatRoom);
     }
 
     // Handler pour un utilisateur qui rejoins
-    private handleUserJoinChatRoom(chatRoomId: string, user: User) {
-        console.log("new user joined ")
-        const joinedRooms = this.joinedChatRooms$.getValue();
-        const chatRoom = joinedRooms.find(r => r.id === chatRoomId);
-        if (chatRoom) {
-            const userAlreadyAdded = chatRoom.participants.some(u => u.id === user.id);
-            if (!userAlreadyAdded) {
-
-                const updatedRooms = joinedRooms.map(room =>
-                    room.id === chatRoomId
-                        ? { ...room, participants: [...room.participants, user] }
-                        : room
-                );
-
-                this.joinedChatRooms$.next(updatedRooms);
-                console.log("User added")
-            } else {
-                console.log("User not added")
-
-            }
-        } else {
-            console.log("error on join room, chatroom not found in added")
-        }
-
-
+    private handleUserJoinChatRoom(chatRoomId: string, user: UserDto) {
+        this.addUserToJoinedRoom(chatRoomId, [user])
     }
-    private handleUserLeaveChatRoom(chatRoom: ChatRoom) {
-        this.updateChatRooms(chatRoom);
-        // TODO notification muser leaved
-    }
-
-
-    // Mise à jour des chatRooms avec la "nouvelle"
-    private updateChatRooms(chatRoom: ChatRoom) {
-
-        const allRooms = this.allChatRooms$.getValue();
-        if (allRooms.some(room => room.id === chatRoom.id)) {
-            this.allChatRooms$.next(allRooms.map(room => (room.id === chatRoom.id ? chatRoom : room)));
-        }
-
-        const joinedRooms = this.joinedChatRooms$.getValue();
-        if (joinedRooms.some(room => room.id === chatRoom.id)) {
-            this.joinedChatRooms$.next(joinedRooms.map(room => (room.id === chatRoom.id ? chatRoom : room)));
-        }
+    private handleUserLeaveChatRoom(chatRoomId: string, user: UserDto) {
+        this.removeUserFromJoinedRoom(chatRoomId, user);
     }
 
 
@@ -225,24 +186,21 @@ export class MessagingManagerService {
             await this.messagingService.sendMessage(this.activeChatRoomId$.value, message)
         } catch (error) {
             // TODO notification message d'erreur
-            console.log("Erreur lors de l'envoie du message :", message)
+            console.log("Erreur lors de l'envoie du message :", message, error)
         }
     }
 
     private addMessageToChatRoom(chatRoomId: string, chatMessage: ChatMessage) {
-        console.log("Handle new message : ", chatMessage.content)
         if (!this.joinedChatRooms$.getValue().some(r => r.id == chatRoomId)) return;
 
         const messagesHistoryToUpdate = new Map(this.messagesHistoryByChatRoom$.getValue());
         const messages = messagesHistoryToUpdate.get(chatRoomId) || [];
         messagesHistoryToUpdate.set(chatRoomId, [...messages, chatMessage]);
-        console.log("Hisotory upadte : ", messagesHistoryToUpdate)
 
         this.messagesHistoryByChatRoom$.next(messagesHistoryToUpdate);
-
     }
 
-
+    // Ajout d'une nouvelle salle dans les chatRooms disponibles
     private addNewRoomToAllAvailableRoom(chatRoom: ChatRoom) {
         const allRooms = this.allChatRooms$.getValue();
         this.allChatRooms$.next([...allRooms, chatRoom]);
@@ -258,12 +216,11 @@ export class MessagingManagerService {
                 this.joinedChatRooms$.next([...joinedRooms, room]);
             } else console.log("La salle est déjà présente dans la liste des chatRejoins")
         } else {
-
             // En prévention d'un état anormal
             this.removeChatRoomFromJoinedRooms(roomId)
 
             //Notif
-            //throw new Error("La salle que vous essayer de rejoindre n'est pas dans la liste des chats disponibles.")
+            //throw new Error("La salle que vous essayer de rejoindre n'est pas dans la liste des chats disponibles. Celle ci va être supprimée de la liste")
         }
     }
 
@@ -303,7 +260,57 @@ export class MessagingManagerService {
     private updateFullMessageHistory(roomId: string, messages: ChatMessage[]) {
         const messagesMap = new Map(this.messagesHistoryByChatRoom$.getValue());
         messagesMap.set(roomId, messages);
-        console.log("chatHisory updated : ", messages);
         this.messagesHistoryByChatRoom$.next(messagesMap);
     }
+
+
+    // Ajoute un participant
+    private addUserToJoinedRoom(chatRoomId: string, users: UserDto[]) {
+        const joinedRooms = this.joinedChatRooms$.getValue();
+        const chatRoom = joinedRooms.find(r => r.id === chatRoomId);
+        var hasChanged = false;
+        if (chatRoom) {
+            const updatedParticipants = [...chatRoom.participants];
+
+            // Pour chaque utilisateur passé en entrée
+            users.forEach(user => {
+                const userAlreadyAdded = updatedParticipants.some(u => u.id === user.id);
+                if (!userAlreadyAdded) {
+                    hasChanged = true;
+                    updatedParticipants.push(user);
+                }
+            });
+
+            // Si la liste des participants a changé, mettre à jour la room
+            if (hasChanged) {
+                const updatedRooms = joinedRooms.map(room =>
+                    room.id === chatRoomId
+                        ? { ...room, participants: updatedParticipants }
+                        : room
+                );
+                this.joinedChatRooms$.next(updatedRooms);
+            }
+        }
+    }
+
+
+    private removeUserFromJoinedRoom(chatRoomId: string, user: UserDto) {
+        const joinedRooms = this.joinedChatRooms$.getValue();
+        const chatRoom = joinedRooms.find(r => r.id === chatRoomId);
+        if (chatRoom) {
+            // Filtrer la liste des participants pour supprimer celui avec l'id spécifié
+            const updatedParticipants = chatRoom.participants.filter(u => u.id !== user.id);
+
+            // Si la liste des participants a changé, mettre à jour la room
+            if (updatedParticipants.length !== chatRoom.participants.length) {
+                const updatedRooms = joinedRooms.map(room =>
+                    room.id === chatRoomId
+                        ? { ...room, participants: updatedParticipants }
+                        : room
+                );
+                this.joinedChatRooms$.next(updatedRooms);
+            }
+        }
+    }
+
 }

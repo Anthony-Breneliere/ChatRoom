@@ -160,7 +160,7 @@ public sealed class MessagingService
     public async Task UserLeftRoom(Guid roomId, string nameIdentifier, CancellationToken ct = default)
     {
         User user = await GetUserFromNameIdentifier(nameIdentifier);
-        //await _notificationHandler.NotifyUserLeftChatRoomAsync(roomId, user);
+        await _notificationHandler.NotifyUserLeftChatRoomAsync(roomId, user);
     }
 
 

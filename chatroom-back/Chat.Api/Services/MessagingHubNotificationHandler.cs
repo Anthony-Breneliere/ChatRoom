@@ -68,9 +68,9 @@ public sealed class MessagingHubNotificationHandler : IMessagingNotificationHand
     }
 
     /// <inheritdoc />
-    public async Task NotifyUserLeftChatRoomAsync(Model.Messaging.ChatRoom chatRoom)
+    public async Task NotifyUserLeftChatRoomAsync(Guid chatRoomId, User user)
     {
-        ChatRoomDto chatRoomDto = _mapper.Map<ChatRoomDto>(chatRoom);
-        await _hubContext.Clients.Group(chatRoom.Id.ToString()).UserLeaveChatRoom(chatRoomDto);
+        UserDto userDto = _mapper.Map<UserDto>(user);
+        await _hubContext.Clients.Group(chatRoomId.ToString()).UserLeaveChatRoom(chatRoomId.ToString(), userDto);
     }
 }

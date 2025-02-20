@@ -5,6 +5,7 @@ import { ChatRoom } from '../../models/chat-room.model';
 import { SignalRClientBase } from '../signalr/signalr.client.base';
 import { Observable, Subject } from 'rxjs';
 import { User } from '../../models/user.model';
+import { UserDto } from '../../dto/user.dto';
 
 @Injectable({
 	providedIn: 'root',
@@ -17,15 +18,14 @@ export class MessagingService extends SignalRClientBase {
 	private userWritingSubject = new Subject<ChatMessage>();
 
 	private createChatRoomSubject = new Subject<ChatRoom>();
-	private userJoinChatRoomSubject = new Subject<{ chatRoomId: string, user: User }>();
-	private userLeaveChatRoomSubject = new Subject<ChatRoom>();
+	private userJoinChatRoomSubject = new Subject<{ chatRoomId: string, user: UserDto }>();
+	private userLeaveChatRoomSubject = new Subject<{ chatRoomId: string, user: UserDto }>();
 
 	constructor() {
 		super(environment.API_URL + '/hub/messaging');
 
 		// Handle messaging events
 		this._hubConnection.on('NewMessage', (message: ChatMessage) => {
-			console.log("new msg", message.content)
 			this.newMessageSubject.next(message);
 		});
 
@@ -51,12 +51,12 @@ export class MessagingService extends SignalRClientBase {
 		// éviter l'incohérence entre le front et le back.
 		// ou juste envoyer l'utilisateur pour alléger les données
 		// ou le mieux serait une vérification périodique
-		this._hubConnection.on('UserJoinChatRoom', (chatRoomId: string, user: User) => {
+		this._hubConnection.on('UserJoinChatRoom', (chatRoomId: string, user: UserDto) => {
 			this.userJoinChatRoomSubject.next({ chatRoomId, user })
 		});
 
-		this._hubConnection.on('UserLeaveChatRoom', (chatRoom: ChatRoom) => {
-			this.userLeaveChatRoomSubject.next(chatRoom)
+		this._hubConnection.on('UserLeaveChatRoom', (chatRoomId: string, user: UserDto) => {
+			this.userLeaveChatRoomSubject.next({ chatRoomId, user })
 		});
 	}
 
@@ -142,11 +142,11 @@ export class MessagingService extends SignalRClientBase {
 
 	// questionnement sur l'efficatité plus haut ^ entre user et chatRoom pour l'allegement des données (par ex on a pas besoin de tout l'historique quand un utilsateur rejoins)
 
-	public onUserJoinChatRoom(): Observable<{ chatRoomId: string, user: User }> {
+	public onUserJoinChatRoom(): Observable<{ chatRoomId: string, user: UserDto }> {
 		return this.userJoinChatRoomSubject.asObservable();
 	}
 
-	public onUserLeaveChatRoom(): Observable<ChatRoom> {
+	public onUserLeaveChatRoom(): Observable<{ chatRoomId: string, user: UserDto }> {
 		return this.userLeaveChatRoomSubject.asObservable();
 	}
 

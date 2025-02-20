@@ -1,0 +1,7 @@
+
+
+
+
+<div *ngIf="(notification$ | async) as notif" class="notification" class="{{notif.type}}">
+  <span>{{ notif.message }}</span>
+</div>

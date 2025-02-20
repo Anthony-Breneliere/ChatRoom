@@ -6,6 +6,7 @@ import { MessagingManagerService } from 'src/app/_common/services/messaging/mess
 import { MessagingService } from 'src/app/_common/services/messaging/messaging.service';
 import { CommonModule } from '@angular/common';
 import { User } from 'src/app/_common/models/user.model';
+import { UserDto } from 'src/app/_common/dto/user.dto';
 
 @Component({
   selector: 'app-chat-room-content',
@@ -20,14 +21,17 @@ export class ChatRoomContentComponent {
 
   public messageHistory: ChatMessage[] = [];
 
-  public participants$: Observable<User[]> = of([]);
+  public participants$ = new BehaviorSubject<UserDto[]>([]);
 
   public activeChatRoomId: string | null = null;
+
+  public isTyping = false;
 
   /* SUbscriptions */
   private _userWriteSubscription: Subscription | null = null;
   private _chatRoomIdSubscription: Subscription | null = null;
   private _chatRoomMessageHistory: Subscription | null = null;
+  private _chatRoomParticipantsSubscription: Subscription | null = null;
 
 
 
@@ -49,14 +53,25 @@ export class ChatRoomContentComponent {
     // Peut être fusionner les deux ... sachant que history by room réagit en fonction de activeChatRoom
     this._chatRoomMessageHistory = this._chatManagerService.getMessagesHistoryOfCurrentChatRoom$()
       .subscribe(history => {
-        console.log("content : historique recu : ", history)
         this.messageHistory = history
       });
 
     this._chatRoomIdSubscription = this._chatManagerService.getActiveChatRoomId$()
       .subscribe(id => {
-        console.log("content : active id  : ", id)
         this.activeChatRoomId = id
+      });
+
+
+    this._chatRoomParticipantsSubscription = this._chatManagerService.getJoinedChatRooms$()
+      .subscribe((joinedChatRooms) => {
+
+        if (this.activeChatRoomId) {
+
+          const activeChatRoom = joinedChatRooms.find(room => room.id === this.activeChatRoomId);
+          if (activeChatRoom) {
+            this.participants$.next(activeChatRoom.participants);
+          }
+        }
       });
   }
 
@@ -71,6 +86,9 @@ export class ChatRoomContentComponent {
     }
     if (this._chatRoomMessageHistory) {
       this._chatRoomMessageHistory.unsubscribe();
+    }
+    if (this._chatRoomParticipantsSubscription) {
+      this._chatRoomParticipantsSubscription.unsubscribe();
     }
   }
 
@@ -93,6 +111,8 @@ export class ChatRoomContentComponent {
   }
 
   async onKeyUp(event: KeyboardEvent) {
+    //Notification isTyping
+
     if (event.key === 'Enter') {
       console.log("pressKey :  ", event.key);
       await this.sendMessage();
