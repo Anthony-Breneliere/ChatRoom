@@ -7,9 +7,16 @@
 		padding: 20px;
 		height: 100%;
 
+
 		.chat-list-title {
 			text-align: center;
 			padding: 5px;
+		}
+
+		.chat-input {
+			display: flex;
+			flex-direction: column;
+			padding: 10px;
 		}
 
 		.chat-rooms {

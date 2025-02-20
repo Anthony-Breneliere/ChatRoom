@@ -13,6 +13,11 @@ public sealed class ChatRoomDto
     public Guid Id { get; init; }
 
     /// <summary>
+    /// Nom de la Room
+    /// </summary>
+    public string Name { get; init; } = "Default Room Name";
+
+    /// <summary>
     /// Companies in the chat room
     /// </summary>
     public UserDto[] Participants { get; set; } = [];

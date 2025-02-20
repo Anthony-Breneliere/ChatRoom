@@ -5,7 +5,11 @@
   
   <div class="chat-rooms-list">
     <h1 class="chat-list-title">Chats disponibles</h1>
-    
+    <div class="chat-input">
+      <label for="chatName">Nom du chat a créer </label>
+      <input id="chatName" #chatName type="text" required name="message-input" placeholder="Renseignez le nom du chat" (keyup)="onKeyUp($event)">
+    </div>
+   
     <button class="btn-base" (click)="createNewChatRoom()">Creer un nouveau chat</button>
     
     <div class="chat-rooms">

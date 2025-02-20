@@ -25,20 +25,14 @@ export class ChatRoomItemComponent implements OnInit, OnDestroy {
     this.joinedSubscription = this.messagingManagerService.getJoinedChatRooms$()
       .subscribe(joinedChatRooms => {
         const isJoined = joinedChatRooms.some(r => r.id === this.chatRoom.id);
-        console.log("Updated")
         this.isJoined$.next(isJoined);
       });
   }
 
   async joinChatRoom() {
-    console.log("Item join room ")
     await this.messagingManagerService.joinChatRoom(this.chatRoom.id);
   }
 
-
-  // public async leaveChatRoom() {
-  //   await this.messagingManagerService.leaveChatRoom(this.chatRoom.id);
-  // }
 
   ngOnDestroy() {
     this.joinedSubscription?.unsubscribe();

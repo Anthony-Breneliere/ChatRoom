@@ -25,6 +25,7 @@ export class MessagingService extends SignalRClientBase {
 
 		// Handle messaging events
 		this._hubConnection.on('NewMessage', (message: ChatMessage) => {
+			console.log("new msg", message.content)
 			this.newMessageSubject.next(message);
 		});
 
@@ -84,10 +85,10 @@ export class MessagingService extends SignalRClientBase {
 	/**
 	 * Create a new chat room
 	 */
-	public async createChatRoom(): Promise<ChatRoom> {
+	public async createChatRoom(chatName: string): Promise<ChatRoom> {
 		await this.getConnectionPromise;
 
-		return await this._hubConnection.invoke<ChatRoom>('CreateChatRoom');
+		return await this._hubConnection.invoke<ChatRoom>('CreateChatRoom', chatName);
 	}
 
 	/**

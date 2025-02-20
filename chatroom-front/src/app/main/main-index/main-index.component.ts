@@ -23,6 +23,9 @@ import { CommonModule } from '@angular/common';
 })
 export class MainIndexComponent {
 
+	@ViewChild('chatName') chatNameInput!: ElementRef;
+
+
 	chatRooms$: Observable<ChatRoom[]>;
 
 	constructor(private messagingManagerService: MessagingManagerService) {
@@ -33,7 +36,27 @@ export class MainIndexComponent {
 		this.messagingManagerService.loadAllChatRooms();
 	}
 
-	createNewChatRoom(): void {
-		this.messagingManagerService.createNewChatRoom();
+
+
+
+
+	public async createNewChatRoom() {
+		if (this.chatNameInput && this.chatNameInput.nativeElement) {
+			const chatName = this.chatNameInput.nativeElement.value.trim();
+			if (chatName) {
+				await this.messagingManagerService.createNewChatRoom(chatName);
+				this.chatNameInput.nativeElement.value = '';
+			} else {
+				// TODO notification "Le nom du chat doit être remplis"
+			}
+		} else {
+			console.error("messageInput n'est pas défini.");
+		}
+	}
+
+	async onKeyUp(event: KeyboardEvent) {
+		if (event.key === 'Enter') {
+			await this.createNewChatRoom();
+		}
 	}
 }

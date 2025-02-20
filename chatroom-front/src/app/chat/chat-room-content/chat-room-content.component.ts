@@ -24,7 +24,7 @@ export class ChatRoomContentComponent {
 
   public activeChatRoomId: string | null = null;
 
-  /* SUbscriptions  */
+  /* SUbscriptions */
   private _userWriteSubscription: Subscription | null = null;
   private _chatRoomIdSubscription: Subscription | null = null;
   private _chatRoomMessageHistory: Subscription | null = null;
@@ -47,16 +47,17 @@ export class ChatRoomContentComponent {
 
   loadChatRoom() {
     // Peut être fusionner les deux ... sachant que history by room réagit en fonction de activeChatRoom
-    this._chatRoomIdSubscription = this._chatManagerService.getActiveChatRoomId$()
-      .subscribe(id => {
-        this.activeChatRoomId = id
-      });
-
     this._chatRoomMessageHistory = this._chatManagerService.getMessagesHistoryOfCurrentChatRoom$()
       .subscribe(history => {
-        console.log("historique recu : ", history)
+        console.log("content : historique recu : ", history)
         this.messageHistory = history
-      })
+      });
+
+    this._chatRoomIdSubscription = this._chatManagerService.getActiveChatRoomId$()
+      .subscribe(id => {
+        console.log("content : active id  : ", id)
+        this.activeChatRoomId = id
+      });
   }
 
 
@@ -67,6 +68,9 @@ export class ChatRoomContentComponent {
     }
     if (this._chatRoomIdSubscription) {
       this._chatRoomIdSubscription.unsubscribe();
+    }
+    if (this._chatRoomMessageHistory) {
+      this._chatRoomMessageHistory.unsubscribe();
     }
   }
 

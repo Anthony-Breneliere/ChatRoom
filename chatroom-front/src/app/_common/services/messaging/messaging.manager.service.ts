@@ -44,15 +44,15 @@ export class MessagingManagerService {
 
 
     // Créer une nouvelle chatRoom et la rejoins
-    async createNewChatRoom(): Promise<void> {
+    async createNewChatRoom(chatName: string): Promise<void> {
 
-        await this.messagingService.createChatRoom()
-            .then(chatRoom => {
-                this.setEmptyHistory(chatRoom.id);
-                console.log("joined room by id ", this.joinedChatRooms$.getValue().filter(r => r.id == chatRoom.id) ?? "rien")
-                console.log("historique joined room by id ", this.messagesHistoryByChatRoom$.getValue().get(chatRoom.id) ?? "rien")
+        await this.messagingService.createChatRoom(chatName)
+            .then(async chatRoom => {
+                // this.addRoomToJoinedRoom(chatRoom.id);
+                // this.updateFullMessageHistory(chatRoom.id, chatRoom.messages);
+                // this.activeChatRoomId$.next(chatRoom.id);
+                await this.joinChatRoom(chatRoom.id)
 
-                this.activeChatRoomId$.next(chatRoom.id);
             })
             .catch(error => {
                 console.log("erreur lors de la creation du chat:", error)
@@ -73,7 +73,6 @@ export class MessagingManagerService {
         if (this.joinedChatRooms$.getValue().some(r => r.id == roomId)) {
             this.setJoinedRoomToCurrentChatRoom(roomId);
         } else {
-
             await this.messagingService.joinChatRoom(roomId)
                 .then(chatMessage => {
                     this.addRoomToJoinedRoom(roomId);
@@ -172,6 +171,7 @@ export class MessagingManagerService {
 
     // Handler pour un utilisateur qui rejoins
     private handleUserJoinChatRoom(chatRoomId: string, user: User) {
+        console.log("new user joined ")
         const joinedRooms = this.joinedChatRooms$.getValue();
         const chatRoom = joinedRooms.find(r => r.id === chatRoomId);
         if (chatRoom) {
@@ -185,7 +185,13 @@ export class MessagingManagerService {
                 );
 
                 this.joinedChatRooms$.next(updatedRooms);
+                console.log("User added")
+            } else {
+                console.log("User not added")
+
             }
+        } else {
+            console.log("error on join room, chatroom not found in added")
         }
 
 
@@ -298,13 +304,6 @@ export class MessagingManagerService {
         const messagesMap = new Map(this.messagesHistoryByChatRoom$.getValue());
         messagesMap.set(roomId, messages);
         console.log("chatHisory updated : ", messages);
-        this.messagesHistoryByChatRoom$.next(messagesMap);
-    }
-
-    // Créer un historique vide
-    private setEmptyHistory(roomId: string) {
-        const messagesMap = new Map(this.messagesHistoryByChatRoom$.getValue());
-        messagesMap.set(roomId, []);
         this.messagesHistoryByChatRoom$.next(messagesMap);
     }
 }

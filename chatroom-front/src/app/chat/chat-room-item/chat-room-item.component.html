@@ -2,7 +2,7 @@
 
 <div *ngIf="chatRoom">
   <div class="chat-room-item" (click)="joinChatRoom()">
-      <p class="chat-name">Name : {{ chatRoom.name}}</p>
+      <p class="chat-name">{{ chatRoom.name}}</p>
 
       <p *ngIf="chatRoom.messages.length !== 0" class="chat-info">
         Dernier message : {{ chatRoom.messages[chatRoom.messages.length - 1] }}
