@@ -140,7 +140,7 @@ public sealed class MessagingService
         ChatRoom? chatRoom = await  GetChatRoomAsync(roomId, ct);
         if (chatRoom != null)
         {
-            await _notificationHandler.NotifyUserJoinChatRoomAsync(roomId, user);
+            await _notificationHandler.NotifyUserJoinChatRoomAsync(chatRoom.Id, user);
         } else
         {
             Logger.LogError("Room not found : roomid {roomId}", roomId);

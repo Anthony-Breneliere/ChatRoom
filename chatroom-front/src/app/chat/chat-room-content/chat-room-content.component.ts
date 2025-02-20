@@ -36,22 +36,26 @@ export class ChatRoomContentComponent {
 
   constructor(chatManagerService: MessagingManagerService) {
     this._chatManagerService = chatManagerService;
-    this.loadChatRoom();
-    this.participants$ = this._chatManagerService.getParticipants$();
+
+    //this.participants$ = this._chatManagerService.getParticipants$();
   }
 
 
+  ngOnInit() {
+    this.loadChatRoom();
+  }
+
   loadChatRoom() {
+    // Peut être fusionner les deux ... sachant que history by room réagit en fonction de activeChatRoom
     this._chatRoomIdSubscription = this._chatManagerService.getActiveChatRoomId$()
       .subscribe(id => {
         this.activeChatRoomId = id
-        //console.log("chatContent - Active chatroom recieve : ", id);
       });
 
     this._chatRoomMessageHistory = this._chatManagerService.getMessagesHistoryOfCurrentChatRoom$()
       .subscribe(history => {
+        console.log("historique recu : ", history)
         this.messageHistory = history
-        //console.log("chatContent - Réception de l'historique : ", history);
       })
   }
 
@@ -70,7 +74,6 @@ export class ChatRoomContentComponent {
     if (this.messageInput && this.messageInput.nativeElement) {
       const message = this.messageInput.nativeElement.value.trim();
       if (message) {
-        console.log("Envoi du message :", message);
         await this._chatManagerService.sendMessage(message);
         this.messageInput.nativeElement.value = '';  // Effacer l'input après l'envoi du message
       }

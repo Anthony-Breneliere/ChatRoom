@@ -25,7 +25,6 @@ export class MessagingService extends SignalRClientBase {
 
 		// Handle messaging events
 		this._hubConnection.on('NewMessage', (message: ChatMessage) => {
-			console.log("HUB avec nouveau mesage : ", message)
 			this.newMessageSubject.next(message);
 		});
 
@@ -42,7 +41,6 @@ export class MessagingService extends SignalRClientBase {
 		});
 
 		this._hubConnection.on('NewChatRoom', (chatRoom: ChatRoom) => {
-			console.log("HUB avec nouveau chatROOM : ", chatRoom.name)
 			this.createChatRoomSubject.next(chatRoom)
 		});
 

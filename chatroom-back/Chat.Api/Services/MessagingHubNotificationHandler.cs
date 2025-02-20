@@ -34,6 +34,7 @@ public sealed class MessagingHubNotificationHandler : IMessagingNotificationHand
     public async Task NotifyNewMessageAsync(ChatMessage message)
     {
         ChatMessageDto dto = _mapper.Map<ChatMessageDto>(message);
+
         await _hubContext.Clients.Group(message.RoomId.ToString()).NewMessage(dto);
     }
 

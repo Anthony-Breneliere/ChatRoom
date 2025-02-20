@@ -2,24 +2,26 @@
 
 
 
-<div *ngIf="activeChatRoomId else noChatRoom" class="chat-message-wrapper">
+<div *ngIf="activeChatRoomId else noChatRoom" class="chat-room-wrapper">
+  <div class="chat-message-wrapper">
     <div class="chat-info">
-        <h1 class="chat-name">Chat Name</h1>
-        <button class="btn-base red"(click)="leaveChatRoom()">Quitter le chat</button>
+      <h1 class="chat-name">Chat Name</h1>
+      <button class="btn-base red"(click)="leaveChatRoom()">Quitter le chat</button>
     </div>
-    <div class="chat-history">
 
+
+    <div class="chat-history"> 
       <div *ngIf="messageHistory.length > 0; else noMessages">
         <div *ngFor="let message of messageHistory">
           <div class="message">
-            <p class="auteur">{{ message.authorFullName }} :</p>
+            <p class="auteur">{{ message.authorFullName }} a écrit :</p>
             <p class="contenu">{{ message.content }}</p>
+            <p class="date">{{ message.createdAt | date: 'dd MMMM yyyy, HH:mm' }}</p>
           </div>
         </div>
       </div>
-   
-
     </div>
+    
     <div class="typing-indicator">
         <p>XXXXX est en train d'écrire...</p>
     </div>
@@ -27,6 +29,11 @@
         <input #messageInput type="text" name="message-input" placeholder="Ecrivez votre message" (keyup)="onKeyUp($event)">
         <button class="btn-base" (click)="sendMessage()">Envoyer</button>
     </div>
+  </div>
+    
+  <div class="chat-participant-wrapper">
+    Participants
+  </div>
   
 </div> 
 
