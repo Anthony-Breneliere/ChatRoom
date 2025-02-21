@@ -47,7 +47,7 @@ export class MainIndexComponent {
 				await this.messagingManagerService.createNewChatRoom(chatName);
 				this.chatNameInput.nativeElement.value = '';
 			} else {
-				// TODO notification "Le nom du chat doit être remplis"
+				alert("Le nom du chatRoom doit être remplis.")
 			}
 		} else {
 			console.error("messageInput n'est pas défini.");

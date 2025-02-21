@@ -2,24 +2,14 @@
 
 <div *ngIf="chatRoom">
   <div class="chat-room-item" (click)="joinChatRoom()">
-      <p class="chat-name">{{ chatRoom.name}}</p>
-
-
-      <!-- J'ai commencer a récupérer les observables un par un isJoined j'ai donc pas encore fait la partie pour mettre a jour les informations du chatRoom
-       mise a par s'il est rejoins-->
-
-       <!--
-      <p *ngIf="chatRoom.messages.length !== 0" class="chat-info">
-        Dernier message : {{ chatRoom.messages[chatRoom.messages.length - 1] }}
-      </p>
-
-      <p *ngIf="chatRoom.messages.length === 0" class="chat-info">
-        Participants : {{ chatRoom.participants.length }}
-      </p>
-      -->
-      <div *ngIf="!(isJoined$ | async)">
-         <button>Rejoindre</button>
-      </div>
+    <div>
+      <p class="chat-name">{{ chatRoom.name }}</p>
+      <p class="chat-info">Créé le {{ chatRoom.createdAt | date: 'd MMMM y à HH:mm' }}</p>
+    </div>
+     
+    <div *ngIf="!(isJoined$ | async)">
+       <button>Rejoindre</button>
+    </div>
      
   </div>
 </div>

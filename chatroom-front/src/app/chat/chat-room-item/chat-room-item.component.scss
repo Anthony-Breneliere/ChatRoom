@@ -1,6 +1,5 @@
 .chat-room-item {
     display: flex;
-    flex-direction: column;
     padding: 5px;
     border-radius: 6px;
     background-color: rgb(251 191 36 / var(--tw-bg-opacity));
@@ -9,7 +8,7 @@
         cursor: pointer;
     }
 
-    .chat-name {}
+
 
     .chat-info {
         font-size: 0.75rem;
