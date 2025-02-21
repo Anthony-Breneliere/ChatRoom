@@ -86,14 +86,23 @@ export class MessagingService extends SignalRClientBase {
 	}
 
 	/**
-	 * Get a chat room for the offer provided, create a new one if it doesn't exist
-	 * @param offerId
-	 * @returns
+	 * Get a chat room for the offer provided
+	 * @param roomId
+	 * @returns chatroom
 	 */
-	public async getOrCreateChatRoomFromOffer(offerId: string): Promise<ChatRoom> {
+	public async getChatRoom(roomId: string): Promise<ChatRoom> {
 		await this.getConnectionPromise;
 
-		return await this._hubConnection.invoke<ChatRoom>('GetChatRoomFromOffer', offerId);
+		return await this._hubConnection.invoke<ChatRoom>('GetChatRoom', roomId);
+	}
+
+	/**
+	 * Create a new chat room
+	 */
+	public async createChatRoom(): Promise<ChatRoom> {
+		await this.getConnectionPromise;
+
+		return await this._hubConnection.invoke<ChatRoom>('CreateChatRoom');
 	}
 
 	/**
