@@ -204,13 +204,8 @@ export class MessagingManagerService {
     }
 
     public async sendUserIsTyping(chatRoomId: string) {
-        const userId = this._user()?.id
-        if (userId) {
-            await this.messagingService.sendUserIsTyping(chatRoomId, userId)
-        } else {
-            // TODO Notification
-            console.log("Une erreur est survenue. Vous n'êtes pas correctement connecté à l'application..")
-        }
+
+        await this.messagingService.sendUserIsTyping(chatRoomId)
 
     }
 

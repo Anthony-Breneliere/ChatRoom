@@ -119,9 +119,9 @@ export class MessagingService extends SignalRClientBase {
 	/**
 	 * Send message to the chat room
 	 */
-	public async sendUserIsTyping(roomId: string, userId: string): Promise<any> {
+	public async sendUserIsTyping(roomId: string): Promise<any> {
 		await this.getConnectionPromise;
-		await this._hubConnection.invoke('UserIsTyping', roomId, userId);
+		await this._hubConnection.invoke('UserIsTyping', roomId);
 	}
 
 

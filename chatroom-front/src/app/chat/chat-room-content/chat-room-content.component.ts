@@ -79,12 +79,15 @@ export class ChatRoomContentComponent {
       });
   }
 
+  // Souscription utile pour la détection des utilisateurs qui écrivent
   private _loadUsersTyping() {
+    // Réception des notifs "est en train d'ecrire"
     this._chatManagerService.getUserTyping$().subscribe(userId => {
       this.typingUsers.add(userId);
       setTimeout(() => this.typingUsers.delete(userId), 1000);
     });
 
+    // Envoie des notifs "est en train d'ecrire"
     this.messageFormControl.valueChanges.pipe(
       debounceTime(300),
       distinctUntilChanged()
