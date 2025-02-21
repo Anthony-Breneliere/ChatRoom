@@ -43,4 +43,9 @@ public interface IMessagingNotificationHandler
     /// Notifies the client that user left the chatRoom.
     /// </summary>
     public Task NotifyUserLeftChatRoomAsync(Guid chatRoomId, User user);
+
+    /// <summary>
+    /// Notifies the client that user left the chatRoom.
+    /// </summary>
+    public Task NotifyUserIsTypingAsync(Guid chatRoomId, string excludedConnexionId, User user);
 }

@@ -164,6 +164,18 @@ public sealed class MessagingService
     }
 
 
+    /// <summary>
+    /// Notifie  qu'un utilisateur est en train d'écrire.
+    /// </summary>
+    /// <param name="roomId">Room Id</param>
+    /// <param name="excludedConnexionId">Id de connexion de l'utilisateur courant</param>
+    /// <param name="nameIdentifier">Identifiant de l'utilisateur</param>
+    /// <returns></returns>
+    public async Task UserIsTypingAsync(Guid roomId, string excludedConnexionId, string nameIdentifier)
+    {
+        User user = await GetUserFromNameIdentifier(nameIdentifier);
+        await _notificationHandler.NotifyUserIsTypingAsync(roomId, excludedConnexionId, user);
+    }
 
     /// <summary>
     /// Gets a specific chat room.

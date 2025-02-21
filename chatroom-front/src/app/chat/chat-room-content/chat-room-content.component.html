@@ -14,7 +14,7 @@
       <div *ngIf="messageHistory.length > 0; else noMessages">
         <div *ngFor="let message of messageHistory">
           <div class="message">
-            <p class="auteur">{{ message.authorFullName }} a écrit :</p>
+            <p class="auteur">{{ message.authorFullName || message.authorCompanyName || message.authorCompanyId }} a écrit :</p>
             <p class="contenu">{{ message.content }}</p>
             <p class="date">{{ message.createdAt | date: 'dd MMMM yyyy, HH:mm' }}</p>
           </div>
@@ -23,11 +23,13 @@
     </div>
     
 
-    <div class="typing-indicator" [ngClass]="isTyping ? 'display' : 'hide'">
-        <p>XXXXX est en train d'écrire...</p>
+
+    <div class="typing-indicator" *ngIf="typingUsers.size > 0">
+      <span *ngFor="let user of typingUsers">{{ user }} est en train d'écrire...</span>
     </div>
+
     <div class="send-message">
-        <input #messageInput type="text" name="message-input" placeholder="Ecrivez votre message" (keyup)="onKeyUp($event)">
+        <input #messageInput [formControl]="messageFormControl" type="text" name="message-input" placeholder="Ecrivez votre message">
         <button class="btn-base" (click)="sendMessage()">Envoyer</button>
     </div>
   </div>

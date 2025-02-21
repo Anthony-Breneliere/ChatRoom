@@ -1,12 +1,12 @@
 import { computed, inject, Injectable } from "@angular/core";
 import { MessagingService } from "./messaging.service";
 import { ChatRoom } from "../../models/chat-room.model";
-import { BehaviorSubject, combineLatest, map, Observable } from "rxjs";
+import { BehaviorSubject, combineLatest, map, Observable, Subject } from "rxjs";
 import { ChatMessage } from "../../models/chat-message.model";
 import { User } from "../../models/user.model";
 import { AccountService } from "../account/account.service";
 import { NotificationService } from "../notification/notification.service";
-import { UserDto } from "../../dto/user.dto";
+import { formatUserName, UserDto } from "../../dto/user.dto";
 import { has } from "lodash";
 
 @Injectable({
@@ -34,13 +34,14 @@ export class MessagingManagerService {
     private activeChatRoomId$ = new BehaviorSubject<string | null>(null); // Chat actif
     private messagesHistoryByChatRoom$ = new BehaviorSubject<Map<string, ChatMessage[]>>(new Map()); // historique (refacto avec le joinedChatRooms$ ?)
     private participants$ = new BehaviorSubject<User[]>([]); // Messages du chat actif
-
+    private userTypingSubject$ = new Subject<string>();
     private readonly _accountService = inject(AccountService);
     private readonly _user = computed<User | null>(this._accountService.user);
 
 
     constructor(private messagingService: MessagingService, private notificationService: NotificationService) {
         this.subscribeToHub();
+
     }
 
 
@@ -49,6 +50,7 @@ export class MessagingManagerService {
         this.messagingService.onNewMessage().subscribe(message => this.handleNewMessage(message));
         this.messagingService.onUserJoinChatRoom().subscribe((obj) => this.handleUserJoinChatRoom(obj.chatRoomId, obj.user));
         this.messagingService.onUserLeaveChatRoom().subscribe(obj => this.handleUserLeaveChatRoom(obj.chatRoomId, obj.user));
+        this.messagingService.onUserIsTyping().subscribe((obj) => this.handleUserIsTyping(obj.chatRoomId, obj.user))
     }
 
 
@@ -132,6 +134,11 @@ export class MessagingManagerService {
         return this.activeChatRoomId$.asObservable();
     }
 
+    // Récupère les utilisateurs qui écrivent
+    public getUserTyping$(): Observable<string> {
+        return this.userTypingSubject$.asObservable();
+    }
+
     // Récupère tous les chats rejoins par l'utilsateur
     public getJoinedChatRooms$(): Observable<ChatRoom[]> {
         return this.joinedChatRooms$.asObservable();
@@ -157,8 +164,6 @@ export class MessagingManagerService {
         return this.participants$.asObservable();
     }
 
-
-
     /* Gestion de la réception des messages  */
     private handleNewMessage(message: ChatMessage) {
         this.addMessageToChatRoom(message.roomId, message);
@@ -173,10 +178,18 @@ export class MessagingManagerService {
     private handleUserJoinChatRoom(chatRoomId: string, user: UserDto) {
         this.addUserToJoinedRoom(chatRoomId, [user])
     }
+
+    //Handler pour un utilisateur qui quitte
     private handleUserLeaveChatRoom(chatRoomId: string, user: UserDto) {
         this.removeUserFromJoinedRoom(chatRoomId, user);
     }
 
+    //Handler pour un utilisateur qui quitte
+    private handleUserIsTyping(chatRoomId: string, user: UserDto) {
+        if (this.activeChatRoomId$.getValue() == chatRoomId) {
+            this.userTypingSubject$.next(formatUserName(user));
+        }
+    }
 
     /* Gestion des messages */
 
@@ -188,6 +201,17 @@ export class MessagingManagerService {
             // TODO notification message d'erreur
             console.log("Erreur lors de l'envoie du message :", message, error)
         }
+    }
+
+    public async sendUserIsTyping(chatRoomId: string) {
+        const userId = this._user()?.id
+        if (userId) {
+            await this.messagingService.sendUserIsTyping(chatRoomId, userId)
+        } else {
+            // TODO Notification
+            console.log("Une erreur est survenue. Vous n'êtes pas correctement connecté à l'application..")
+        }
+
     }
 
     private addMessageToChatRoom(chatRoomId: string, chatMessage: ChatMessage) {

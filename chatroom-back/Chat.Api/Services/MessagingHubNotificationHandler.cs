@@ -73,4 +73,12 @@ public sealed class MessagingHubNotificationHandler : IMessagingNotificationHand
         UserDto userDto = _mapper.Map<UserDto>(user);
         await _hubContext.Clients.Group(chatRoomId.ToString()).UserLeaveChatRoom(chatRoomId.ToString(), userDto);
     }
+
+    /// <inheritdoc />
+    public async Task NotifyUserIsTypingAsync(Guid chatRoomId, string excludedConnexionId, User user)
+    {
+        UserDto userDto = _mapper.Map<UserDto>(user);
+        await _hubContext.Clients.GroupExcept(chatRoomId.ToString(), excludedConnexionId).UserIsTyping(chatRoomId.ToString(), userDto);
+    }
+
 }

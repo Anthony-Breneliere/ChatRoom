@@ -46,6 +46,13 @@ public interface IMessagingHubPush
     /// <param name="chatRoomId">The chatRoom Id.</param>
     /// <param name="user">User</param>
     public Task UserLeaveChatRoom(string chatRoomId, UserDto user);
+
+    /// <summary>
+    /// Pushes that user leave to the client.
+    /// </summary>
+    /// <param name="chatRoomId">The chatRoom Id.</param>
+    /// <param name="user">User</param>
+    public Task UserIsTyping(string chatRoomId, UserDto user);
 }
 
 /// <summary>
@@ -63,9 +70,15 @@ public interface IMessagingHubInvoke
     /// <summary>
     /// Leave the chat room
     /// </summary>
-    /// <param name="roomId"></param>
+    /// <param name="roomId">Room Id</param>
     public Task LeaveChatRoom(Guid roomId);
-    
+
+    /// <summary>
+    ///  User is typing
+    /// </summary>
+    /// <param name="roomId">Room Id</param>
+    public Task UserIsTyping(Guid roomId);
+
     /// <summary>
     /// Submits a new message to the chatroom.
     /// </summary>

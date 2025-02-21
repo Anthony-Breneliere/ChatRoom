@@ -20,6 +20,7 @@ export class MessagingService extends SignalRClientBase {
 	private createChatRoomSubject = new Subject<ChatRoom>();
 	private userJoinChatRoomSubject = new Subject<{ chatRoomId: string, user: UserDto }>();
 	private userLeaveChatRoomSubject = new Subject<{ chatRoomId: string, user: UserDto }>();
+	private userIsTypingSubject = new Subject<{ chatRoomId: string, user: UserDto }>();
 
 	constructor() {
 		super(environment.API_URL + '/hub/messaging');
@@ -45,18 +46,16 @@ export class MessagingService extends SignalRClientBase {
 			this.createChatRoomSubject.next(chatRoom)
 		});
 
-
-
-		// Techniquement je sais pas si je suis censé envoyer (ducoup recevoir) toute la chatRoom pour
-		// éviter l'incohérence entre le front et le back.
-		// ou juste envoyer l'utilisateur pour alléger les données
-		// ou le mieux serait une vérification périodique
 		this._hubConnection.on('UserJoinChatRoom', (chatRoomId: string, user: UserDto) => {
 			this.userJoinChatRoomSubject.next({ chatRoomId, user })
 		});
 
 		this._hubConnection.on('UserLeaveChatRoom', (chatRoomId: string, user: UserDto) => {
 			this.userLeaveChatRoomSubject.next({ chatRoomId, user })
+		});
+
+		this._hubConnection.on('UserIsTyping', (chatRoomId: string, user: UserDto) => {
+			this.userIsTypingSubject.next({ chatRoomId, user })
 		});
 	}
 
@@ -117,6 +116,14 @@ export class MessagingService extends SignalRClientBase {
 		await this._hubConnection.invoke('SendMessage', roomId, message);
 	}
 
+	/**
+	 * Send message to the chat room
+	 */
+	public async sendUserIsTyping(roomId: string, userId: string): Promise<any> {
+		await this.getConnectionPromise;
+		await this._hubConnection.invoke('UserIsTyping', roomId, userId);
+	}
+
 
 	/* Observables */
 	public onNewMessage(): Observable<ChatMessage> {
@@ -131,8 +138,8 @@ export class MessagingService extends SignalRClientBase {
 		return this.deletedMessageSubject.asObservable();
 	}
 
-	public onUserWriting(): Observable<ChatMessage> {
-		return this.userWritingSubject.asObservable();
+	public onUserIsTyping(): Observable<{ chatRoomId: string, user: UserDto }> {
+		return this.userIsTypingSubject.asObservable();
 	}
 
 	public onCreateChatRoom(): Observable<ChatRoom> {

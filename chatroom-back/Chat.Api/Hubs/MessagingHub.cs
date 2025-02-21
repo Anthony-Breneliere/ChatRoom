@@ -94,6 +94,12 @@ public sealed class MessagingHub : Hub<IMessagingHubPush>, IMessagingHubInvoke
     }
 
     /// <inheritdoc />
+    public async Task UserIsTyping(Guid roomId)
+    {
+        await _messagingService.UserIsTypingAsync(roomId, Context.ConnectionId, NameIdentifier);
+    }
+
+    /// <inheritdoc />
     public async Task SendMessage(string roomId, string message)
     {
         await _messagingService.SubmitMessageAsync(roomId, message, NameIdentifier);

@@ -1,5 +1,5 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
-import { BehaviorSubject, debounceTime, fromEvent, map, of, Subscription, tap } from 'rxjs';
+import { BehaviorSubject, debounceTime, distinctUntilChanged, fromEvent, map, of, Subscription, tap } from 'rxjs';
 import { Observable } from 'rxjs/internal/Observable';
 import { ChatMessage } from 'src/app/_common/models/chat-message.model';
 import { MessagingManagerService } from 'src/app/_common/services/messaging/messaging.manager.service';
@@ -7,11 +7,12 @@ import { MessagingService } from 'src/app/_common/services/messaging/messaging.s
 import { CommonModule } from '@angular/common';
 import { User } from 'src/app/_common/models/user.model';
 import { UserDto } from 'src/app/_common/dto/user.dto';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-chat-room-content',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './chat-room-content.component.html',
   styleUrl: './chat-room-content.component.scss'
 })
@@ -25,7 +26,9 @@ export class ChatRoomContentComponent {
 
   public activeChatRoomId: string | null = null;
 
-  public isTyping = false;
+  public typingUsers: Set<string> = new Set();
+  public messageFormControl = new FormControl('');
+
 
   /* SUbscriptions */
   private _userWriteSubscription: Subscription | null = null;
@@ -46,10 +49,11 @@ export class ChatRoomContentComponent {
 
 
   ngOnInit() {
-    this.loadChatRoom();
+    this._loadChatRoom();
+    this._loadUsersTyping();
   }
 
-  loadChatRoom() {
+  private _loadChatRoom() {
     // Peut être fusionner les deux ... sachant que history by room réagit en fonction de activeChatRoom
     this._chatRoomMessageHistory = this._chatManagerService.getMessagesHistoryOfCurrentChatRoom$()
       .subscribe(history => {
@@ -75,6 +79,19 @@ export class ChatRoomContentComponent {
       });
   }
 
+  private _loadUsersTyping() {
+    this._chatManagerService.getUserTyping$().subscribe(userId => {
+      this.typingUsers.add(userId);
+      setTimeout(() => this.typingUsers.delete(userId), 1000);
+    });
+
+    this.messageFormControl.valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged()
+    ).subscribe(async () => {
+      await this._chatManagerService.sendUserIsTyping(this.activeChatRoomId ?? "");
+    });
+  }
 
 
   ngOnDestroy(): void {
