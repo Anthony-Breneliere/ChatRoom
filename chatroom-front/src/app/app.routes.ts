@@ -9,7 +9,6 @@ import { isNotAuthenticatedGuard } from './_common/guards/is-not-authenticated/i
 import { MainComponent } from './main/main.component';
 import { MainIndexComponent } from './main/main-index/main-index.component';
 import { MainAccountComponent } from './main/main-account/main-account.component';
-import { MainDashboardComponent } from './main/main-dashboard/main-dashboard.component';
 
 import { AdminComponent } from './admin/admin.component';
 import { AdminIndexComponent } from './admin/admin-index/admin-index.component';
@@ -22,6 +21,7 @@ import { MaintenanceComponent } from './maintenance/maintenance.component';
 import { NotFoundComponent } from './not-found/not-found.component';
 import { UnauthorizedComponent } from './unauthorized/unauthorized.component';
 import { ForbiddenComponent } from './forbidden/forbidden.component';
+import { MainChatComponent } from './main/main-chat/main-chat.component';
 
 export const routes: Routes = [
 	{
@@ -38,9 +38,9 @@ export const routes: Routes = [
 				component: MainAccountComponent,
 			},
 			{
-				path: SITEMAP.dashboard.path,
+				path: SITEMAP.chat.path,
 				canActivate: [isAuthenticatedGuard],
-				component: MainDashboardComponent,
+				component: MainChatComponent,
 			}
 		],
 	},

@@ -1,7 +1,7 @@
 <header class="fixed top-0 w-full z-10 bg-white dark:bg-gray-800">
   <nav class="flex items-center justify-between px-6 py-4 lg:px-24 chat-header-nav" aria-label="Global">
     <div class="inline-flex flex-row items-center lg:flex-1">
-      <a [routerLink]="[ this.user() ? this.sitemap.dashboard.route : this.sitemap.main.route ]" class="flex -m-1.5 p-1.5">
+      <a [routerLink]="[ this.user() ? this.sitemap.chat.route : this.sitemap.main.route ]" class="flex -m-1.5 p-1.5">
         <span class="sr-only">ChatRoom</span>
         <chat-svg-logo class="w-[149px] h-[40px]" />
       </a>
@@ -19,16 +19,16 @@
     </div>
     <div class="hidden lg:flex lg:gap-x-6">
       <a
-        [routerLink]="[ this.sitemap.dashboard.route ]"
-        [ngClass]="this.router.url === this.sitemap.dashboard.route ? 'bg-blue-50 dark:bg-blue-900': ''"
+        [routerLink]="[ this.sitemap.chat.route ]"
+        [ngClass]="this.router.url === this.sitemap.chat.route ? 'bg-blue-50 dark:bg-blue-900': ''"
         class="chat-header-nav-link"
       >
         <ng-icon
           class="mr-2"
-          [ngClass]="this.router.url === this.sitemap.dashboard.route ? 'text-blue-500' : 'text-gray-900 dark:text-white'"
-          [name]="this.router.url === this.sitemap.dashboard.route ? 'saxHome2Bulk' : 'saxHome2Outline'"
+          [ngClass]="this.router.url === this.sitemap.chat.route ? 'text-blue-500' : 'text-gray-900 dark:text-white'"
+          [name]="this.router.url === this.sitemap.chat.route ? 'saxHome2Bulk' : 'saxHome2Outline'"
         />
-        Dashboard
+        Chat
       </a>
 
 
@@ -61,7 +61,7 @@
         <div class="flex flex-row justify-between items-start">
           <a
             class="flex"
-            [routerLink]="[ this.user() ? this.sitemap.dashboard.route : this.sitemap.main.route ]"
+            [routerLink]="[ this.user() ? this.sitemap.chat.route : this.sitemap.main.route ]"
             (click)="this.isMenuOpened = false"
           >
             <span class="sr-only">ChatRoom</span>
@@ -80,15 +80,15 @@
             <div class="space-y-2 py-6">
               <a
                 class="chat-header-nav-mobile-link"
-                [ngClass]="this.router.url === this.sitemap.dashboard.route ? 'bg-blue-50 dark:bg-blue-900': ''"
-                [routerLink]="[ this.sitemap.dashboard.route ]"
+                [ngClass]="this.router.url === this.sitemap.chat.route ? 'bg-blue-50 dark:bg-blue-900': ''"
+                [routerLink]="[ this.sitemap.chat.route ]"
                 (click)="this.isMenuOpened = false"
               >
                 <ng-icon
-                  [ngClass]="this.router.url === this.sitemap.dashboard.route ? 'text-blue-500' : 'text-gray-900 dark:text-white'"
-                  [name]="this.router.url === this.sitemap.dashboard.route ? 'saxHome2Bulk' : 'saxHome2Outline'"
+                  [ngClass]="this.router.url === this.sitemap.chat.route ? 'text-blue-500' : 'text-gray-900 dark:text-white'"
+                  [name]="this.router.url === this.sitemap.chat.route ? 'saxHome2Bulk' : 'saxHome2Outline'"
                 />
-                <span>Dashboard</span>
+                <span>Chat</span>
               </a>
 
             </div>

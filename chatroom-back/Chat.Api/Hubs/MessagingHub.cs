@@ -6,6 +6,7 @@ using Chat.ApiModel.Messaging;
 using Chat.Business.Messaging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using ChatRoom.ApiModel;
 
 namespace Chat.Api.Hubs;
 
@@ -49,9 +50,9 @@ public sealed class MessagingHub : Hub<IMessagingHubPush>, IMessagingHubInvoke
     /// <summary>
     /// Gets the chat room from an offer.
     /// </summary>
-    public async Task<ChatRoomDto> CreateChatRoom()
+    public async Task<ChatRoomDto> CreateChatRoom(string name)
     {
-        Model.Messaging.ChatRoom room = await _messagingService.CreateChatRoom(NameIdentifier)
+        Model.Messaging.ChatRoom room = await _messagingService.CreateChatRoom(name, NameIdentifier)
                                         ?? throw new ArgumentException("Offer not created");
 
         return _mapper.Map<ChatRoomDto>(room);
@@ -64,6 +65,7 @@ public sealed class MessagingHub : Hub<IMessagingHubPush>, IMessagingHubInvoke
             throw new KeyNotFoundException("Chatroom not found.");
 
         await Groups.AddToGroupAsync(Context.ConnectionId, roomId.ToString());
+        await _messagingService.JoinChatRoomAsync(roomId, NameIdentifier);
 
         var messages = _messagingService.GetMessagesInRoom(roomId);
 
@@ -74,11 +76,50 @@ public sealed class MessagingHub : Hub<IMessagingHubPush>, IMessagingHubInvoke
     public async Task LeaveChatRoom(Guid roomId)
     {
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId.ToString());
+        await _messagingService.LeaveChatRoomAsync(roomId, NameIdentifier);
     }
 
     /// <inheritdoc />
     public async Task SendMessage(string roomId, string message)
     {
         await _messagingService.SubmitMessageAsync(roomId, message, NameIdentifier);
+        await NotifyStoppedTyping(roomId);
+    }
+
+    /// <inheritdoc />
+    public async Task<IEnumerable<ChatRoomDto>> GetChatRooms()
+    {
+        var rooms = await _messagingService.GetChatRooms(Context.ConnectionAborted);
+
+        return _mapper.Map<IEnumerable<ChatRoomDto>>(rooms);
+    }
+
+    /// <inheritdoc />
+    public async Task EditMessage(string roomId, Guid messageId, string message)
+    {
+        await _messagingService.EditMessageAsync(messageId, message, NameIdentifier);
+        await NotifyStoppedTyping(roomId);
+    }
+
+    /// <summary>
+    /// Notifies that the user is typing
+    /// </summary>
+    public async Task NotifyTyping(string roomId)
+    {
+        var user = await _messagingService.GetUserFromNameIdentifier(NameIdentifier);
+        var userDto = _mapper.Map<UserDto>(user);
+
+        await Clients.Group(roomId).UserTyping(Guid.Parse(roomId), userDto);
+    }
+
+    /// <summary>
+    /// Notifies that the user stopped typing
+    /// </summary>
+    public async Task NotifyStoppedTyping(string roomId)
+    {
+        var user = await _messagingService.GetUserFromNameIdentifier(NameIdentifier);
+        var userDto = _mapper.Map<UserDto>(user);
+
+        await Clients.Group(roomId).UserStoppedTyping(Guid.Parse(roomId), userDto);
     }
 }

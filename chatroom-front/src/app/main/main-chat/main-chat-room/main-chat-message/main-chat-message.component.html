@@ -1,0 +1,41 @@
+<div class="flex flex-col">
+	@if (shouldShowDate()) {
+	<div class="flex justify-center">
+		<span class="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">
+			{{ getFormattedDate(message.createdAt) }}
+		</span>
+	</div>
+	}
+
+	<div
+		class="flex flex-col gap-1 w-full {{ isMessageFromCurrentUser() ? 'items-end' : '' }}"
+		(contextmenu)="onContextMenu($event)"
+	>
+		@if (!message.isSystemMessage && shouldMessageHaveInfo()) {
+		<div class="flex items-center gap-1">
+			@if (!isMessageFromCurrentUser()) {
+			<span class="text-sm font-semibold text-gray-900 dark:text-white">{{ message.author.email!.split('@')[0] }}</span>
+			} @if (shouldMessageHasTime()) {
+			<span class="text-sm font-normal text-gray-500 dark:text-gray-400">
+				{{ getTime(message.createdAt) }}
+			</span>
+			} @if (isMessageEdited()) {
+			<span class="text-sm font-normal text-gray-500 dark:text-gray-400">(édité)</span>
+			}
+		</div>
+		}
+		<div
+			class="flex flex-col leading-1.5 border-gray-200 {{
+				message.isSystemMessage
+					? 'w-full text-gray-500 dark:text-gray-400 mx-auto italic my-0 text-center'
+					: isMessageFromCurrentUser()
+					? 'p-4 w-min bg-blue-500 ml-4 rounded-s-xl rounded-ee-xl text-white'
+					: 'p-4 w-min bg-gray-100 mr-4 rounded-e-xl rounded-es-xl text-gray-900'
+			}} {{ editing ? 'bg-blue-500/75' : '' }} {{ !shouldMessageHaveInfo() ? '-mt-2' : '' }}"
+		>
+			<p class="text-sm font-normal">
+				{{ message.content }}
+			</p>
+		</div>
+	</div>
+</div>

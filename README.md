@@ -37,7 +37,7 @@ For the front end application you must [download NodeJS](https://nodejs.org/en/d
 ```bash
 ~$ npm i -g @angular/cli
 ~$ npm i -g pnpm
-~$ cd ./chatroom-app
+~$ cd ./chatroom-front
 ~$ pnpm i
 ```
 
@@ -51,7 +51,7 @@ Now that all the project dependencies are installed, you can launch it without w
 First of all you must go to the root of the project by typing the following command:
 
 ```bash
-~$ cd ~/ChatRoom
+~$ cd ./chatroom-back
 ```
 
 ### Database
@@ -82,7 +82,7 @@ If not install them with the following command:
 In a second terminal, type the following commands:
 
 ```bash
-~$ cd ./ChatRoom.Startup
+~$ cd ./Chat.Startup
 ~$ dotnet run
 ```
 

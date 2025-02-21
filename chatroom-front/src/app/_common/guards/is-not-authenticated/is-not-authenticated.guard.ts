@@ -13,6 +13,6 @@ export const isNotAuthenticatedGuard: CanActivateFn = async (route, state) => {
 
 	if (!user) return true;
 
-	router.navigate([SITEMAP.dashboard.route]);
+	router.navigate([SITEMAP.chat.route]);
 	return false;
 };

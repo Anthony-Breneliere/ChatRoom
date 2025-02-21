@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using ChatRoom.ApiModel;
 
 namespace Chat.ApiModel.Messaging;
 
@@ -21,6 +22,11 @@ public sealed class ChatMessageDto
     /// ID of message's author
     /// </summary>
     public Guid AuthorId { get; set; }
+
+    /// <summary>
+    /// Author user
+    /// </summary>
+    public UserDto Author { get; set; } = new();
 
     /// <summary>
     /// Full name of the message's author

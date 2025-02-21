@@ -45,4 +45,7 @@ public sealed class ChatMessage : ICreateTimestamp
 
     /// <inheritdoc />
     public DateTimeOffset CreatedAt { get; set; }
+
+    /// <inheritdoc />
+    public DateTimeOffset UpdatedAt { get; set; }
 }

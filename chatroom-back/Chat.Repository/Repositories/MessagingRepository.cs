@@ -23,8 +23,12 @@ public sealed class MessagingRepository : IMessagingPersistance
     }
 
     /// <inheritdoc />
-    public async  Task<IEnumerable<ChatMessage>> GetMessages(Guid roomId, CancellationToken ct) =>
-        await _context.ChatMessages.Where(m => m.RoomId == roomId).AsNoTracking().ToArrayAsync(ct);
+    public async Task<IEnumerable<ChatMessage>> GetMessages(Guid roomId, CancellationToken ct) =>
+        await _context.ChatMessages
+            .Where(m => m.RoomId == roomId)
+            .Include(m => m.Author)
+            .AsNoTracking()
+            .ToArrayAsync(ct);
 
     /// <inheritdoc />
     public IQueryable<ChatRoom> GetRooms() => _context.ChatRooms.AsNoTracking();
@@ -38,9 +42,9 @@ public sealed class MessagingRepository : IMessagingPersistance
     /// <inheritdoc />
     public IEnumerable<ChatMessage> GetMessagesInRoom(Guid roomId) =>
         (from message in _context.ChatMessages
-        where message.RoomId == roomId
-        orderby message.CreatedAt
-        select message).AsNoTracking().ToArray();
+         where message.RoomId == roomId
+         orderby message.CreatedAt
+         select message).Include(m => m.Author).AsNoTracking().ToArray();
 
     /// <inheritdoc />
     public async Task SubmitMessageAsync(ChatMessage message, CancellationToken ct = default)
@@ -83,5 +87,33 @@ public sealed class MessagingRepository : IMessagingPersistance
     {
         return await _context.ChatRooms
             .Include(static r => r.Participants).FirstOrDefaultAsync(c => c.Id == roomId, ct);
+    }
+
+    /// <summary>
+    /// Get all chat rooms.
+    /// </summary>
+    public async Task<IEnumerable<ChatRoom>> GetChatRooms(CancellationToken ct = default)
+    {
+        return await _context.ChatRooms
+            .Include(r => r.Participants)
+            .AsNoTracking()
+            .ToListAsync(ct);
+    }
+
+    /// <inheritdoc />
+    /// <summary>
+    /// Edit message
+    /// </summary>
+    public async Task EditMessageAsync(ChatMessage message, CancellationToken ct = default)
+    {
+        _context.ChatMessages.Update(message);
+        await _context.SaveChangesAsync(ct);
+    }
+
+    /// <inheritdoc />
+    public async Task UpdateChatRoomAsync(ChatRoom room, CancellationToken ct = default)
+    {
+        _context.ChatRooms.Update(room);
+        await _context.SaveChangesAsync(ct);
     }
 }

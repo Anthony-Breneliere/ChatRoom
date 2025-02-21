@@ -13,6 +13,11 @@ public sealed class ChatRoomDto
     public Guid Id { get; init; }
 
     /// <summary>
+    /// Name of the chat room
+    /// </summary>
+    public string Name { get; set; } = "";
+
+    /// <summary>
     /// Companies in the chat room
     /// </summary>
     public UserDto[] Participants { get; set; } = [];
@@ -26,7 +31,7 @@ public sealed class ChatRoomDto
     /// Date and time the chat room was created.
     /// </summary>
     public DateTimeOffset CreatedAt { get; set; }
-    
+
     /// <summary>
     /// Whether the chat room is read-only.
     /// </summary>

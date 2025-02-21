@@ -4,8 +4,6 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
-
 namespace Chat.Repository.Migrations
 {
     /// <inheritdoc />
@@ -19,6 +17,7 @@ namespace Chat.Repository.Migrations
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
+                    name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
                     created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
                     read_only = table.Column<bool>(type: "boolean", nullable: false)
                 },
@@ -166,7 +165,8 @@ namespace Chat.Repository.Migrations
                     room_id = table.Column<Guid>(type: "uuid", nullable: false),
                     author_id = table.Column<Guid>(type: "uuid", nullable: false),
                     content = table.Column<string>(type: "character varying(4096)", maxLength: 4096, nullable: false),
-                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()")
+                    created_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
+                    updated_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()")
                 },
                 constraints: table =>
                 {

@@ -1,0 +1,25 @@
+<div class="flex flex-col gap-y-6">
+	<h1 class="font-bold uppercase text-5xl">Chat</h1>
+
+	<button
+		(click)="createChatRoom()"
+		class="mr-auto rounded-md text-base font-medium transition-colors bg-blue-500 text-white hover:bg-blue-500/80 p-4"
+	>
+		Créer un salon
+	</button>
+
+	<h2 class="font-bold text-3xl">Salons disponibles</h2>
+	@for (room of rooms(); track room.id) {
+	<button (click)="joinChatRoom(room.id)" class="mr-auto">{{ room.name }}</button>
+	}
+</div>
+
+<div class="fixed right-0 bottom-0 flex justify-end">
+	@for (joinedRoom of joinedRooms(); track joinedRoom) {
+	<app-main-chat-room
+		[roomId]="joinedRoom"
+		[onChatRoomLeave]="leaveChatRoom.bind(this, joinedRoom)"
+		class="w-52 md:w-64 lg:w-80 flex items-end"
+	/>
+	}
+</div>
