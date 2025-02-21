@@ -1,0 +1,25 @@
+<div class="conversation">
+    <div class="header">
+        <h1>{{id}}</h1>
+        <button (click)="leaveChatRoom()">X</button>
+    </div>
+
+    <div #discussion class="messages">
+        <div *ngFor="let message of roomInfo.messages" class="message-container" [ngStyle]="{
+            'align-self' : message.authorId == user$()!.id ? 'flex-end' : 'flex-start',
+            'margin-right' : message.authorId == user$()!.id ? '10px' : '0',
+            'margin-left' : message.authorId == user$()!.id ? '0' : '10px',
+        }">
+            
+            <p [innerHTML]="getSanitizedMessage(message.content)"></p>
+            <p class="message-date">{{formatDate(message.createdAt)}}</p>
+        </div>
+    </div>
+
+
+    <div class="bottom">
+        <textarea [(ngModel)]="message"></textarea>
+        <button (click)="sendMessage()">SEND</button>
+    </div>
+	
+</div>

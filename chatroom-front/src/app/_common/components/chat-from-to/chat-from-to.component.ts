@@ -1,6 +1,5 @@
 import { Component, input } from '@angular/core';
 
-import type { Company } from '../../models/company.model';
 import type { User } from '../../models/user.model';
 import { getGravatarUrl } from '../../utils/get-gravatar-url.util';
 import { ChatSvgIconComponent } from '../chat-svg-icon/chat-svg-icon.component';
@@ -13,10 +12,9 @@ import { ChatSvgIconComponent } from '../chat-svg-icon/chat-svg-icon.component';
 	styleUrl: './chat-from-to.component.scss',
 })
 export class ChatFromToComponent {
-	public readonly from = input.required<User | Company>();
-	public readonly to = input<Company[]>();
+	public readonly from = input.required<User>();
 
-	public getIconUri(party?: User | Company | null): string {
+	public getIconUri(party?: User | null): string {
 		if (!party) {
 			return 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
 		}
@@ -24,7 +22,7 @@ export class ChatFromToComponent {
 		return getGravatarUrl((party as User).email ?? (party as Company).displayName, 64);
 	}
 
-	public getDisplayName(party?: User | Company | null): string {
+	public getDisplayName(party?: User | null): string {
 		if (!party) {
 			return 'Unknown';
 		}

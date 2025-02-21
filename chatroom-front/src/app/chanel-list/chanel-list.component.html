@@ -1,1 +1,14 @@
-<p>chanel-list works!</p>
+<app-main-header></app-main-header>
+<div class="rooms">
+	<button (click)="createChatRoom()">Ajout de room</button>
+	<div class="room-list">
+		<div class="room" *ngFor="let room of allRooms"  (click)="joinChatRoom(room.id)">
+			<div class="room-name">{{ room.id }}</div>
+			<div class="room-participant">Nombre de personnes connectées : {{ room.participants.length }}</div>
+		</div>
+	</div>
+</div>
+
+<div class="conversations">
+    <app-chanel *ngFor="let room of roomsJoined" [id]="room.id"></app-chanel>
+</div>

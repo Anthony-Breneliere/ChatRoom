@@ -1,9 +1,10 @@
-import { Company } from './company.model';
+
+import { UserDto } from '../dto/user.dto';
 import { ChatMessage } from './chat-message.model';
 
 export interface ChatRoom {
 	id: string;
-	participants: Company[];
+	participants: UserDto[];
 	messages: ChatMessage[];
 	createdAt: Date;
 	updatedAt: Date;

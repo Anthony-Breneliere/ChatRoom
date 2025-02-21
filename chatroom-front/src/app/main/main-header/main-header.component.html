@@ -1,12 +1,6 @@
 <header class="fixed top-0 w-full z-10 bg-white dark:bg-gray-800">
   <nav class="flex items-center justify-between px-6 py-4 lg:px-24 chat-header-nav" aria-label="Global">
     <div class="inline-flex flex-row items-center lg:flex-1">
-      <a [routerLink]="[ this.user() ? this.sitemap.dashboard.route : this.sitemap.main.route ]" class="flex -m-1.5 p-1.5">
-        <span class="sr-only">ChatRoom</span>
-        <chat-svg-logo class="w-[149px] h-[40px]" />
-      </a>
-
-      <chat-label class="ml-2 mt-1" label="Beta" />
     </div>
 
     <div class="flex lg:hidden">
@@ -16,22 +10,6 @@
           <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
         </svg>
       </button>
-    </div>
-    <div class="hidden lg:flex lg:gap-x-6">
-      <a
-        [routerLink]="[ this.sitemap.dashboard.route ]"
-        [ngClass]="this.router.url === this.sitemap.dashboard.route ? 'bg-blue-50 dark:bg-blue-900': ''"
-        class="chat-header-nav-link"
-      >
-        <ng-icon
-          class="mr-2"
-          [ngClass]="this.router.url === this.sitemap.dashboard.route ? 'text-blue-500' : 'text-gray-900 dark:text-white'"
-          [name]="this.router.url === this.sitemap.dashboard.route ? 'saxHome2Bulk' : 'saxHome2Outline'"
-        />
-        Dashboard
-      </a>
-
-
     </div>
 
     <div class="items-center hidden lg:flex lg:flex-1 lg:justify-end">
@@ -59,14 +37,6 @@
 
       <div class="fixed inset-y-0 right-0 z-10 w-full overflow-y-auto bg-white dark:bg-gray-800 px-6 py-4 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
         <div class="flex flex-row justify-between items-start">
-          <a
-            class="flex"
-            [routerLink]="[ this.user() ? this.sitemap.dashboard.route : this.sitemap.main.route ]"
-            (click)="this.isMenuOpened = false"
-          >
-            <span class="sr-only">ChatRoom</span>
-            <chat-svg-logo class="w-72" />
-          </a>
 
           <button (click)="this.isMenuOpened = false" type="button" class="-mx-2.5 rounded-md p-2.5 text-gray-700 dark:text-white">
             <span class="sr-only">Close menu</span>
@@ -74,38 +44,6 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
-        </div>
-        <div class="mt-6 flow-root">
-          <div class="-my-6 divide-y divide-gray-500/10">
-            <div class="space-y-2 py-6">
-              <a
-                class="chat-header-nav-mobile-link"
-                [ngClass]="this.router.url === this.sitemap.dashboard.route ? 'bg-blue-50 dark:bg-blue-900': ''"
-                [routerLink]="[ this.sitemap.dashboard.route ]"
-                (click)="this.isMenuOpened = false"
-              >
-                <ng-icon
-                  [ngClass]="this.router.url === this.sitemap.dashboard.route ? 'text-blue-500' : 'text-gray-900 dark:text-white'"
-                  [name]="this.router.url === this.sitemap.dashboard.route ? 'saxHome2Bulk' : 'saxHome2Outline'"
-                />
-                <span>Dashboard</span>
-              </a>
-
-            </div>
-
-            <div class="py-6">
-              @if(!this.user()) {
-                <a
-                  [routerLink]="[ this.sitemap.auth.route ]"
-                  class="-mx-3 block rounded-lg px-3 py-2.5 text-base font-medium leading-7 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700"
-                >Log in</a>
-              }
-
-              @else {
-                <app-main-header-account [user]="this.user()!" />
-              }
-            </div>
-          </div>
         </div>
       </div>
     </div>

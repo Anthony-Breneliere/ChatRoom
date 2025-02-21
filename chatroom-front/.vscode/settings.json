@@ -21,6 +21,6 @@
 	"peacock.color": "#1F2937",
 	"editor.useTabStops": false,
 	"[html]": {
-		"editor.defaultFormatter": "ghaschel.vscode-angular-html"
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
 	}
 }

@@ -1,4 +1,5 @@
 using Chat.ApiModel.Messaging;
+using ChatRoom.ApiModel;
 
 namespace Chat.Api.Hubs;
 
@@ -24,6 +25,26 @@ public interface IMessagingHubPush
     /// </summary>
     /// <param name="id">The ID of the deleted message.</param>
     public Task DeletedMessage(Guid id);
+
+    /// <summary>
+    /// Pushes a new chat room to the client.
+    /// </summary>
+    /// <param name="room">The new chat room to push.</param>
+    Task NewRoom(ChatRoomDto room);
+
+    /// <summary>
+    /// Pushes a user who had joigned a room to the clients.
+    /// </summary>
+    /// <param name="roomId"></param>
+    /// <param name="user"></param>
+    public Task UserJoignedChatRoom(Guid roomId, UserDto user);
+
+    /// <summary>
+    /// Pushes a user who had left a room to the clients.
+    /// </summary>
+    /// <param name="roomId"></param>
+    /// <param name="user"></param>
+    public Task UserLeavedChatRoom(Guid roomId, UserDto user);
 }
 
 /// <summary>
@@ -58,4 +79,9 @@ public interface IMessagingHubInvoke
     /// Create chat room
     /// </summary>
     Task<ChatRoomDto> CreateChatRoom();
+
+    /// <summary>
+    /// Gets all chat rooms.
+    /// </summary>
+    Task<ChatRoomDto[]> GetAllChatRooms();
 }

@@ -37,11 +37,6 @@ export const routes: Routes = [
 				path: SITEMAP.account.path,
 				canActivate: [isAuthenticatedGuard],
 				component: MainAccountComponent,
-			},
-			{
-				path: SITEMAP.dashboard.path,
-				canActivate: [isAuthenticatedGuard],
-				component: MainDashboardComponent,
 			}
 		],
 	},
@@ -66,6 +61,10 @@ export const routes: Routes = [
 	{ path: SITEMAP.maintenance.path, component: MaintenanceComponent },
 	{ path: SITEMAP.forbidden.path, component: ForbiddenComponent },
 	{ path: SITEMAP.unauthorized.path, component: UnauthorizedComponent },
-	{path : SITEMAP.chanels.path, component: ChanelListComponent},
+	{
+		path: SITEMAP.chanels.path,
+		canActivate: [isAuthenticatedGuard],
+		component: ChanelListComponent,
+	},
 	{ path: '**', component: NotFoundComponent },
 ];

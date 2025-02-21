@@ -1,0 +1,31 @@
+.rooms{
+    margin-top: 100px;
+    display: flex;
+    flex-direction: column;
+    height: 30vh;
+    width: 100vw;
+    align-items: center;
+    overflow: hidden;
+    overflow-y: auto;
+}
+
+.room-list{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    padding: 16px;
+}
+
+.room{
+    background-color: #f1f1f1;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.conversations{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    padding: 16px;
+    width: 100vw;
+}

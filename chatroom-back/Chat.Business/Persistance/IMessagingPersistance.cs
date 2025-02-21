@@ -45,6 +45,13 @@ public interface IMessagingPersistance
     /// <summary>
     /// Gets a specific chat room.
     /// </summary>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>The chat room.</returns>
+    Task<Model.Messaging.ChatRoom[]> GetChatRoomsAsync(CancellationToken ct = default);
+
+    /// <summary>
+    /// Gets a specific chat room.
+    /// </summary>
     /// <param name="roomId">ID of the chat room.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The chat room.</returns>
@@ -57,4 +64,9 @@ public interface IMessagingPersistance
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The chat message.</returns>
     Task<ChatMessage?> GetMessageAsync(Guid id, CancellationToken ct = default);
+
+    /// <summary>
+    /// Updates a chat room.
+    /// </summary>
+    Task UpdateRoomAsync(ChatRoom room, CancellationToken ct);
 }

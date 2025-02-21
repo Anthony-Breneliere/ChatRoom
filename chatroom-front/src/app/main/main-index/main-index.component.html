@@ -1,20 +1,25 @@
 <div class="chat-main-index">
   <div class="mx-auto max-w-2xl py-16 sm:py-24 lg:py-38">
     <div class="text-center">
-      <h1 class="chat-main-index-title">
-        <chat-svg-logo class="h-32 w-100" />
-        <span class="sr-only">ChatRoom</span>
-      </h1>
-      <p class="chat-main-index-paragraphe">
-        ChatRoom revolutionizes pharma trade by connecting buyers and suppliers across Europe.
-        Our platform offers seamless sourcing, instant communication, dynamic auctions,
-        and relationship management to build stronger partnerships and grow your business.
-      </p>
-      <div class="mt-10 flex items-center justify-center gap-x-6">
-        <a href="https://dev.chatroom.com" target="_blank">
-          <chat-button text="Visit our website" />
-        </a>
-      </div>
+      @if(user()){
+        <p class="chat-main-index-paragraphe">
+          Check our chatrooms and start chatting with other users
+        </p>
+        <div class="mt-10 flex items-center justify-center gap-x-6">
+          <a [routerLink]="sitemap.chanels.route">
+            <chat-button text="ChatRooms" />
+          </a>
+        </div>
+      }@else {
+        <p class="chat-main-index-paragraphe">
+          Please log in to visit our website
+        </p>
+        <div class="mt-10 flex items-center justify-center gap-x-6">
+          <a [routerLink]="sitemap.auth.route">
+            <chat-button text="Log in" />
+          </a>
+        </div>
+      }
     </div>
   </div>
 </div>
