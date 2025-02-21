@@ -1,3 +1,4 @@
+using Chat.Model;
 using Chat.Model.Messaging;
 
 namespace Chat.Business.Messaging;
@@ -7,6 +8,28 @@ namespace Chat.Business.Messaging;
 /// </summary>
 public interface IMessagingNotificationHandler
 {
+    /// <summary>
+    /// Notifies the client of a new chat room.
+    /// </summary>
+    /// <param name="room"></param>
+    /// <returns></returns>
+    public Task NotifyNewChatRoomAsync(Model.Messaging.ChatRoom room);
+
+    /// <summary>
+    /// Notifies the client of a join/leave chat room participant.
+    /// </summary>
+    /// <param name="room"></param>
+    /// <returns></returns>
+    public Task NotifyUpdateChatRoomParticipantAsync(Model.Messaging.ChatRoom room);
+
+    /// <summary>
+    /// Notifies the client that that someone write in the chat room.
+    /// </summary>
+    /// <param name="room"></param>
+    /// <param name="user"></param>
+    /// <returns></returns>
+    public Task NotifySomeoneWriteInChatRoomAsync(ChatRoom room, User user);
+    
     /// <summary>
     /// Notifies the client of a new message.
     /// </summary>

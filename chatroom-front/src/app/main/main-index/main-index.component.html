@@ -1,21 +1,56 @@
-<div class="chat-main-index">
-  <div class="mx-auto max-w-2xl py-16 sm:py-24 lg:py-38">
-    <div class="text-center">
-      <h1 class="chat-main-index-title">
-        <chat-svg-logo class="h-32 w-100" />
-        <span class="sr-only">ChatRoom</span>
-      </h1>
-      <p class="chat-main-index-paragraphe">
-        ChatRoom revolutionizes pharma trade by connecting buyers and suppliers across Europe.
-        Our platform offers seamless sourcing, instant communication, dynamic auctions,
-        and relationship management to build stronger partnerships and grow your business.
-      </p>
-      <div class="mt-10 flex items-center justify-center gap-x-6">
-        <a href="https://dev.chatroom.com" target="_blank">
-          <chat-button text="Visit our website" />
-        </a>
+<div class="chat-container">
+  <aside class="sidebar">
+    <h2 class="sidebar-title">Chat Rooms</h2>
+    <div class="room-list">
+      <h3>Available Channels</h3>
+      <ul>
+        <li *ngFor="let room of availableChatRooms()"
+            (click)="joinChatRoom(room)"
+            [class.active]="joinedChatRooms().includes(room)">
+          <span class="room-name">{{ room.name }}</span>
+          <span class="join-btn">Join</span>
+        </li>
+      </ul>
+    </div>
+    <div class="create-channel">
+      <input type="text" [(ngModel)]="newChannelName" placeholder="New Channel Name">
+      <button (click)="createChannel()">Create</button>
+    </div>
+  </aside>
+
+  <main class="chat-grid">
+    <div class="chat-room" *ngFor="let room of joinedChatRooms()">
+      <header class="chat-header">
+        <div class="room-info">
+          <h2>{{ room.name }}</h2>
+          <div class="participants">
+            {{ getDisplayParticipants(room.participants) }}
+          </div>
+        </div>
+        <div class="room-actions">
+          <button class="load-history-btn" (click)="loadChatHistory(room)">Load Chat History</button>
+          <button class="leave-room-btn" (click)="leaveChatRoom(room)">Leave Room</button>
+        </div>
+      </header>
+      <div class="messages-container">
+        <div class="message" *ngFor="let msg of room.messages" [class.user-message]="msg.authorId === user()?.id">
+          <div class="message-header">
+            <span class="author">{{ msg.authorFullName }}</span>
+            <span class="timestamp">{{ msg.createdAt | date:'short' }}</span>
+          </div>
+          <p class="content">{{ msg.content }}</p>
+        </div>
+      </div>
+      <div class="writing-indicator" *ngIf="writingUsers[room.id]">
+        {{ writingUsers[room.id] }} is writing...
+      </div>
+      <div class="message-input">
+        <input type="text"
+         [(ngModel)]="newMessageContents[room.id]"
+         (input)="onUserTyping(room.id)"
+         placeholder="Type your message...">
+        <button (click)="sendMessage(room)">Send</button>
       </div>
     </div>
-  </div>
+  </main>
 </div>
-

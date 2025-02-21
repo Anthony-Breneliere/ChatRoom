@@ -6,6 +6,7 @@ using Chat.ApiModel.Messaging;
 using Chat.Business.Messaging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using Chat.Model.Messaging;
 
 namespace Chat.Api.Hubs;
 
@@ -36,6 +37,17 @@ public sealed class MessagingHub : Hub<IMessagingHubPush>, IMessagingHubInvoke
         ?? throw new AuthenticationException("User nameidentifier not found in Claims.");
     
     /// <summary>
+    /// Gets all chat room.
+    /// </summary>
+    public List<ChatRoomDto> ListChatRoom()
+    {
+        List<Model.Messaging.ChatRoom> room = _messagingService.GetRooms().ToList()
+                                        ?? throw new ArgumentException("Offer not found");
+
+        return _mapper.Map<List<ChatRoomDto>>(room);
+    }
+
+    /// <summary>
     /// Gets the chat room from an offer.
     /// </summary>
     public async Task<ChatRoomDto> GetChatRoom(Guid roomId)
@@ -49,36 +61,58 @@ public sealed class MessagingHub : Hub<IMessagingHubPush>, IMessagingHubInvoke
     /// <summary>
     /// Gets the chat room from an offer.
     /// </summary>
-    public async Task<ChatRoomDto> CreateChatRoom()
+    public async Task<ChatRoomDto> CreateChatRoom(string chatRoomName, string creatorIdentifier)
     {
-        Model.Messaging.ChatRoom room = await _messagingService.CreateChatRoom(NameIdentifier)
+        Model.Messaging.ChatRoom room = await _messagingService.CreateChatRoom(chatRoomName, creatorIdentifier)
                                         ?? throw new ArgumentException("Offer not created");
 
         return _mapper.Map<ChatRoomDto>(room);
     }
+
+    /// <summary>
+    /// Gets the chat room history.
+    /// </summary>
+    public IEnumerable<ChatMessageDto> GetChatRoomHistory(string chatRoomId)
+    {
+        var messages = _messagingService.GetMessagesInRoom(Guid.Parse(chatRoomId));
+
+        return messages.Adapt<IEnumerable<ChatMessageDto>>(_mapper.Config);
+    }
     
     /// <inheritdoc />
-    public async Task<IEnumerable<ChatMessageDto>> JoinChatRoom(Guid roomId)
+    public async Task JoinChatRoom(Guid roomId, string creatorId)
     {
         if (await _messagingService.GetChatRoomAsync(roomId, Context.ConnectionAborted) is not { } room)
             throw new KeyNotFoundException("Chatroom not found.");
 
         await Groups.AddToGroupAsync(Context.ConnectionId, roomId.ToString());
 
-        var messages = _messagingService.GetMessagesInRoom(roomId);
-
-        return messages.Adapt<IEnumerable<ChatMessageDto>>(_mapper.Config);
+        await _messagingService.AddParticipant(room, creatorId);
     }
 
     /// <inheritdoc />
-    public async Task LeaveChatRoom(Guid roomId)
+    public async Task LeaveChatRoom(Guid roomId, string creatorId)
     {
+        if (await _messagingService.GetChatRoomAsync(roomId, Context.ConnectionAborted) is not { } room)
+            throw new KeyNotFoundException("Chatroom not found.");
+
+        await _messagingService.RemoveParticipant(room, creatorId);
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomId.ToString());
+
     }
 
     /// <inheritdoc />
-    public async Task SendMessage(string roomId, string message)
+    public async Task SomeoneWriteInChatRoom(Guid roomId, string creatorId)
     {
-        await _messagingService.SubmitMessageAsync(roomId, message, NameIdentifier);
+        if (await _messagingService.GetChatRoomAsync(roomId, Context.ConnectionAborted) is not { } room)
+            throw new KeyNotFoundException("Chatroom not found.");
+
+        await _messagingService.SomeoneWriteInChatRoom(room, creatorId);
+    }
+
+    /// <inheritdoc />
+    public async Task SendMessage(string roomId, string creatorId, string message)
+    {
+        await _messagingService.SubmitMessageAsync(roomId, creatorId, message);
     }
 }

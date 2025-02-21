@@ -27,7 +27,7 @@ public sealed class MessagingRepository : IMessagingPersistance
         await _context.ChatMessages.Where(m => m.RoomId == roomId).AsNoTracking().ToArrayAsync(ct);
 
     /// <inheritdoc />
-    public IQueryable<ChatRoom> GetRooms() => _context.ChatRooms.AsNoTracking();
+    public IQueryable<ChatRoom> GetRooms() => _context.ChatRooms.Include(r => r.Participants);
 
     /// <inheritdoc />
     public IQueryable<ChatRoom> GetRoomsForCompany(Guid userId) =>
@@ -67,6 +67,29 @@ public sealed class MessagingRepository : IMessagingPersistance
         room.Participants = participants;
 
         EntityEntry<ChatRoom> entityEntry = _context.ChatRooms.Add(room);
+        await _context.SaveChangesAsync(ct);
+
+        return entityEntry.Entity;
+    }
+
+    /// <inheritdoc />
+    public async Task<ChatRoom> UpdateRoomAsync(ChatRoom room, CancellationToken ct = default)
+    {
+        // Get the company IDs from the participants
+        Guid[] participantIds = room.Participants.Select(participant => participant.Id).ToArray();
+
+        // Prune participants and replace with full entities from the database
+        List<User> participants = await _context.Users.Where(c => participantIds.Contains(c.Id))
+            .ToListAsync(cancellationToken: ct);
+
+        if (participants.Count != participantIds.Length)
+        {
+            throw new ArgumentException("Invalid participants.");
+        }
+
+        room.Participants = participants;
+
+        EntityEntry<ChatRoom> entityEntry = _context.ChatRooms.Update(room);
         await _context.SaveChangesAsync(ct);
 
         return entityEntry.Entity;

@@ -55,12 +55,12 @@ public sealed class MessagingService
     /// <summary>
     /// Submits a new chat message.
     /// </summary>
-    public async Task SubmitMessageAsync(string roomId, string message, string nameIdentifier, CancellationToken ct = default)
+    public async Task SubmitMessageAsync(string roomId, string creatorId, string message, CancellationToken ct = default)
     {
         Model.Messaging.ChatRoom chatRoom = await _messagingPersistance.GetChatRoomAsync(Guid.Parse(roomId), ct) 
                                             ?? throw new ArgumentException($"Room {roomId} not found");
         
-        User user = await GetUserFromNameIdentifier(nameIdentifier);
+        User user = GetUserById(Guid.Parse(creatorId));
         
         ChatMessage chatMessage = new ChatMessage()
         {
@@ -90,6 +90,16 @@ public sealed class MessagingService
     }
 
     /// <summary>
+    ///  Get user from id.
+    /// </summary>
+    private User GetUserById(Guid id)
+    {
+        User user = _userPersistance.GetUserById(id) 
+                    ?? throw new ArgumentException($"User {id} not found");
+        return user;
+    }
+
+    /// <summary>
     /// create chat room for an offer.
     /// </summary>
     /// <returns>The chat room.</returns>
@@ -105,22 +115,71 @@ public sealed class MessagingService
     /// create chat room for an offer.
     /// </summary>
     /// <returns>The chat room.</returns>
-    public async Task<Model.Messaging.ChatRoom?> CreateChatRoom( string nameIdentifier,
-        CancellationToken ct = default)
+    public async Task<Model.Messaging.ChatRoom?> CreateChatRoom(string chatRoomName, string creatorId, CancellationToken ct = default)
     {
-        User user = await GetUserFromNameIdentifier(nameIdentifier);
+        User user = GetUserById(Guid.Parse(creatorId));
 
         // using a HashSet to avoid duplicates if userCompany is importer or exporter
         HashSet<User> participants = [user];
-        
-        ChatRoom chatRoom = new Model.Messaging.ChatRoom
+        ChatRoom chatRoom = new ChatRoom
         {
-            Participants = participants.ToList()
+            Id = Guid.NewGuid(),
+            Name = chatRoomName,
+            Participants = participants.ToList(),
+            ReadOnly = false
         };
+
+        await _notificationHandler.NotifyNewChatRoomAsync(chatRoom);
 
         return await _messagingPersistance.CreateRoomAsync(chatRoom, ct);
     }
     
+    /// <summary>
+    /// Add participant to chat room.
+    /// </summary>
+    /// <param name="room"></param>
+    /// <param name="creatorId"></param>
+    /// <returns></returns>
+    public async Task<ChatRoom> AddParticipant(ChatRoom room, string creatorId)
+    {
+        User user = GetUserById(Guid.Parse(creatorId));
+        room.Participants.Add(user);
+        await _messagingPersistance.UpdateRoomAsync(room);
+
+        await _notificationHandler.NotifyUpdateChatRoomParticipantAsync(room);
+
+        return room;
+    }
+
+    /// <summary>
+    /// Remove participant to chat room.
+    /// </summary>
+    /// <param name="room"></param>
+    /// <param name="creatorId"></param>
+    /// <returns></returns>
+    public async Task<ChatRoom> RemoveParticipant(ChatRoom room, string creatorId)
+    {
+        User user = GetUserById(Guid.Parse(creatorId));
+        room.Participants.Remove(user);
+        await _messagingPersistance.UpdateRoomAsync(room);
+
+        await _notificationHandler.NotifyUpdateChatRoomParticipantAsync(room);
+
+        return room;
+    }
+
+    /// <summary>
+    /// Someone write in chat room.
+    /// </summary>
+    /// <param name="room"></param>
+    /// <param name="creatorId"></param>
+    /// <returns></returns>
+    public async Task SomeoneWriteInChatRoom(ChatRoom room, string creatorId)
+    {
+        User user = GetUserById(Guid.Parse(creatorId));
+
+        await _notificationHandler.NotifySomeoneWriteInChatRoomAsync(room, user);
+    }
     
     /// <summary>
     /// Gets a specific chat room.

@@ -4,6 +4,8 @@ using Chat.ApiModel.Messaging;
 using Chat.Business.Messaging;
 using Chat.Model.Messaging;
 using Microsoft.AspNetCore.SignalR;
+using ChatRoom.ApiModel;
+using Chat.Model;
 
 namespace Chat.Api.Services;
 
@@ -27,6 +29,31 @@ public sealed class MessagingHubNotificationHandler : IMessagingNotificationHand
         _hubContext = hubContext;
         _mapper = mapper;
     }
+
+    /// <inheritdoc />
+    public async Task NotifyNewChatRoomAsync(Model.Messaging.ChatRoom room)
+    {
+        Console.WriteLine("NotifyNewChatRoomAsync");
+        ChatRoomDto dto = _mapper.Map<ChatRoomDto>(room);
+        await _hubContext.Clients.All.NewChatRoom(dto);
+    }
+
+    /// <inheritdoc />
+    public async Task NotifyUpdateChatRoomParticipantAsync(Model.Messaging.ChatRoom room)
+    {
+        Console.WriteLine("NotifyUpdateChatRoomParticipantAsync");
+        ChatRoomDto dto = _mapper.Map<ChatRoomDto>(room);
+        await _hubContext.Clients.Group(room.Id.ToString()).UpdateChatRoomParticipant(dto);
+    }
+
+    /// <inheritdoc />
+    public async Task NotifySomeoneWriteInChatRoomAsync(Model.Messaging.ChatRoom room, User user)
+    {
+        ChatRoomDto room_dto = _mapper.Map<ChatRoomDto>(room);
+        UserDto user_dto = _mapper.Map<UserDto>(user);
+        await _hubContext.Clients.Group(room.Id.ToString()).SomeoneWriteInChatRoom(room_dto, user_dto);
+    }
+
 
     /// <inheritdoc />
     public async Task NotifyNewMessageAsync(ChatMessage message)

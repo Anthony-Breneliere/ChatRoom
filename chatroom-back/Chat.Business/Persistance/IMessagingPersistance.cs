@@ -43,6 +43,14 @@ public interface IMessagingPersistance
     Task<Model.Messaging.ChatRoom> CreateRoomAsync(Model.Messaging.ChatRoom room, CancellationToken ct = default);
 
     /// <summary>
+    /// Updates a chat room.
+    /// </summary>
+    /// <param name="room">Room to update.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>The updated chat room.</returns>
+    Task<Model.Messaging.ChatRoom> UpdateRoomAsync(Model.Messaging.ChatRoom room, CancellationToken ct = default);
+
+    /// <summary>
     /// Gets a specific chat room.
     /// </summary>
     /// <param name="roomId">ID of the chat room.</param>

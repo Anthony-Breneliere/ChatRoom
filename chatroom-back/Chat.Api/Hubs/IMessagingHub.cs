@@ -1,4 +1,5 @@
 using Chat.ApiModel.Messaging;
+using ChatRoom.ApiModel;
 
 namespace Chat.Api.Hubs;
 
@@ -7,6 +8,27 @@ namespace Chat.Api.Hubs;
 /// </summary>
 public interface IMessagingHubPush
 {
+    /// <summary>
+    /// Pushes a new chat room to the client.
+    /// </summary>
+    /// <param name="room">The room to push.</param>
+    public Task NewChatRoom(ChatRoomDto room);
+
+    /// <summary>
+    /// Pushes a join/leave chat room participant to the client.
+    /// </summary>
+    /// <param name="room"></param>
+    /// <returns></returns>
+    public Task UpdateChatRoomParticipant(ChatRoomDto room);
+    
+    /// <summary>
+    /// Pushes that someone write in the chat room to the client.
+    /// </summary>
+    /// <param name="room"></param>
+    /// <param name="user"></param>
+    /// <returns></returns>
+    public Task SomeoneWriteInChatRoom(ChatRoomDto room, UserDto user);
+
     /// <summary>
     /// Pushes a new message to the client.
     /// </summary>
@@ -32,22 +54,23 @@ public interface IMessagingHubPush
 public interface IMessagingHubInvoke
 {
     /// <summary>
-    /// Join a chat room to receive new messages, and get the chat history.
+    /// Join a chat room to receive new messages.
     /// </summary>
     /// <param name="roomId">The ID of the chatroom.</param>
-    /// <returns>The chat history</returns>
-    public Task<IEnumerable<ChatMessageDto>> JoinChatRoom(Guid roomId);
+    /// <param name="creatorId">The ID of the new participant.</param>
+    public Task JoinChatRoom(Guid roomId, string creatorId);
 
     /// <summary>
-    /// Leave the chat room
+    /// Leave the chat room.
     /// </summary>
-    /// <param name="roomId"></param>
-    public Task LeaveChatRoom(Guid roomId);
+    /// <param name="roomId">The ID of the chatroom.</param>
+    /// <param name="creatorId">The ID of the participant who leave.</param>
+    public Task LeaveChatRoom(Guid roomId, string creatorId);
     
     /// <summary>
     /// Submits a new message to the chatroom.
     /// </summary>
-    public Task SendMessage(string roomId, string message);
+    public Task SendMessage(string roomId, string creatorId, string message);
 
     /// <summary>
     /// Get Chat rooom
@@ -57,5 +80,5 @@ public interface IMessagingHubInvoke
     /// <summary>
     /// Create chat room
     /// </summary>
-    Task<ChatRoomDto> CreateChatRoom();
+    Task<ChatRoomDto> CreateChatRoom(string chatRoomName, string creatorIdentifier);
 }
