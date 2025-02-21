@@ -49,6 +49,10 @@ export class MainDashboardComponent {
 		// { text: 'Products', value: 2 },
 	];
 
+	goToChat() {
+		window.location.href = '/';
+	}
+
 	public viewSelected: number = 1;
 
 	constructor() {}

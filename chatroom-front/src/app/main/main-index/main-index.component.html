@@ -1,21 +1,104 @@
-<div class="chat-main-index">
-  <div class="mx-auto max-w-2xl py-16 sm:py-24 lg:py-38">
-    <div class="text-center">
-      <h1 class="chat-main-index-title">
-        <chat-svg-logo class="h-32 w-100" />
-        <span class="sr-only">ChatRoom</span>
-      </h1>
-      <p class="chat-main-index-paragraphe">
-        ChatRoom revolutionizes pharma trade by connecting buyers and suppliers across Europe.
-        Our platform offers seamless sourcing, instant communication, dynamic auctions,
-        and relationship management to build stronger partnerships and grow your business.
-      </p>
-      <div class="mt-10 flex items-center justify-center gap-x-6">
-        <a href="https://dev.chatroom.com" target="_blank">
-          <chat-button text="Visit our website" />
+@if (this.user(); as user) {
+<div class="flex space-x-4 h-[70vh] overflow-hidden">
+  <!-- Sidebar -->
+  <div class="w-1/4 bg-gray-50 p-4 rounded-lg shadow-md flex flex-col">
+    <h2 class="text-xl font-semibold mb-4">All Rooms for {{user.firstName}}</h2>
+    <input
+      type="text"
+      [(ngModel)]="newUserName"
+      class="w-full border px-2 py-1 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2"
+      placeholder="Enter new username"
+    />
+    <button class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition duration-200" (click)="ChangeUserName(newUserName)">Change username</button>
+    <ul class="divide-y divide-gray-200 flex-grow overflow-y-auto" style="max-height: calc(100% - 100px);">
+      <li *ngFor="let room of chatRooms" class="py-4">
+        <a href="#" class="block px-4 py-2 hover:bg-gray-100 rounded-md transition duration-200" (click)="selectRoom(room)">
+          <div class="font-medium">{{ room.chatName }}</div>
+          <div class="text-sm text-gray-600">Created At: {{ room.createdAt }}</div>
+          <div class="text-sm text-gray-600">Participants: {{ getParticipantsNamesByRoomId(room.id).length }}</div>
         </a>
+      </li>
+    </ul>
+    <div class="mt-4">
+      <input
+        type="text"
+        [(ngModel)]="newRoomName"
+        class="w-full border px-2 py-1 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2"
+        placeholder="Enter room name"
+      />
+      <button class="mt-2 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-200" (click)="createChatRoom(newRoomName)">Créer Channel</button>
+    </div>
+  </div>
+
+  <!-- Selected Rooms Messaging -->
+  <div class="flex-grow overflow-y-auto">
+    <div
+      [ngClass]="{
+        'grid grid-cols-1': selectedRooms.length === 1,
+        'grid grid-cols-2 gap-4': selectedRooms.length === 2,
+        'grid grid-cols-2 gap-5': selectedRooms.length >= 3
+      }"
+      class="h-full overflow-y-auto"
+    >
+      <div
+        *ngFor="let room of selectedRooms"
+        class="relative bg-white p-4 border rounded-lg shadow-md flex flex-col h-[70vh]"
+      >
+        <!-- Modal -->
+        <div *ngIf="openModal" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50">
+          <div class="bg-white p-6 rounded-lg shadow-lg w-1/3">
+            <h2 class="text-2xl font-semibold mb-4">Users in {{ currentRoomForModal?.chatName }}</h2>
+            <ul class="divide-y divide-gray-200 flex-grow overflow-y-auto" style="max-height: 300px;">
+              <li *ngFor="let user of currentRoomForModal?.participants" class="py-4">
+                <div class="font-medium">{{ user.firstName }}</div>
+              </li>
+            </ul>
+            <button class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition duration-200" (click)="closeModalWindow(room)">Close</button>
+          </div>
+        </div>
+
+        <button
+          class="absolute top-2 right-6 text-red-500 hover:text-red-700 text-4xl"
+          (click)="leaveRoom(room)"
+        >
+          &times;
+        </button>
+        <button
+          class="absolute top-2 right-16 text-blue-500 hover:text-blue-700 text-4xl"
+          (click)="openModalWindow(room)"
+        >
+          &#9432;
+        </button>
+        <h2 class="text-xl font-semibold mb-4">Messages from chat : {{ room.chatName }}</h2>
+        <!-- Messages Container -->
+        <div #messageContainer [id]="'messages-' + room.id" class="bg-gray-50 px-4 pt-4 border rounded-lg flex-grow overflow-y-auto">
+          <div *ngFor="let message of room.messages" class="mb-4">
+            <div class="font-medium">{{ message.authorFullName }}</div>
+            <div class="text-sm text-gray-600">{{ message.content }}</div>
+            <div class="text-xs text-gray-400">{{ message.createdAt | date:'dd/MM/yy HH:mm:ss' }}</div>
+          </div>
+        </div>
+        <!-- Message Input -->
+        <div *ngIf="room.user_is_writing" class="text-sm text-gray-500 italic mb-2">
+          {{ room.user_writing_message }}
+        </div>
+        <div class="mt-4 flex">
+          <input
+            type="text"
+            [(ngModel)]="room.newMessage"
+            class="flex-grow border px-2 py-1 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Type your message..."
+            (input)="onUserTyping(room.id)"
+          />
+          <button
+            class="ml-2 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-200"
+            (click)="sendMessage(room)"
+          >
+            Send
+          </button>
+        </div>
       </div>
     </div>
   </div>
 </div>
-
+}

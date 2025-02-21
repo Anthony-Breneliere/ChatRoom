@@ -2,6 +2,7 @@ import { inject, Injectable, signal } from '@angular/core';
 import { HttpResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { CookieService } from 'ngx-cookie-service';
+import { MessagingService } from 'src/app/_common/services/messaging/messaging.service';
 
 import { SITEMAP } from '../../sitemap';
 import { User } from '../../models/user.model';
@@ -21,6 +22,8 @@ export class AccountService {
 	private readonly userKey: string = 'user';
 
 	public readonly user = signal<User | null>(JSON.parse(sessionStorage.getItem(this.userKey)!));
+
+	constructor(private messagingService: MessagingService) {}
 
 	public updateAccount(user: User): void {
 		this.user.set(user);
@@ -58,6 +61,8 @@ export class AccountService {
 
 		// remove access token from cookies
 		this._cookieSvc.delete('.AspNetCore.Cookies');
+
+		this.messagingService.leaveChatRooms();
 
 		// reset current logged user from the current service
 		this.resetAccount();

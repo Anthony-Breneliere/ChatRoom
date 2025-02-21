@@ -32,6 +32,8 @@ public sealed class MessagingHubNotificationHandler : IMessagingNotificationHand
     public async Task NotifyNewMessageAsync(ChatMessage message)
     {
         ChatMessageDto dto = _mapper.Map<ChatMessageDto>(message);
+        dto.AuthorFullName = $"{message.Author.FirstName}";
+
         await _hubContext.Clients.Group(message.RoomId.ToString()).NewMessage(dto);
     }
 
@@ -47,5 +49,32 @@ public sealed class MessagingHubNotificationHandler : IMessagingNotificationHand
     public async Task NotifyDeletedMessageAsync(long roomId, Guid id)
     {
         await _hubContext.Clients.Group(roomId.ToString()).DeletedMessage(id);
+    }
+
+    /// <inheritdoc />
+    public async Task NotifyNewChatRoomAsync(Chat.Model.Messaging.ChatRoom room)
+    {
+        ChatRoomDto dto = _mapper.Map<ChatRoomDto>(room);
+        await _hubContext.Clients.All.NewChatRoom(dto);
+    }
+
+    /// <inheritdoc />
+    public async Task NotifyUserJoinedRoomAsync(Chat.Model.Messaging.ChatRoom room)
+    {
+        ChatRoomDto dto = _mapper.Map<ChatRoomDto>(room);
+        await _hubContext.Clients.All.UserJoinedRoom(dto);
+    }
+
+    /// <inheritdoc />
+    public async Task NotifyUserLeftRoomAsync(Chat.Model.Messaging.ChatRoom room, Chat.Model.User user)
+    {
+        ChatRoomDto dto = _mapper.Map<ChatRoomDto>(room);
+        await _hubContext.Clients.All.UserLeftRoom(dto, user.FirstName);
+    }
+
+    /// <inheritdoc />
+    public async Task NotifyUserChangedNameAsync(Chat.Model.User user)
+    {
+        await _hubContext.Clients.All.UserChangedName(user.Id, user.FirstName);
     }
 }

@@ -35,4 +35,9 @@ public sealed class ChatRoom : ICreateTimestamp
     /// This is used to lock chat rooms for system messages, or to prevent users from sending messages.
     /// </remarks>
     public bool ReadOnly { get; set; }
+
+    /// <summary>
+    /// The name of the chat room.
+    /// </summary>
+    public string ChatName { get; set; } = string.Empty;
 }

@@ -38,6 +38,7 @@ public sealed class MessagingRepository : IMessagingPersistance
     /// <inheritdoc />
     public IEnumerable<ChatMessage> GetMessagesInRoom(Guid roomId) =>
         (from message in _context.ChatMessages
+        .Include(m => m.Author)
         where message.RoomId == roomId
         orderby message.CreatedAt
         select message).AsNoTracking().ToArray();
@@ -67,7 +68,7 @@ public sealed class MessagingRepository : IMessagingPersistance
         room.Participants = participants;
 
         EntityEntry<ChatRoom> entityEntry = _context.ChatRooms.Add(room);
-        await _context.SaveChangesAsync(ct);
+        await _context.SaveChangesAsync(ct);    
 
         return entityEntry.Entity;
     }
@@ -83,5 +84,34 @@ public sealed class MessagingRepository : IMessagingPersistance
     {
         return await _context.ChatRooms
             .Include(static r => r.Participants).FirstOrDefaultAsync(c => c.Id == roomId, ct);
+    }
+
+    /// <summary>
+    /// Get chat rooms with participants
+    /// </summary>
+    public async Task<ChatRoom[]?> GetChatRoomsAsync(CancellationToken ct = default)
+    {
+        return await _context.ChatRooms
+            .Include(static r => r.Participants).ToArrayAsync(ct);
+    }
+
+    /// <summary>
+    /// Get chat rooms for a user.
+    /// </summary>
+    public async Task<ChatRoom[]?> GetChatRoomsForUserAsync(Guid userId, CancellationToken ct = default)
+    {
+        return await _context.ChatRooms
+            .Include(static r => r.Participants)
+            .Where(r => r.Participants.Any(p => p.Id == userId))
+            .ToArrayAsync(ct);
+    }
+
+    /// <summary>
+    /// Update a chat room
+    /// </summary>
+    public async Task UpdateRoomAsync(ChatRoom room, CancellationToken ct = default)
+    {
+        _context.ChatRooms.Update(room);
+        await _context.SaveChangesAsync(ct);
     }
 }
