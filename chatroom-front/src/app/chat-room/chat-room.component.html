@@ -1,0 +1,76 @@
+<div class="p-4">
+  <!-- Bouton pour créer une chat room -->
+  <button class="px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600" (click)="createChatRoom()">
+    Create a ChatRoom
+  </button>
+
+  <!-- Liste des chat rooms -->
+  <div class="mt-6 bg-gray-800 bg-opacity-75 backdrop-blur-sm rounded-xl border border-gray-700 p-6">
+    <div class="flex justify-between border-b border-gray-600 pb-2 mb-4">
+      <p class="font-bold text-white">Room ID</p>
+      <p class="font-bold text-white">Participants</p>
+    </div>
+    <div class="h-60 overflow-y-auto">
+      <ul *ngIf="chatRooms().length > 0" class="space-y-4">
+        <li *ngFor="let room of chatRooms()">
+          <div class="flex items-center justify-between p-4 bg-gray-700 rounded-lg">
+            <div>
+              <p class="text-white font-semibold">{{ room.id }}</p>
+              <p class="text-gray-300 text-sm">
+                Last message:
+                {{ room.messages && room.messages.length > 0 ? room.messages[room.messages.length - 1]?.content : 'No messages yet' }}
+              </p>
+            </div>
+            <div class="flex space-x-2">
+              <button class="px-3 py-1 border border-gray-500 rounded hover:bg-gray-600 text-white" (click)="joinChatRoom(room.id)">
+                Join Chat
+              </button>
+              <button class="px-3 py-1 border border-gray-500 rounded hover:bg-gray-600 text-white" (click)="closeChatRoom(room.id)">
+                Close Chat
+              </button>
+            </div>
+            <div class="ml-4">
+              <p class="text-white">{{ room.participants?.length || 0 }}</p>
+            </div>
+          </div>
+        </li>
+      </ul>
+      <div *ngIf="chatRooms().length === 0" class="text-gray-300 text-center">
+        No chat rooms available.
+      </div>
+    </div>
+  </div>
+
+  <!-- Zone de chat pour la room active -->
+  <div *ngIf="currentRoomId" class="mt-6">
+    <!-- Liste des messages -->
+    <div class="bg-gray-800 p-4 rounded-xl h-60 overflow-y-auto">
+      <h3 class="text-white font-bold mb-2">Messages</h3>
+      <ul class="space-y-2">
+        <li *ngFor="let msg of messages">
+          <div class="p-2 bg-gray-600 rounded">
+            <p class="text-white">{{ msg.content }}</p>
+            <p class="text-xs text-gray-300">
+              From: {{ msg.authorFullName || msg.authorId }}
+            </p>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Zone de saisie -->
+    <div class="flex items-center space-x-2 mt-4">
+      <input #messageInput type="text" placeholder="Type your message..." (input)="onTyping($event)"
+             class="flex-1 p-2 border border-gray-500 rounded-lg focus:outline-none focus:border-blue-400" />
+      <button class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+              (click)="sendMessage(currentRoomId, messageInput.value, messageInput)">
+        Send Message
+      </button>
+    </div>
+
+    <!-- Affichage de "User is typing" -->
+    <div *ngIf="userTyping" class="mt-2 text-sm text-gray-300">
+      {{ userTyping }} is typing...
+    </div>
+  </div>
+</div>

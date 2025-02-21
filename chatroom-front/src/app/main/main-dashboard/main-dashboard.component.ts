@@ -13,18 +13,18 @@ import { SITEMAP } from 'src/app/_common/sitemap';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ChatSvgIconComponent } from '../../_common/components/chat-svg-icon/chat-svg-icon.component';
+import { ChatRoomComponent } from "../../chat-room/chat-room.component";
 
 @Component({
 	selector: 'app-main-dashboard',
 	standalone: true,
 	imports: [
-		CommonModule,
-		RouterModule,
-		NgIconComponent,
-		ChatButtonGroupComponent,
-		ChatButtonComponent,
-		ChatSvgIconComponent,
-	],
+    CommonModule,
+    RouterModule,
+    NgIconComponent,
+    ChatSvgIconComponent,
+    ChatRoomComponent
+],
 	providers: [
 		provideIcons({
 			bootstrapArrowUp,

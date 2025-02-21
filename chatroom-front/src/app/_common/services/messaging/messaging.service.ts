@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Subject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { ChatMessage } from '../../models/chat-message.model';
 import { ChatRoom } from '../../models/chat-room.model';
@@ -8,70 +9,69 @@ import { SignalRClientBase } from '../signalr/signalr.client.base';
 	providedIn: 'root',
 })
 export class MessagingService extends SignalRClientBase {
+	// Subject pour diffuser l'événement "user is writing"
+	private _userWritingSubject = new Subject<string>();
+	public userWriting$ = this._userWritingSubject.asObservable();
+
+	// Subject pour diffuser les nouveaux messages
+	private _newMessageSubject = new Subject<ChatMessage>();
+	public newMessage$ = this._newMessageSubject.asObservable();
 
 	constructor() {
 		super(environment.API_URL + '/hub/messaging');
 
-		// Handle messaging events
+		// Écoute de l'événement "NewMessage"
 		this._hubConnection.on('NewMessage', (message: ChatMessage) => {
 			console.log('New message received:', message);
-
+			this._newMessageSubject.next(message);
 		});
-
 		this._hubConnection.on('EditedMessage', (message: ChatMessage) => {
+			// Gestion des messages édités si besoin
 		});
-
 		this._hubConnection.on('DeletedMessage', (message: ChatMessage) => {
+			// Gestion des messages supprimés si besoin
 		});
 
-		this._hubConnection.on('UserWriting', (user: ChatMessage) => {
+		// Écoute de l'événement "UserWriting"
+		this._hubConnection.on('UserWriting', (user: string) => {
+			console.log('User is writing:', user);
+			this._userWritingSubject.next(user);
 		});
 	}
 
-	/**
-	 * Get a chat room for the offer provided
-	 * @param roomId
-	 * @returns chatroom
-	 */
-	public async getChatRoom(roomId: string): Promise<ChatRoom> {
+	public async joinChatRoom(roomId: string): Promise<ChatMessage[]> {
 		await this.getConnectionPromise;
-
-		return await this._hubConnection.invoke<ChatRoom>('GetChatRoom', roomId);
+		return await this._hubConnection.invoke<ChatMessage[]>('JoinChatRoom', roomId);
 	}
 
-	/**
-	 * Create a new chat room
-	 */
+	public async leaveChatRoom(roomId: string): Promise<void> {
+		await this.getConnectionPromise;
+		return await this._hubConnection.invoke('LeaveChatRoom', roomId);
+	}
+
+	public async sendMessage(roomId: string, message: string): Promise<any> {
+		await this.getConnectionPromise;
+		return await this._hubConnection.invoke('SendMessage', roomId, message);
+	}
+
 	public async createChatRoom(): Promise<ChatRoom> {
 		await this.getConnectionPromise;
-
 		return await this._hubConnection.invoke<ChatRoom>('CreateChatRoom');
 	}
 
-	/**
-	 * Join the chat room and get all chat room message history
-	 */
-	public async joinChatRoom(roomId: string): Promise<void> {
+	public async getAllChatRooms(): Promise<ChatRoom[]> {
 		await this.getConnectionPromise;
-
-		const chatHistory = await this._hubConnection.invoke<ChatMessage[]>('JoinChatRoom', roomId);
+		return await this._hubConnection.invoke<ChatRoom[]>('GetAllChatRooms');
 	}
 
-	/**
-	 * Get all chat room messages
-	 */
-	public async leaveChatRoom(roomId: string): Promise<void> {
+	public async notifyUserIsWriting(roomId: string): Promise<void> {
 		await this.getConnectionPromise;
-
-		await this._hubConnection.invoke('LeaveChatRoom', roomId);
+		return await this._hubConnection.invoke('NotifyUserIsWriting', roomId);
 	}
 
-	/**
-	 * Send message to the chat room
-	 */
-	public async sendMessage(roomId: string, message: string): Promise<any> {
+	// Nouvelle méthode pour rafraîchir les détails d'une room
+	public async getChatRoom(roomId: string): Promise<ChatRoom> {
 		await this.getConnectionPromise;
-
-		await this._hubConnection.invoke('SendMessage', roomId, message);
+		return await this._hubConnection.invoke<ChatRoom>('GetChatRoom', roomId);
 	}
 }

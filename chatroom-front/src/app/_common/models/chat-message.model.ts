@@ -6,6 +6,7 @@ export interface ChatMessage {
 	authorCompanyId: number;
 	authorCompanyName: string;
 	content: string;
+	sender: string;
 	createdAt: Date;
 	updatedAt: Date;
 }
