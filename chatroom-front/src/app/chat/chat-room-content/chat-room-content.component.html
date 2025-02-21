@@ -10,7 +10,7 @@
     </div>
 
 
-    <div class="chat-history"> 
+    <div class="chat-history" #chatHistory> 
       <div *ngIf="messageHistory.length > 0; else noMessages">
         <div *ngFor="let message of messageHistory">
           <div class="message">
@@ -29,7 +29,7 @@
     </div>
 
     <div class="send-message">
-        <input #messageInput [formControl]="messageFormControl" type="text" name="message-input" placeholder="Ecrivez votre message">
+        <input #messageInput [formControl]="messageFormControl" type="text" name="message-input" placeholder="Ecrivez votre message" (keyup)="onKeyUp($event)">
         <button class="btn-base" (click)="sendMessage()">Envoyer</button>
     </div>
   </div>

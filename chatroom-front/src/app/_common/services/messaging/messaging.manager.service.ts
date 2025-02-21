@@ -18,6 +18,9 @@ import { has } from "lodash";
  *   Amélioration sur les événemnts : j'ai des envoie de modification next() qui pourraient être regroupés addRoomToJoinedRoom, addUserToJoinedRoom, updateFullMessageHistory par exemple
  *   Dans mes observables j'ai séparé les joinedrooms, des participants, de l'historique (j'ai fait au fur et a messure : besoin refacto pour regrouper + efficacité, maintenance)
  *   
+ *   Et j'ai également fait une gestion avec un seul chat actif en gardant en mémoire l'historique
+ *   Ce qui fait que toutes les chats rooms ne s'affichent pas en même temps ... , on garde cependant
+ *   l'historique des messages pour chaque chatRoom, ainsi que leur participants à jour pour les chats "rejoins" dans ce service
  */
 
 
@@ -84,6 +87,7 @@ export class MessagingManagerService {
 
         if (this.joinedChatRooms$.getValue().some(r => r.id == roomId)) {
             this.setJoinedRoomToCurrentChatRoom(roomId);
+            //this.setParticipantOfJoinedRoom(roomId);
         } else {
             await this.messagingService.joinChatRoom(roomId)
                 .then(chatMessage => {
@@ -96,7 +100,10 @@ export class MessagingManagerService {
                 })
                 .catch((error) => {
                     console.log("Impossible de rejoindre la room, une erreur est survenue :", error.message)
-                    // TODO notification la salle est innacessible
+                    // TODO notification la salle est innacessible, filtrer en cas de room qui n'existe plus
+                    // on affiche un message comme quoi la salle n'existe plus et qu'elle va être supprimée, puis la supprimer
+                    // this.notificationService.showNotification("Le chat n'a pu être rejoins.", "error", 3000);
+
                     return;
                 });
         }
@@ -312,7 +319,7 @@ export class MessagingManagerService {
         }
     }
 
-
+    //  Supprime un participant des salles rejointes
     private removeUserFromJoinedRoom(chatRoomId: string, user: UserDto) {
         const joinedRooms = this.joinedChatRooms$.getValue();
         const chatRoom = joinedRooms.find(r => r.id === chatRoomId);
@@ -329,6 +336,15 @@ export class MessagingManagerService {
                 );
                 this.joinedChatRooms$.next(updatedRooms);
             }
+        }
+    }
+
+    private setParticipantOfJoinedRoom(roomId: string) {
+        const joinedRooms = this.joinedChatRooms$.getValue();
+        const chatRoom = joinedRooms.find(r => r.id === roomId);
+        if (chatRoom) {
+            console.log("participants", chatRoom.participants)
+            //this.participants$.next(chatRoom.participants);
         }
     }
 

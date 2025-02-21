@@ -53,6 +53,11 @@ export class ChatRoomContentComponent {
     this._loadUsersTyping();
   }
 
+  ngAfterViewInit() {
+  }
+
+
+
   private _loadChatRoom() {
     // Peut être fusionner les deux ... sachant que history by room réagit en fonction de activeChatRoom
     this._chatRoomMessageHistory = this._chatManagerService.getMessagesHistoryOfCurrentChatRoom$()
@@ -131,10 +136,9 @@ export class ChatRoomContentComponent {
   }
 
   async onKeyUp(event: KeyboardEvent) {
-    //Notification isTyping
 
     if (event.key === 'Enter') {
-      console.log("pressKey :  ", event.key);
+
       await this.sendMessage();
     }
   }
