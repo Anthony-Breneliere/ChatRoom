@@ -1,78 +1,50 @@
 @if (this.user(); as user) {
-  <div class="chat-dashboard">
+  <div class="dashboard">
     <div class="chat-dashboard-header">
-      <h2 class="text-4xl font-semibold text-gray-900 dark:text-white">Hello {{ user.firstName }}</h2>
+      <h2 class="text-4xl font-semibold text-gray-900 dark:text-white">Hello {{ user.firstName }} !</h2>
       <div class="flex mt-6 flex-col space-y-6 lg:flex-row lg:space-x-6 lg:space-y-0">
         <div class="chat-dashboard-card">
-          <div class="chat-dashboard-card-icon">
-            <ng-icon name="saxCardsBulk" />
-          </div>
-          <div class="mr-auto">
-            <h3 class="text-3xl font-semibold text-gray-900 dark:text-white">{{ 583640 | currency : 'EUR' : 'symbol' : '.0-2' }}</h3>
-          </div>
-          <div class="h-full shrink-0">
-            <div class="flex items-center text-gray-900 dark:text-white">
-              <ng-icon
-                [class]="true ? 'text-green-500' : 'text-red-500'"
-                [name]="true ? 'bootstrapArrowUp' : 'bootstrapArrowDown'"
-                size="1rem"
-              />
-              <span class="ml-2">{{ 15 }} %</span>
-            </div>
+          <div class="flex items-center text-gray-900 dark:text-white">
+            <p class="text-center">
+              Lx'up révolutionne la manière dont nous communiquons au quotidien. 
+              Conçu pour répondre aux besoins des utilisateurs exigeants, Lx'up combine messagerie instantanée et une gestion intuitive des groupes. 
+              Avec une interface moderne, Lx'up se positionne comme la solution idéale pour échanger en toute simplicité.
+              Transformez votre façon de rester connecté avec Lx'up : l'application qui place vos échanges au cœur de son innovation.
+            </p>
           </div>
         </div>
+      </div>
 
-        <div class="chat-dashboard-card">
-          <div class="chat-dashboard-card-icon">
-            <chat-svg-icon class="fill-blue-500" icon="jar-of-pills" />
-          </div>
-          <div class="mr-auto">
-            <h3 class="text-3xl font-semibold text-gray-900 dark:text-white">{{ 1421 | number : '' : 'en-US' }}</h3>
-
-          </div>
-          <div class="h-full shrink-0">
-            <div class="flex items-center text-gray-900 dark:text-white">
-              <ng-icon
-                [class]="true ? 'text-green-500' : 'text-red-500'"
-                [name]="true ? 'bootstrapArrowUp' : 'bootstrapArrowDown'"
-                size="1rem"
-              />
-              <span class="ml-2">{{ 12 }} %</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="chat-dashboard-card">
-          <div class="chat-dashboard-card-icon">
-            <ng-icon name="saxBuildingsBulk" />
-          </div>
-          <div class="mr-auto">
-            <h3 class="text-3xl font-semibold text-gray-900 dark:text-white">{{ 4 | number : '' : 'en-US' }}</h3>
-
-          </div>
-          <div class="h-full shrink-0">
-            <div class="flex items-center text-gray-900 dark:text-white">
-              <ng-icon
-                [class]="true ? 'text-green-500' : 'text-red-500'"
-                [name]="true ? 'bootstrapArrowUp' : 'bootstrapArrowDown'"
-                size="1rem"
-              />
-              <span class="ml-2">{{ 20 }} %</span>
+      <div class="chatrooms-list mt-8">
+        <h3 class="text-2xl font-semibold text-gray-900 dark:text-white">Vos Groupes de Conversation</h3>
+        <div class="flex flex-wrap gap-4 mt-4">
+          <div class="chatroom-card" *ngFor="let chatroom of chatrooms">
+            <div class="p-4 bg-gray-100 dark:bg-gray-800 rounded-lg shadow-lg">
+              <h4 class="text-lg font-semibold text-gray-900 dark:text-white">{{ chatroom.name }}</h4>
+              <div class="flex justify-between mt-3">
+                <span class="text-sm text-gray-600 dark:text-gray-400 mr-2">Participants: {{ chatroom.participants.length }}</span>
+                <button (click)="joinChatRoom(chatroom.id)" class="text-blue-600 dark:text-blue-400 hover:underline ml-2">Rejoindre</button>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="flex flex-row pt-8 pb-6">
-      <div class="flex flex-row items-center w-full">
-        <chat-button-group
-          [buttons]="this.buttons"
-          [(choice)]="this.viewSelected"
-        />
+      <div class="flex justify-center gap-x-5 mt-10">
+        <div class="mt-10 flex items-center justify-center">
+          <button (click)="openCreateChatRoomPopup()" class="btn btn-primary">
+            <p class="dark:text-white">Créez un groupe de conversation</p>
+          </button>
+        </div>
       </div>
-
     </div>
-
+  </div>
+  <div *ngIf="isCreateChatRoomPopupOpen" class="popup-overlay">
+    <div class="popup">
+      <h3>Créer un groupe de conversation</h3>
+      <input type="text" [(ngModel)]="newChatRoomName" placeholder="Nom du groupe" />
+      <button (click)="createChatRoom()">Créer</button>
+      <button (click)="closeCreateChatRoomPopup()">Annuler</button>
+    </div>
   </div>
 }

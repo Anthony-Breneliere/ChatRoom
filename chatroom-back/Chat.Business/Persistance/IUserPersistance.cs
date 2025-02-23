@@ -31,7 +31,7 @@ public interface IUserPersistance
     /// <param name="id">The ID of the user.</param>
     /// <returns>The user with the specified ID, or <see langword="null"/> if no user was found.</returns>
     [MustUseReturnValue]
-    User? GetUserById(Guid id);
+    Task<User?> GetUserById(Guid id);
 
     /// <summary>
     /// Gets the user with the specified username.

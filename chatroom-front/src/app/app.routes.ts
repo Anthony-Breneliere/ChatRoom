@@ -22,6 +22,7 @@ import { MaintenanceComponent } from './maintenance/maintenance.component';
 import { NotFoundComponent } from './not-found/not-found.component';
 import { UnauthorizedComponent } from './unauthorized/unauthorized.component';
 import { ForbiddenComponent } from './forbidden/forbidden.component';
+import { ChatRoomComponent } from './_common/components/chat-room/chat-room.component';
 
 export const routes: Routes = [
 	{
@@ -41,7 +42,12 @@ export const routes: Routes = [
 				path: SITEMAP.dashboard.path,
 				canActivate: [isAuthenticatedGuard],
 				component: MainDashboardComponent,
-			}
+			},
+			{
+				path: 'chatroom/:roomId',
+				canActivate: [isAuthenticatedGuard],
+				component: ChatRoomComponent, 
+			},
 		],
 	},
 

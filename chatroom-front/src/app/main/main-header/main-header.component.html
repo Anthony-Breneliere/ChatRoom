@@ -1,17 +1,12 @@
 <header class="fixed top-0 w-full z-10 bg-white dark:bg-gray-800">
   <nav class="flex items-center justify-between px-6 py-4 lg:px-24 chat-header-nav" aria-label="Global">
     <div class="inline-flex flex-row items-center lg:flex-1">
-      <a [routerLink]="[ this.user() ? this.sitemap.dashboard.route : this.sitemap.main.route ]" class="flex -m-1.5 p-1.5">
-        <span class="sr-only">ChatRoom</span>
-        <chat-svg-logo class="w-[149px] h-[40px]" />
-      </a>
-
-      <chat-label class="ml-2 mt-1" label="Beta" />
+      <chat-label class="ml-2 mt-1" label="Logo" />
     </div>
 
     <div class="flex lg:hidden">
       <button (click)="this.isMenuOpened = true" type="button" class="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700 dark:text-white">
-        <span class="sr-only">Open main menu</span>
+        <span class="sr-only">menu</span>
         <svg class="size-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
         </svg>
@@ -28,7 +23,7 @@
           [ngClass]="this.router.url === this.sitemap.dashboard.route ? 'text-blue-500' : 'text-gray-900 dark:text-white'"
           [name]="this.router.url === this.sitemap.dashboard.route ? 'saxHome2Bulk' : 'saxHome2Outline'"
         />
-        Dashboard
+        Accueil
       </a>
 
 
@@ -88,7 +83,7 @@
                   [ngClass]="this.router.url === this.sitemap.dashboard.route ? 'text-blue-500' : 'text-gray-900 dark:text-white'"
                   [name]="this.router.url === this.sitemap.dashboard.route ? 'saxHome2Bulk' : 'saxHome2Outline'"
                 />
-                <span>Dashboard</span>
+                <span>Accueil</span>
               </a>
 
             </div>

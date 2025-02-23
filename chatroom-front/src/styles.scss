@@ -11,6 +11,20 @@
 	font-family: 'Inter Tight';
 }
 
+:root {
+	--primary-color: #007bff;
+	--primary-color-hover: #0056b3;
+	--secondary-color: #6c757d;
+	--secondary-color-hover: #5a6268;
+	--text-color: #ffffff;
+	--background-color: #f8f9fa;
+	--border-color: #dee2e6;
+	--message-background-color: #e9ecef;
+	--my-message-background-color: #d1e7dd; /* Couleur de fond pour les messages de l'utilisateur actuel */
+	--other-message-background-color: #f8d7da; /* Couleur de fond pour les messages des autres utilisateurs */
+	--text-muted-color: #6c757d; /* Couleur de texte atténuée */
+  }
+  
 input {
 	background: transparent;
 

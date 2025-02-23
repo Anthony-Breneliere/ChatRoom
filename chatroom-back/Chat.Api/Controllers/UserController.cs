@@ -8,6 +8,7 @@ using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Throw;
+using System.Threading.Tasks;
 
 namespace Chat.Api.Controllers;
 
@@ -60,9 +61,9 @@ public class UserController : UserControllerBase
     /// <response code="500">The user could not be fetched.</response>
     [HttpGet("{id:guid}"), Authorize(Roles = Roles.SuperAdmin)]
     [ProducesResponseType(200, Type = typeof(UserDto))]
-    public UserDto GetUser(Guid id)
+    public async Task<UserDto> GetUser(Guid id)
     {
-        User user = _userPersistance.GetUserById(id).ThrowIfNull();
+        User? user = (await _userPersistance.GetUserById(id)).ThrowIfNull();
         return user.Adapt<UserDto>();
     }
     
@@ -137,7 +138,7 @@ public class UserController : UserControllerBase
         User current = PlatformUser.ThrowIfNull();
         userDto.Id = current.Id;
         
-        User existing = _userPersistance.GetUserById(userDto.Id).ThrowIfNull();
+        User existing = (await _userPersistance.GetUserById(userDto.Id)).ThrowIfNull();
         
         // Mapping UserDto to User
         existing.Email = userDto.Email;

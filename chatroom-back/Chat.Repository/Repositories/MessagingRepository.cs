@@ -26,6 +26,17 @@ public sealed class MessagingRepository : IMessagingPersistance
     public async  Task<IEnumerable<ChatMessage>> GetMessages(Guid roomId, CancellationToken ct) =>
         await _context.ChatMessages.Where(m => m.RoomId == roomId).AsNoTracking().ToArrayAsync(ct);
 
+    /// <summary>
+    /// Updates the specified chat room.
+    /// </summary>
+    /// <param name="room">The chat room to update.</param>
+    /// <param name="ct">The cancellation token.</param>
+    public async Task UpdateChatRoomAsync(ChatRoom room, CancellationToken ct = default)
+    {
+        _context.ChatRooms.Update(room);
+        await _context.SaveChangesAsync(ct);
+    }
+
     /// <inheritdoc />
     public IQueryable<ChatRoom> GetRooms() => _context.ChatRooms.AsNoTracking();
 
@@ -65,6 +76,7 @@ public sealed class MessagingRepository : IMessagingPersistance
         }
 
         room.Participants = participants;
+        room.Name = room.Name ?? throw new ArgumentException("Room name is required");
 
         EntityEntry<ChatRoom> entityEntry = _context.ChatRooms.Add(room);
         await _context.SaveChangesAsync(ct);

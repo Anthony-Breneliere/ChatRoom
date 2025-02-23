@@ -8,13 +8,45 @@
 		@apply bg-gray-800 border-gray-700;
 	}
 
-	.chat-dashboard-card-icon {
-		@apply flex justify-center items-center h-12 w-12 mr-4
-			shrink-0 border rounded-3xl
-			text-blue-500 border-gray-200;
+	.dashboard-card .dashboard {
 
 		&:is(.dark *) {
 			@apply border-gray-700;
 		}
 	}
+}
+
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.popup {
+  background: white;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.popup h3 {
+  margin-top: 0;
+}
+
+.popup input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.popup button {
+  margin-right: 10px;
 }

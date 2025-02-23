@@ -12,14 +12,14 @@ public interface IMessagingPersistance
     /// Gets messages from a room
     /// </summary>
     /// <returns>All messages of the room.</returns>
-    Task<IEnumerable<ChatMessage>> GetMessages( Guid roomId, CancellationToken ct = default);
-    
+    Task<IEnumerable<ChatMessage>> GetMessages(Guid roomId, CancellationToken ct = default);
+
     /// <summary>
     /// Gets all chat rooms.
     /// </summary>
     /// <returns>All chat rooms.</returns>
     IQueryable<Model.Messaging.ChatRoom> GetRooms();
-    
+
     /// <summary>
     /// Gets all messages in a chat room.
     /// </summary>
@@ -57,4 +57,11 @@ public interface IMessagingPersistance
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The chat message.</returns>
     Task<ChatMessage?> GetMessageAsync(Guid id, CancellationToken ct = default);
+
+    /// <summary>
+    /// Updates an existing chat room.
+    /// </summary>
+    /// <param name="chatRoom">Chat room to update.</param>
+    /// <param name="ct">Cancellation token.</param>
+    Task UpdateChatRoomAsync(ChatRoom chatRoom, CancellationToken ct = default);
 }

@@ -25,4 +25,12 @@ public interface IMessagingNotificationHandler
     /// <param name="roomId">The ID of the chat room.</param>
     /// <param name="id">The ID of the deleted message.</param>
     public Task NotifyDeletedMessageAsync(long roomId, Guid id);
+
+    /// <summary>
+    /// Notifies the client that a user is typing.
+    /// </summary>
+    /// <param name="roomId">The ID of the chat room.</param>
+    /// <param name="userId">The ID of the user who is typing.</param>
+    /// <param name="userName">The name of the user who is typing.</param>
+    public Task NotifyUserTypingAsync(Guid roomId, Guid userId, string userName);
 }

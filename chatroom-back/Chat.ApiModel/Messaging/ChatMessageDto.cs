@@ -16,7 +16,7 @@ public sealed class ChatMessageDto
     /// ID of chat room this message belongs to
     /// </summary>
     public Guid RoomId { get; set; }
-    
+
     /// <summary>
     /// ID of message's author
     /// </summary>
@@ -31,12 +31,12 @@ public sealed class ChatMessageDto
     /// ID of the author's company
     /// </summary>
     public int AuthorCompanyId { get; set; }
-    
+
     /// <summary>
     /// Name of the author's company
     /// </summary>
     public string AuthorCompanyName { get; set; } = "";
-    
+
     /// <summary>
     /// Message content
     /// </summary>
@@ -47,7 +47,7 @@ public sealed class ChatMessageDto
     /// Date and time the message was created.
     /// </summary>
     public DateTimeOffset CreatedAt { get; set; }
-    
+
     /// <summary>
     /// Date and time the message was last updated.
     /// </summary>

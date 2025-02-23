@@ -38,11 +38,25 @@ public sealed class ChatMessage : ICreateTimestamp
     public User Author { get; init; } = new();
 
     /// <summary>
+    /// Full name of the message's author
+    /// </summary>
+    public string AuthorFullName { get; set; } = "";
+
+
+    /// <summary>
     /// Message content
     /// </summary>
     [StringLength(4096, MinimumLength = 1)] 
     public string Content { get; set; } = "";
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Date and time the message was created.
+    /// </summary>
     public DateTimeOffset CreatedAt { get; set; }
+
+    /// <summary>
+    /// Date and time the message was last updated.
+    /// </summary>
+    public DateTimeOffset UpdatedAt { get; set; }
+
 }

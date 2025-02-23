@@ -1,0 +1,35 @@
+<div class="chatroom-header flex justify-between items-center p-4 bg-gray-200 dark:bg-gray-700 rounded-t-lg">
+  <h2 class="text-2xl font-semibold text-gray-900 dark:text-white">{{ chatroom.name }}</h2>
+  <div class="participants-list">
+    <h3 class="text-2xl font-semibold text-gray-900 dark:text-white">Participants:</h3>
+    <ul>
+      <li *ngFor="let participant of participants" class="text-gray-900 dark:text-white">
+        {{ participant.firstName }}
+      </li>
+    </ul>
+  </div>
+  <button (click)="leaveChatRoom()" class="btn btn-secondary">Quitter</button>
+</div>
+
+<div class="chatroom-messages">
+  <div class="messages-list">
+    <div class="message" *ngFor="let message of messages" [ngClass]="{'my-message': message.authorId === currentUserId, 'other-message': message.authorId !== currentUserId}">
+      <span class="author-name">{{ message.authorFullName }}</span>
+      <p class="text-sm">{{ message.content }}</p>
+      <span class="message-timestamp">{{ message.createdAt | date:'short' }}</span>
+      <button (click)="editMessage(message)">Modifier</button>
+      <button (click)="deleteMessage(message.id)">Supprimer</button>
+    </div>
+  </div>
+  <div class="notifications">
+    <div *ngFor="let notification of notifications" class="notification bg-gray-200 text-center p-2 rounded">
+      {{ notification }}
+    </div>
+  </div>
+  <div class="new-message">
+    <div class="input-group">
+      <input type="text" [(ngModel)]="newMessage" placeholder="Écrire un message..." />
+      <button (click)="sendMessage()">{{ editingMessage ? 'Modifier' : 'Envoyer' }}</button>
+    </div>
+  </div>
+</div>

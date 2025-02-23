@@ -3,16 +3,20 @@ import { NgIconComponent, provideIcons, provideNgIconsConfig } from '@ng-icons/c
 import { saxCardsBulk, saxBuildingsBulk } from '@ng-icons/iconsax/bulk';
 import { bootstrapArrowDown, bootstrapArrowUp } from '@ng-icons/bootstrap-icons';
 
-import { User } from 'src/app/_common/models/user.model';
 import { AccountService } from 'src/app/_common/services/account/account.service';
-
+import { ChatRoom } from 'src/app/_common/models/chat-room.model';
 import { ChatButtonGroupComponent } from '../../_common/components/chat-button-group/chat-button-group.component';
-import { MHPButton } from 'src/app/_common/components/chat-button-group/chat-button.interface';
+
 import { ChatButtonComponent } from '../../_common/components/chat-button/chat-button.component';
 import { SITEMAP } from 'src/app/_common/sitemap';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ChatSvgIconComponent } from '../../_common/components/chat-svg-icon/chat-svg-icon.component';
+import { User } from 'src/app/_common/models/user.model';
+
+import { MessagingService } from 'src/app/_common/services/messaging/messaging.service';
+import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 @Component({
 	selector: 'app-main-dashboard',
@@ -24,6 +28,7 @@ import { ChatSvgIconComponent } from '../../_common/components/chat-svg-icon/cha
 		ChatButtonGroupComponent,
 		ChatButtonComponent,
 		ChatSvgIconComponent,
+    FormsModule
 	],
 	providers: [
 		provideIcons({
@@ -37,20 +42,50 @@ import { ChatSvgIconComponent } from '../../_common/components/chat-svg-icon/cha
 	styleUrl: './main-dashboard.component.scss',
 	templateUrl: './main-dashboard.component.html',
 })
-export class MainDashboardComponent {
+export class MainDashboardComponent implements OnInit {
+  public chatrooms: ChatRoom[] = [];
+  public isCreateChatRoomPopupOpen = false;
+  public newChatRoomName = '';
+  private readonly chatService = inject(MessagingService);
+
 	private readonly _accountSvc = inject(AccountService);
-
 	public readonly sitemap = SITEMAP;
-
 	public readonly user = computed<User | null>(this._accountSvc.user);
-
-	public readonly buttons: MHPButton<number>[] = [
-		{ text: 'Requests', value: 1 },
-		// { text: 'Products', value: 2 },
-	];
 
 	public viewSelected: number = 1;
 
-	constructor() {}
+  private readonly router = inject(Router);
+
+  constructor() {}
+
+    ngOnInit(): void {
+    this.chatService.getChatRooms().then(chatRooms => {
+      this.chatrooms = chatRooms;
+    });
+  }
+  
+  public openCreateChatRoomPopup(): void {
+    this.isCreateChatRoomPopupOpen = true;
+  }
+  
+  public closeCreateChatRoomPopup(): void {
+    this.isCreateChatRoomPopupOpen = false;
+    this.newChatRoomName = '';
+  }
+  
+  public joinChatRoom(roomId: string): void {
+    this.router.navigate(['/chatroom', roomId]);
+  }
+  
+  public createChatRoom(): void {
+    if (this.newChatRoomName.trim()) {
+        this.chatService.createChatRoom(this.newChatRoomName).then(chatRoom => {
+        this.chatrooms.push(chatRoom);
+        this.closeCreateChatRoomPopup();
+      });
+    }
+  }
 
 }
+
+

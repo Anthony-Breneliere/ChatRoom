@@ -34,4 +34,9 @@ public sealed class ChatRoomDto
     /// This is used to lock chat rooms for system messages, or to prevent users from sending messages.
     /// </remarks>
     public bool ReadOnly { get; set; }
+
+    /// <summary>
+    /// Name of the chat room
+    /// </summary>
+    public string Name { get; set; } = string.Empty;
 }

@@ -22,9 +22,17 @@ export class AccountService {
 
 	public readonly user = signal<User | null>(JSON.parse(sessionStorage.getItem(this.userKey)!));
 
+	getCurrentUser(): User | null {
+		return this.user();
+	}
+	
 	public updateAccount(user: User): void {
 		this.user.set(user);
 		sessionStorage.setItem(this.userKey, JSON.stringify(user));
+	}
+
+	public getUserById(id: string): User | null {
+		return this.user()?.id === id ? this.user() : null;
 	}
 
 	public resetAccount(): void {

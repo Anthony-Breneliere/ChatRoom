@@ -22,30 +22,30 @@ public class UserRepository : IUserPersistance
     {
         _userManager = userManager;
     }
-    
+
     /// <inheritdoc />
     [MustUseReturnValue]
-    public async Task<IEnumerable<Guid>> GetUsersIdsAsync() => await _userManager.Users.Select( u => u.Id ).ToArrayAsync();
-    
+    public async Task<IEnumerable<Guid>> GetUsersIdsAsync() => await _userManager.Users.Select(u => u.Id).ToArrayAsync();
+
     /// <inheritdoc />
     [MustUseReturnValue]
     public async Task<User?> GetUserByEmailAsync(string email) => await _userManager.FindByEmailAsync(email);
 
     /// <inheritdoc />
     [MustUseReturnValue]
-    public User? GetUserById(Guid id) => _userManager.Users.FirstOrDefault(u => u.Id == id);
-    
+    public async Task<User?> GetUserById(Guid id) => await _userManager.Users.FirstOrDefaultAsync(u => u.Id == id);
+
     /// <inheritdoc />
     [MustUseReturnValue]
-    public async Task<User?> GetUserByUsernameAsync(string username) => 
+    public async Task<User?> GetUserByUsernameAsync(string username) =>
         await _userManager.Users.FirstOrDefaultAsync(u => u.UserName == username);
-    
+
     /// <inheritdoc />
     [MustUseReturnValue]
-    public async Task<IList<string>> GetUserRolesAsync(string username) 
-        => await _userManager.GetRolesAsync((await GetUserByUsernameAsync(username)) 
+    public async Task<IList<string>> GetUserRolesAsync(string username)
+        => await _userManager.GetRolesAsync((await GetUserByUsernameAsync(username))
                                             ?? throw new ApplicationException($"{nameof(GetUserByUsernameAsync)} No username ${username}"));
-    
+
     /// <inheritdoc />
     public async Task<User> CreateUserAsync(string email, string password)
     {
@@ -58,7 +58,7 @@ public class UserRepository : IUserPersistance
         };
 
         IdentityResult result = await _userManager.CreateAsync(user, password);
-        
+
         if (!result.Succeeded)
         {
             throw new InvalidOperationException("Could not create user : " + string.Join(", ", result.Errors));
@@ -66,12 +66,12 @@ public class UserRepository : IUserPersistance
 
         return user;
     }
-    
+
     /// <inheritdoc />
     public async Task<User> CreateUserAsync(User user, params UserLoginInfo[] connections)
     {
         IdentityResult result = await _userManager.CreateAsync(user);
-        
+
         if (!result.Succeeded)
         {
             throw new InvalidOperationException("Could not create user : " + string.Join(", ", result.Errors.Select(e => e.Description)));
@@ -85,7 +85,7 @@ public class UserRepository : IUserPersistance
         await _userManager.UpdateAsync(user);
         return user;
     }
-    
+
     /// <inheritdoc />
     public async Task<User> LoginAsync(string email, string password)
     {
