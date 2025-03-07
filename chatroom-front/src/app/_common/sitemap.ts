@@ -8,4 +8,5 @@ export const SITEMAP = {
 	maintenance: { path: 'maintenance', route: '/maintenance' },
 	forbidden: { path: 'forbidden', route: '/forbidden' },
 	unauthorized: { path: 'unauthorized', route: '/unauthorized' },
+	chatroom: { path: 'chatroom', route: '/chatroom' },
 } as const;

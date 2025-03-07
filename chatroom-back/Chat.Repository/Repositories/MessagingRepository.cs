@@ -23,7 +23,7 @@ public sealed class MessagingRepository : IMessagingPersistance
     }
 
     /// <inheritdoc />
-    public async  Task<IEnumerable<ChatMessage>> GetMessages(Guid roomId, CancellationToken ct) =>
+    public async Task<IEnumerable<ChatMessage>> GetMessages(Guid roomId, CancellationToken ct) =>
         await _context.ChatMessages.Where(m => m.RoomId == roomId).AsNoTracking().ToArrayAsync(ct);
 
     /// <inheritdoc />
@@ -38,9 +38,9 @@ public sealed class MessagingRepository : IMessagingPersistance
     /// <inheritdoc />
     public IEnumerable<ChatMessage> GetMessagesInRoom(Guid roomId) =>
         (from message in _context.ChatMessages
-        where message.RoomId == roomId
-        orderby message.CreatedAt
-        select message).AsNoTracking().ToArray();
+         where message.RoomId == roomId
+         orderby message.CreatedAt
+         select message).AsNoTracking().ToArray();
 
     /// <inheritdoc />
     public async Task SubmitMessageAsync(ChatMessage message, CancellationToken ct = default)
@@ -83,5 +83,14 @@ public sealed class MessagingRepository : IMessagingPersistance
     {
         return await _context.ChatRooms
             .Include(static r => r.Participants).FirstOrDefaultAsync(c => c.Id == roomId, ct);
+    }
+
+    /// <summary>
+    /// Get chat room with participants
+    /// </summary>
+    public async Task<ChatRoom[]?> GetChatRoomsAsync(CancellationToken ct)
+    {
+        return await _context.ChatRooms
+            .Include(static r => r.Participants).ToArrayAsync();
     }
 }

@@ -32,9 +32,9 @@ public sealed class MessagingHub : Hub<IMessagingHubPush>, IMessagingHubInvoke
         _mapper = mapper;
     }
 
-    private string NameIdentifier => Context.User?.GetNameIdentifier() 
+    private string NameIdentifier => Context.User?.GetNameIdentifier()
         ?? throw new AuthenticationException("User nameidentifier not found in Claims.");
-    
+
     /// <summary>
     /// Gets the chat room from an offer.
     /// </summary>
@@ -45,7 +45,18 @@ public sealed class MessagingHub : Hub<IMessagingHubPush>, IMessagingHubInvoke
 
         return _mapper.Map<ChatRoomDto>(room);
     }
-    
+
+    /// <summary>
+    /// Gets the chat room from an offer.
+    /// </summary>
+    public async Task<ChatRoomDto[]> GetChatRooms()
+    {
+        Model.Messaging.ChatRoom[] room = await _messagingService.GetChatRooms()
+                                        ?? throw new ArgumentException("Offer not found");
+
+        return _mapper.Map<ChatRoomDto[]>(room);
+    }
+
     /// <summary>
     /// Gets the chat room from an offer.
     /// </summary>
@@ -56,7 +67,7 @@ public sealed class MessagingHub : Hub<IMessagingHubPush>, IMessagingHubInvoke
 
         return _mapper.Map<ChatRoomDto>(room);
     }
-    
+
     /// <inheritdoc />
     public async Task<IEnumerable<ChatMessageDto>> JoinChatRoom(Guid roomId)
     {

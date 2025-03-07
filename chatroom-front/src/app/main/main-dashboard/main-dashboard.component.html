@@ -76,3 +76,7 @@
 
   </div>
 }
+<chat-button (click)="createChatroom()" text='Create chatrooms'></chat-button>
+@for (chatroom of Chatrooms; track chatroom.id) {
+<div>{{chatroom.id}}</div>
+}

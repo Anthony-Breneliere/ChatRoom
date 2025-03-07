@@ -13,6 +13,8 @@ import { SITEMAP } from 'src/app/_common/sitemap';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ChatSvgIconComponent } from '../../_common/components/chat-svg-icon/chat-svg-icon.component';
+import { MessagingService } from 'src/app/_common/services/messaging/messaging.service';
+import { ChatRoom } from 'src/app/_common/models/chat-room.model';
 
 @Component({
 	selector: 'app-main-dashboard',
@@ -37,8 +39,9 @@ import { ChatSvgIconComponent } from '../../_common/components/chat-svg-icon/cha
 	styleUrl: './main-dashboard.component.scss',
 	templateUrl: './main-dashboard.component.html',
 })
-export class MainDashboardComponent {
+export class MainDashboardComponent implements OnInit {
 	private readonly _accountSvc = inject(AccountService);
+	private readonly _serviceMessage = inject(MessagingService);
 
 	public readonly sitemap = SITEMAP;
 
@@ -53,4 +56,13 @@ export class MainDashboardComponent {
 
 	constructor() {}
 
+	Chatrooms!: ChatRoom[];
+
+	createChatroom(): void {
+		this._serviceMessage.createChatRoom().then(c => console.log(c));
+	}
+
+	ngOnInit(): void {
+		this._serviceMessage.getChatRooms().then(c => (this.Chatrooms = c));
+	}
 }

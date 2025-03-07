@@ -35,7 +35,7 @@ public sealed class MessagingService
     /// Gets all messages.
     /// </summary>
     /// <returns>All messages.</returns>
-    public async Task<IEnumerable<ChatMessage>> GetMessagesAsync(Guid roomId, CancellationToken ct) => 
+    public async Task<IEnumerable<ChatMessage>> GetMessagesAsync(Guid roomId, CancellationToken ct) =>
         await _messagingPersistance.GetMessages(roomId, ct);
 
     /// <summary>
@@ -57,11 +57,11 @@ public sealed class MessagingService
     /// </summary>
     public async Task SubmitMessageAsync(string roomId, string message, string nameIdentifier, CancellationToken ct = default)
     {
-        Model.Messaging.ChatRoom chatRoom = await _messagingPersistance.GetChatRoomAsync(Guid.Parse(roomId), ct) 
+        Model.Messaging.ChatRoom chatRoom = await _messagingPersistance.GetChatRoomAsync(Guid.Parse(roomId), ct)
                                             ?? throw new ArgumentException($"Room {roomId} not found");
-        
+
         User user = await GetUserFromNameIdentifier(nameIdentifier);
-        
+
         ChatMessage chatMessage = new ChatMessage()
         {
             Content = message,
@@ -71,11 +71,11 @@ public sealed class MessagingService
             Room = chatRoom,
             RoomId = chatRoom.Id
         };
-        
+
         Logger.LogDebug("Received a chat message: {chatMessage}", JsonSerializer.Serialize(chatMessage, new JsonSerializerOptions { WriteIndented = true, ReferenceHandler = ReferenceHandler.Preserve }));
-        
+
         await _messagingPersistance.SubmitMessageAsync(chatMessage, ct);
-        
+
         await _notificationHandler.NotifyNewMessageAsync(chatMessage);
     }
 
@@ -84,7 +84,7 @@ public sealed class MessagingService
     /// </summary>
     private async Task<User> GetUserFromNameIdentifier(string nameIdentifier)
     {
-        User user = await _userPersistance.GetUserByUsernameAsync(nameIdentifier) 
+        User user = await _userPersistance.GetUserByUsernameAsync(nameIdentifier)
                     ?? throw new ArgumentException($"User {nameIdentifier} not found");
         return user;
     }
@@ -100,19 +100,30 @@ public sealed class MessagingService
 
         return chatRoom;
     }
-    
+
     /// <summary>
     /// create chat room for an offer.
     /// </summary>
     /// <returns>The chat room.</returns>
-    public async Task<Model.Messaging.ChatRoom?> CreateChatRoom( string nameIdentifier,
+    public async Task<ChatRoom[]?> GetChatRooms(CancellationToken ct = default)
+    {
+        ChatRoom[]? chatRoom = await _messagingPersistance.GetChatRoomsAsync(ct);
+
+        return chatRoom;
+    }
+
+    /// <summary>
+    /// create chat room for an offer.
+    /// </summary>
+    /// <returns>The chat room.</returns>
+    public async Task<Model.Messaging.ChatRoom?> CreateChatRoom(string nameIdentifier,
         CancellationToken ct = default)
     {
         User user = await GetUserFromNameIdentifier(nameIdentifier);
 
         // using a HashSet to avoid duplicates if userCompany is importer or exporter
         HashSet<User> participants = [user];
-        
+
         ChatRoom chatRoom = new Model.Messaging.ChatRoom
         {
             Participants = participants.ToList()
@@ -120,15 +131,15 @@ public sealed class MessagingService
 
         return await _messagingPersistance.CreateRoomAsync(chatRoom, ct);
     }
-    
-    
+
+
     /// <summary>
     /// Gets a specific chat room.
     /// </summary>
     /// <returns>The chat room.</returns>
     public async Task<Model.Messaging.ChatRoom?> GetChatRoomAsync(Guid roomId, CancellationToken ct = default)
         => await _messagingPersistance.GetChatRoomAsync(roomId, ct);
-        
+
     /// <summary>
     /// Gets a specific chat message.
     /// </summary>
