@@ -23,9 +23,16 @@ public sealed class MessagingHubNotificationHandler : IMessagingNotificationHand
     public MessagingHubNotificationHandler(
         IHubContext<MessagingHub, IMessagingHubPush> hubContext,
         IMapper mapper
-    ) {
+    )
+    {
         _hubContext = hubContext;
         _mapper = mapper;
+    }
+
+    /// <inheritdoc />
+    public async Task NotifyUserTypingAsync(Guid roomId, Guid userId, string userName)
+    {
+        await _hubContext.Clients.Group(roomId.ToString()).UserTyping(userId, userName);
     }
 
     /// <inheritdoc />

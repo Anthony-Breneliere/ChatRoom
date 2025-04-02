@@ -48,6 +48,11 @@ public interface IMessagingHubPush
     /// </summary>
     public Task ParticipantLeft(string userId);
 
+    /// <summary>
+    ///    
+    /// </summary>
+    public Task UserTyping(Guid userId, string userName);
+
 }
 
 /// <summary>

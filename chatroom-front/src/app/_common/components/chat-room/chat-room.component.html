@@ -18,7 +18,6 @@
       <p class="text-sm">{{ message.content }}</p>
       <span class="message-timestamp">{{ message.createdAt | date:'short' }}</span>
       <button (click)="editMessage(message)">Modifier</button>
-      <button (click)="deleteMessage(message.id)">Supprimer</button>
     </div>
   </div>
   <div class="notifications">

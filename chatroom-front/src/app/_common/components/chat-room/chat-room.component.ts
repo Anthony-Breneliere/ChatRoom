@@ -91,8 +91,8 @@ export class ChatRoomComponent implements OnInit {
     this.newMessage = message.content;
   }
 
-  public deleteMessage(messageId: string): void {
-    this.chatService.deleteMessage(messageId);
-  }
+  // public deleteMessage(messageId: string): void {
+  //   this.chatService.deleteMessage(messageId);
+  // }
   
 }
