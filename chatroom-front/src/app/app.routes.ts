@@ -1,3 +1,5 @@
+import { ChatroomComponent } from './components/chatroom/chatroom.component';
+
 import { Routes } from '@angular/router';
 
 import { SITEMAP } from './_common/sitemap';
@@ -24,46 +26,51 @@ import { UnauthorizedComponent } from './unauthorized/unauthorized.component';
 import { ForbiddenComponent } from './forbidden/forbidden.component';
 
 export const routes: Routes = [
-	{
-		path: SITEMAP.main.path,
-		component: MainComponent,
-		children: [
-			{
-				path: '',
-				component: MainIndexComponent,
-			},
-			{
-				path: SITEMAP.account.path,
-				canActivate: [isAuthenticatedGuard],
-				component: MainAccountComponent,
-			},
-			{
-				path: SITEMAP.dashboard.path,
-				canActivate: [isAuthenticatedGuard],
-				component: MainDashboardComponent,
-			}
-		],
-	},
+    {
+        path: SITEMAP.main.path,
+        component: MainComponent,
+        children: [
+            {
+                path: '',
+                component: MainIndexComponent,
+            },
+            {
+                path: SITEMAP.account.path,
+                canActivate: [isAuthenticatedGuard],
+                component: MainAccountComponent,
+            },
+            {
+                path: SITEMAP.dashboard.path,
+                canActivate: [isAuthenticatedGuard],
+                component: MainDashboardComponent,
+            },
+            {
+                path: 'chatroom/:id',
+                canActivate: [isAuthenticatedGuard],
+                component: ChatroomComponent,
+            }
+        ],
+    },
 
-	{
-		path: SITEMAP.admin.path,
-		canActivate: [isAdminGuard],
-		component: AdminComponent,
-		children: [{ path: '', component: AdminIndexComponent }],
-	},
+    {
+        path: SITEMAP.admin.path,
+        canActivate: [isAdminGuard],
+        component: AdminComponent,
+        children: [{ path: '', component: AdminIndexComponent }],
+    },
 
-	{
-		path: SITEMAP.auth.path,
-		canActivate: [isNotAuthenticatedGuard],
-		component: AuthComponent,
-		children: [
-			{ path: '', component: AuthIndexComponent },
-			{ path: SITEMAP.login.path, component: AuthLoginComponent },
-		],
-	},
+    {
+        path: SITEMAP.auth.path,
+        canActivate: [isNotAuthenticatedGuard],
+        component: AuthComponent,
+        children: [
+            { path: '', component: AuthIndexComponent },
+            { path: SITEMAP.login.path, component: AuthLoginComponent },
+        ],
+    },
 
-	{ path: SITEMAP.maintenance.path, component: MaintenanceComponent },
-	{ path: SITEMAP.forbidden.path, component: ForbiddenComponent },
-	{ path: SITEMAP.unauthorized.path, component: UnauthorizedComponent },
-	{ path: '**', component: NotFoundComponent },
-];
+    { path: SITEMAP.maintenance.path, component: MaintenanceComponent },
+    { path: SITEMAP.forbidden.path, component: ForbiddenComponent },
+    { path: SITEMAP.unauthorized.path, component: UnauthorizedComponent },
+    { path: '**', component: NotFoundComponent },
+]; 
